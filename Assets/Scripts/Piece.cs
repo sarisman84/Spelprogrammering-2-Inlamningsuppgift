@@ -10,6 +10,7 @@ public class Piece : MonoBehaviour
     private void OnEnable()
     {
         _renderer = GetComponent<SpriteRenderer>();
+        defaultColor = _renderer.color;
     }
     public void SetPlayerColor(Color color)
     {

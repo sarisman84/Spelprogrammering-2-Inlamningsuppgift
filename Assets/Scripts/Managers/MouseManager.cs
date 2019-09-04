@@ -6,21 +6,13 @@ public class MouseManager : MonoBehaviour
 {
     [SerializeField] Transform mouseObj;
     public LayerMask mask;
-
-    Node currentNode, selectedNode;
-
+    bool toggle = false;
     NodeManager _manager;
-
-    public bool HasPickedUpAPiece
-    {
-        get => (currentNode.StoredPiece == null) ? false : true;
-    }
-
     bool input;
     private void Awake()
     {
         mouseObj = mouseObj ?? new GameObject("Mouse").transform;
-        _manager = new NodeManager();
+        _manager = new NodeManager(mask);
     }
     void Update()
     {
@@ -31,9 +23,10 @@ public class MouseManager : MonoBehaviour
         Collider2D go = Physics2D.OverlapCircle(mouseObj.transform.position, 0.1f, mask.value);
         //if(go.GetComponent<Piece>()) selectedPiece = go.GetComponnent<Piece>();
         if (go == null) return;
+        // toggle = (input) ? !toggle : toggle;
+
+        //If the player attempts to reselect an already selected node, or right clicks, remove it from the selection
         if (!input) return;
-
-
         Node node = go.GetComponent<Node>();
         AttemptToMovePiece(node);
 
