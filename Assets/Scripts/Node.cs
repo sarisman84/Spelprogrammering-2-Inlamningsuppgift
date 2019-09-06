@@ -3,32 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//This script acts as an Object which is represented in the game.
 public class Node : MonoBehaviour {
+    public enum Team { Empty, None, Red, Blue, Yellow, Green, Magenta, Orange }
 
+    Team currentTeam;
+    Vector2Int boardPosition;
     [SerializeField] Piece storedPiece;
-    //This property uses Raycast to find the closest nodes in 6 different angles and returns them into a list.
-    //NOTE: THIS PROPERTY AND ITS LOGIC WILL BE REPLACED SOON AS IT IS SUPER INEFFICIENT! THIS IS ONLY MEANT AS A TEMPORARY MEAN TO GET THE NODES!!!
+
+    Color defaultColor;
+    SpriteRenderer _renderer;
+
+    #region Accessors
+    public Team BelongsTo {
+        get => currentTeam;
+        set => currentTeam = value;
+    }
+
     public Node[] GetNearestNodes {
         get {
-            Node[] nodes = new Node[6];
-            GetComponent<CircleCollider2D> ().enabled = false;
-            for (int i = 0; i < 6; i++) {
-                Ray2D ray;
-                ray = new Ray2D (transform.position, SetDirection (i));
-                //Debug.DrawRay(transform.position, new Vector3(rot.x, rot.y, 0), Color.blue, 1f);
-                RaycastHit2D hit = Physics2D.Raycast (ray.origin, ray.direction);
-                if (hit.collider != null) {
-                    Debug.Log ("Has found " + hit.collider.gameObject.name, hit.collider.gameObject);
-                    nodes[i] = hit.collider.GetComponent<Node> ();
-                }
-
-            }
-            GetComponent<CircleCollider2D> ().enabled = true;
-            return nodes;
+            throw new NotImplementedException ();
         }
     }
-    //This property gives access to other scripts about whenever or not it holds a piece.
+
+    public Vector2Int CurrentBoardPosition {
+        get => boardPosition;
+        set => boardPosition = value;
+    }
+
     public Piece StoredPiece {
         get => storedPiece;
         set {
@@ -37,15 +38,21 @@ public class Node : MonoBehaviour {
         }
     }
 
-    Color defaultColor;
-    SpriteRenderer _renderer;
+    public Color SetColor {
+        set {
+            defaultColor = (defaultColor == new Color ()) ? value : defaultColor;
+            _renderer = _renderer ?? GetComponent<SpriteRenderer> ();
+            _renderer.color = value;
+        }
 
-    //When this is enabled, Get a reference to its sprite renderer, then proceed to save its defaultColor for later uses.
+    }
+    #endregion
+
     private void OnEnable () {
         _renderer = GetComponent<SpriteRenderer> ();
-        defaultColor = _renderer.color;
+
     }
-    //This method is used to change the color of the sprite by using a color property and a boolean to check if the user wants to highlight the object or reset it.
+
     public void HighlightNode (Color highlight, bool isHighlighting) {
         switch (isHighlighting) {
 
@@ -59,46 +66,83 @@ public class Node : MonoBehaviour {
         }
     }
 
-    //This method uses an index parameter and a switch in order to get 6 different angles depending on the current Index number.
+    #region Global Node Methods
 
-    private Vector2 SetDirection (int i) {
-        Vector2 rot = Vector2.zero;
-        //Debug.Log(i);
-        switch (i) {
-            case 0:
-                //Upper right
-                rot = Vector2.one;
-                break;
+    /// <summary>
+    /// Gets a piece (if it has any) and returns it.
+    /// </summary>
+    /// <param name="selectedNode">The node in question. </param>
+    /// <param name="team">What team the one who selected it actually is. </param>
+    /// <returns>A Node with a piece.</returns>
+    public static Node GetPiece (Node selectedNode, Team team) {
+        return (selectedNode.StoredPiece != null && selectedNode.BelongsTo == team) ? selectedNode : null;
+    }
 
-            case 1:
-                //Middle right
-                rot = Vector2.right;
-                break;
+    /// <summary>
+    /// Similar to Instantiate(), CreateNode creates a node and sets the appropiate variables to it at once.
+    /// </summary>
+    /// <param name="prefab">The prefab used to create a new Node.</param>
+    /// <param name="blueprint">An ID system that sets the correct data to the Node.</param>
+    /// <param name="parent">A parent that sorts the Nodes for convenience sake. </param>
+    /// <returns></returns>
+    public static Node CreateNode (Node prefab, int blueprint, Transform parent) {
+        Node newNode = Instantiate (prefab, parent);
+        UpdateNode (blueprint, newNode);
+        newNode.BelongsTo = (Node.Team) blueprint;
+
+        return newNode;
+    }
+
+    /// <summary>
+    /// Updates the color and data contained within the Node with the new data inputed.
+    /// </summary>
+    /// <param name="blueprint"> Used as an ID for setting up the color of the node. </param>
+    /// <param name="newNode">The node in question. </param>
+    private static void UpdateNode (int blueprint, Node newNode) {
+        switch (blueprint) {
 
             case 2:
-                //Botton right
-                rot = new Vector2 (1, -1);
-
+                //Set color to Red.
+                newNode.SetColor = Color.red;
                 break;
 
             case 3:
-                //Buttom left
-                rot = -Vector2.one;
+                //Set color to Blue.
+                newNode.SetColor = Color.blue;
                 break;
+
             case 4:
-                //Middle left
-                rot = Vector2.left;
+                //Set color to Yellow.
+                newNode.SetColor = Color.yellow;
                 break;
 
             case 5:
-                //Upper left
-                rot = new Vector2 (-1, 1);
+                //Set color to Green.
+                newNode.SetColor = Color.green;
+                break;
+
+            case 6:
+                //set color to Magenta.
+                newNode.SetColor = Color.magenta;
+                break;
+
+            case 7:
+                //Set color to Orange.
+                newNode.SetColor = new Color (1, 0.6f, 0);
+                break;
+
+            case 1:
+                //Set color to White.
+                newNode.SetColor = Color.white;
                 break;
 
             default:
+                newNode.SetColor = new Color ();
+                newNode.GetComponent<CircleCollider2D> ().enabled = false;
                 break;
         }
-        return rot;
     }
+
+    #endregion
 
 }

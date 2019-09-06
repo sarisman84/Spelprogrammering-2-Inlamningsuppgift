@@ -1,22 +1,71 @@
 using System.Collections;
 using System.Collections.Generic;
+using static ChineseCheckers.HexagonGrid;
 using UnityEngine;
 
 //Temporary script to test the rest of this project.
 public class GameManager : MonoBehaviour {
 
-    public Piece piecePrefab;
+    public Node nodePrefab;
 
-    [SerializeField] List<Node> listOfNodes = new List<Node> ();
+    int[, ] blueprint = new int[, ] { { 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0 }, { 6, 6, 6, 6, 1, 1, 1, 1, 1, 5, 5, 5, 5 }, { 6, 6, 6, 1, 1, 1, 1, 1, 1, 5, 5, 5, 0 }, { 0, 6, 6, 1, 1, 1, 1, 1, 1, 1, 5, 5, 0 }, { 0, 6, 1, 1, 1, 1, 1, 1, 1, 1, 5, 0, 0 }, { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 }, { 0, 7, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0 }, { 0, 7, 7, 1, 1, 1, 1, 1, 1, 1, 3, 3, 0 }, { 7, 7, 7, 1, 1, 1, 1, 1, 1, 3, 3, 3, 0 }, { 7, 7, 7, 7, 1, 1, 1, 1, 1, 3, 3, 3, 3 }, { 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0 },
+    };
 
-    //At the start of the scene, create an X amount of Pieces, set their position to an X node and give them a default rotation, based on the amount of Nodes added into the listOfNodes from the Inspector
+    /*
+    At the start of the game, create a board using an 2 Dimentional Array that holds a number.
+    This number tells the nodes what state they should be!
+    0 = Empty. (Collisions and Textures are turned off)
+    1-7 = Board peaces (Have a dedicated color per number as well as sets the team to each of the nodes corresponding the color).
+     */
     private void Awake () {
 
-        for (int i = 0; i < listOfNodes.Count; i++) {
-            Piece newPiece = Instantiate (piecePrefab, listOfNodes[i].transform.position, Quaternion.identity) as Piece;
-            newPiece.SetPlayerColor (Color.red);
-            listOfNodes[i].StoredPiece = newPiece;
+        NodeManager.board = CreateGrid (blueprint, nodePrefab);
 
-        }
     }
+
+    //Blueprint for the int[,] that is used to shape the grid
+
+    /*
+
+    Star Shape
+                           { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0 }, 
+                          { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,0 }, 
+                         { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,0 }, 
+                        { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,0 }, 
+                       { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1 }, 
+                      { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,0 }, 
+                     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,0 }, 
+                    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,0 }, 
+                   { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,0 }, 
+                  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,0 }, 
+                 { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,0 }, 
+                { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,0 }, 
+               { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1 }, 
+              { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,0 }, 
+             { 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,0 }, 
+            { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,0 }, 
+           { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,0 },
+ 
+
+    Star Shade
+ 
+                            { 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0,0 }, 
+                          { 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0,0 }, 
+                         { 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0,0 }, 
+                        { 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0,0 }, 
+                       { 6, 6, 6, 6, 1, 1, 1, 1, 1, 5, 5, 5,5 }, 
+                      { 6, 6, 6, 1, 1, 1, 1, 1, 1, 5, 5, 5,0 }, 
+                     { 0, 6, 6, 1, 1, 1, 1, 1, 1, 1, 5, 5,0 }, 
+                    { 0, 6, 1, 1, 1, 1, 1, 1, 1, 1, 5, 0,0 }, 
+                   { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,0 }, 
+                  { 0, 7, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0,0 }, 
+                 { 0, 7, 7, 1, 1, 1, 1, 1, 1, 1, 3, 3,0 }, 
+                { 7, 7, 7, 1, 1, 1, 1, 1, 1, 3, 3, 3,0 }, 
+               { 7, 7, 7, 7, 1, 1, 1, 1, 1, 3, 3, 3,3 }, 
+              { 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0,0 }, 
+             { 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0,0 }, 
+            { 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0,0 }, 
+           { 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0,0 },
+    
+     */
 }

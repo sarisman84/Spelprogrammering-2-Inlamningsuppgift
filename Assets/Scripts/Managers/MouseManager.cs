@@ -14,7 +14,6 @@ public class MouseManager : MonoBehaviour {
     Vector2 mousePos;
     private void Awake () {
 
-        _manager = new NodeManager (mask);
     }
     void Update () {
         //First, get the mouse position from screen coordinates to world coordinates.
@@ -28,21 +27,17 @@ public class MouseManager : MonoBehaviour {
         input = Input.GetMouseButtonDown (0);
 
         if (go == null) return;
-
+        Node node = go.GetComponent<Node> ();
+        Debug.Log (node.CurrentBoardPosition);
         //When the player has pressed the Left Mouse Button Once: Get the component of the node then AttemptToMovePiece().
         if (!input) return;
-        Node node = go.GetComponent<Node> ();
-        AttemptToMovePiece (node);
+
+        NodeManager.ValidMoves (node);
 
     }
 
     //This function calls the 3 methods from the NodeManager. 
     //AGAIN: THIS IS TEMPORARY AND IS MEANT TO BE REPLACED LATER!!!
-    private void AttemptToMovePiece (Node node) {
-        _manager.GetPiece (node);
-        _manager.GetTargetPosition (node);
-        _manager.MovePiece ();
-    }
 
     //A debug Gizmo to see if the mouse works.
     private void OnDrawGizmos () {
