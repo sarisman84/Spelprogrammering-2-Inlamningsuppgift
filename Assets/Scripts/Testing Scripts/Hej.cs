@@ -8,7 +8,7 @@ using UnityEngine.UI;
 namespace ChineseCheckers
 {
 
-    static class HexagonGrid
+    public sealed class HexagonGrid
     {
 
         //I need to do the following:
@@ -46,7 +46,6 @@ namespace ChineseCheckers
         {
             Transform parent = new GameObject($"{prefab.name}'s list ").transform;
             Node[,] tempGrid = new Node[blueprint.GetLength(0), blueprint.GetLength(1)];
-            Canvas newCanvas = new GameObject("Text").AddComponent<Canvas>();
             int xPos;
             for (int y = 0; y < blueprint.GetLength(0); y++)
             {
@@ -57,6 +56,7 @@ namespace ChineseCheckers
                     xPos = x - y / 2;
                     tempGrid[y, x].transform.position = SetPosition(new Vector2Int(xPos, y));
                     tempGrid[y, x].CurrentBoardPosition = new Vector2Int(y, x);
+                    tempGrid[y,x].name = $"Node:{y},{x}";
 
                     //Need to make a text function that displays a coordinate.
 
@@ -65,6 +65,9 @@ namespace ChineseCheckers
             }
             return tempGrid;
         }
+
+        
+        
 
 
 

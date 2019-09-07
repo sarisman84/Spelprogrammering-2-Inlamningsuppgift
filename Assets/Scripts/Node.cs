@@ -5,21 +5,25 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    public enum Team { Empty, None, Red, Blue, Yellow, Green, Magenta, Orange }
+    public enum Team { Empty, Unoccupied, Red, Blue, Yellow, Green, Magenta, Orange }
 
-    Team currentTeam;
+
     Vector2Int boardPosition;
     [SerializeField] Piece storedPiece;
 
     Color defaultColor;
     SpriteRenderer _renderer;
 
-    #region Accessors
+    [SerializeField] Team currentTeam;
+
     public Team BelongsTo
     {
         get => currentTeam;
         set => currentTeam = value;
     }
+
+    #region Accessors
+
 
     public Node[] GetNearestNodes
     {
@@ -86,10 +90,7 @@ public class Node : MonoBehaviour
     /// <param name="selectedNode">The node in question. </param>
     /// <param name="team">What team the one who selected it actually is. </param>
     /// <returns>A Node with a piece.</returns>
-    public static Node GetPiece(Node selectedNode, Team team)
-    {
-        return (selectedNode.StoredPiece != null && selectedNode.BelongsTo == team) ? selectedNode : null;
-    }
+
 
     /// <summary>
     /// Similar to Instantiate(), CreateNode creates a node and sets the appropiate variables to it at once.
@@ -101,7 +102,7 @@ public class Node : MonoBehaviour
     public static Node CreateNode(Node prefab, int blueprint, Transform parent)
     {
         Node newNode = Instantiate(prefab, parent);
-        UpdateNode(blueprint, newNode);
+        SetTeamColor(blueprint, newNode);
         newNode.BelongsTo = (Node.Team)blueprint;
 
         return newNode;
@@ -112,63 +113,131 @@ public class Node : MonoBehaviour
     /// </summary>
     /// <param name="blueprint"> Used as an ID for setting up the color of the node. </param>
     /// <param name="newNode">The node in question. </param>
-    private static void UpdateNode(int blueprint, Node newNode)
+    public static Color SetTeamColor(int blueprint, Node newNode)
     {
+        Color newColor = new Color();
         switch (blueprint)
         {
 
             case 2:
                 //Set color to Red.
                 newNode.SetColor = Color.red;
+                newColor = Color.red;
                 break;
 
             case 3:
                 //Set color to Blue.
                 newNode.SetColor = Color.blue;
+                newColor = Color.blue;
                 break;
 
             case 4:
                 //Set color to Yellow.
                 newNode.SetColor = Color.yellow;
+                newColor = Color.yellow;
                 break;
 
             case 5:
                 //Set color to Green.
                 newNode.SetColor = Color.green;
+                newColor = Color.green;
                 break;
 
             case 6:
                 //set color to Magenta.
                 newNode.SetColor = Color.magenta;
+                newColor = Color.magenta;
                 break;
 
             case 7:
                 //Set color to Orange.
                 newNode.SetColor = new Color(1, 0.6f, 0);
+                newColor = new Color(1, 0.6f, 0);
                 break;
 
             case 1:
                 //Set color to White.
                 newNode.SetColor = Color.white;
+                newColor = Color.white;
                 break;
 
             default:
                 newNode.SetColor = new Color();
+                newColor = new Color();
                 newNode.GetComponent<PolygonCollider2D>().enabled = false;
                 break;
         }
+        return newColor;
+    }
+    public static Color SetTeamColor(int blueprint)
+    {
+        Color newColor = new Color();
+        switch (blueprint)
+        {
+
+            case 2:
+                //Set color to Red.
+
+                newColor = Color.red;
+                break;
+
+            case 3:
+                //Set color to Blue.
+
+                newColor = Color.blue;
+                break;
+
+            case 4:
+                //Set color to Yellow.
+
+                newColor = Color.yellow;
+                break;
+
+            case 5:
+                //Set color to Green.
+
+                newColor = Color.green;
+                break;
+
+            case 6:
+                //set color to Magenta.
+
+                newColor = Color.magenta;
+                break;
+
+            case 7:
+                //Set color to Orange.
+
+                newColor = new Color(1, 0.6f, 0);
+                break;
+
+            case 1:
+                //Set color to White.
+
+                newColor = Color.white;
+                break;
+
+            default:
+
+                newColor = new Color();
+
+                break;
+        }
+        return newColor;
     }
 
-    static class Cache{
+    static class Cache
+    {
         public static Vector2Int[] directions;
         public static Node cachedNode;
     }
     public static Vector2Int DirectionToBoardCoordinate(Node go, int index)
     {
-        if(Cache.cachedNode == null || Cache.cachedNode != go){
+        if (Cache.cachedNode == null || Cache.cachedNode != go)
+        {
             Cache.directions = new Vector2Int[]{
-            new Vector2Int((NodeManager.board.GetLength(0) - 1 <= go.CurrentBoardPosition.x) ? 0: 1, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 0), //Upper Right
-            new Vector2Int((NodeManager.board.GetLength(0) - 1 <= go.CurrentBoardPosition.x) ? 0: 1, (go.CurrentBoardPosition.x%2 == 1) ? 1 : -1), //Upper Left
+            new Vector2Int((ChineseCheckers.BoardManager.board.GetLength(0) - 1 <= go.CurrentBoardPosition.x) ? 0: 1, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 0), //Upper Right
+            new Vector2Int((ChineseCheckers.BoardManager.board.GetLength(0) - 1 <= go.CurrentBoardPosition.x) ? 0: 1, (go.CurrentBoardPosition.x%2 == 1) ? 1 : -1), //Upper Left
             new Vector2Int(0, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 1), //Middle Right
             new Vector2Int(0, (go.CurrentBoardPosition.x%2 == 1) ? -1 : -1), //Middle Left
             new Vector2Int((go.CurrentBoardPosition.x <= 0) ? 0: -1, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 0), //Bottom Right

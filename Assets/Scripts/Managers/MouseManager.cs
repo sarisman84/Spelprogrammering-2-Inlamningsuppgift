@@ -1,15 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ChineseCheckers;
 
 //This script handles the player input.
 //NOTE: THIS SCRIPT IS MEANT ONLY TO TEST THE REST OF THE PROJECT AND THEREFOR WILL BE REPLACED!!
 public class MouseManager : MonoBehaviour
 {
-
+    #region Common Variables
     public LayerMask mask;
-    bool toggle = false;
-    NodeManager _manager;
     bool input;
 
     Vector3 mousePos;
@@ -17,12 +16,24 @@ public class MouseManager : MonoBehaviour
     Camera cam;
 
     RaycastHit2D go;
+    #endregion
+
+
+    public Node.Team team;
+    [SerializeField] Node currentNode, selectedNode;
+
+    [SerializeField] Node[] validMoves;
+
+
+
     private void Awake()
     {
         cam = Camera.main;
     }
+
     void Update()
     {
+        #region Gameobject Detection
         //First, get the mouse position from screen coordinates to world coordinates.
         mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
 
@@ -33,23 +44,50 @@ public class MouseManager : MonoBehaviour
 
         //Get an input from the left mouse button when pressed down.
         input = Input.GetMouseButtonDown(0);
+        #endregion
 
         if (go.collider == null) return;
         Node node = go.collider.GetComponent<Node>();
-        Debug.Log(node.CurrentBoardPosition);
-        //When the player has pressed the Left Mouse Button Once: Get the component of the node then AttemptToMovePiece().
+        //Debug.Log(node.CurrentBoardPosition);
+
         if (!input) return;
 
-        NodeManager.ValidMoves(node);
+        currentNode = UserManager.GetNodeWithPiece(node, team);
+        selectedNode = UserManager.GetTargetNode(node, currentNode);
+
+        if (currentNode == null || selectedNode == null) return;
+        Piece.MovePiece(currentNode.StoredPiece, currentNode, selectedNode);
+        currentNode.HighlightNode(new Color(), false);
+        BoardManager.ResetValidNodes();
+        currentNode = null;
+        selectedNode = null;
+
+
+
+
 
     }
 
-
-
-    //A debug Gizmo to see if the mouse works.
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(go.point, 0.1f);
+        Gizmos.color = Color.red;
+        if (currentNode != null)
+            foreach (var node in BoardManager.ValidMoves(currentNode))
+            {
+                if (node != null)
+                    Gizmos.DrawWireSphere(node.transform.position, 0.5f);
+            }
+        Gizmos.color = Color.blue;
+        if (selectedNode != null)
+            Gizmos.DrawWireCube(selectedNode.transform.position, new Vector3(0.5f, 0.5f, 0.5f));
     }
+
+
+
+
+
+
+
 }

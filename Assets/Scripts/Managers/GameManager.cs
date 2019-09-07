@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using ChineseCheckers;
 using static ChineseCheckers.HexagonGrid;
 using UnityEngine;
 
@@ -8,6 +9,9 @@ public class GameManager : MonoBehaviour
 {
     const int O = 1;
     public Node nodePrefab;
+    public Piece piecePrefab;
+
+    public int amountOfPlayers;
 
     int[,] blueprint = new int[,] {
 {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0,0,0 },
@@ -61,7 +65,8 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
 
-        NodeManager.board = CreateGrid(blueprint, nodePrefab);
+        BoardManager.board = CreateGrid(blueprint, nodePrefab);
+        BoardManager.InsertPiecesToBoard(amountOfPlayers, piecePrefab);
 
     }
 
