@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Node : MonoBehaviour {
+public class Node : MonoBehaviour
+{
     public enum Team { Empty, None, Red, Blue, Yellow, Green, Magenta, Orange }
 
     Team currentTeam;
@@ -14,47 +15,58 @@ public class Node : MonoBehaviour {
     SpriteRenderer _renderer;
 
     #region Accessors
-    public Team BelongsTo {
+    public Team BelongsTo
+    {
         get => currentTeam;
         set => currentTeam = value;
     }
 
-    public Node[] GetNearestNodes {
-        get {
-            throw new NotImplementedException ();
+    public Node[] GetNearestNodes
+    {
+        get
+        {
+            throw new NotImplementedException();
         }
     }
 
-    public Vector2Int CurrentBoardPosition {
+    public Vector2Int CurrentBoardPosition
+    {
         get => boardPosition;
         set => boardPosition = value;
     }
 
-    public Piece StoredPiece {
+    public Piece StoredPiece
+    {
         get => storedPiece;
-        set {
+        set
+        {
             storedPiece = value;
 
         }
     }
 
-    public Color SetColor {
-        set {
-            defaultColor = (defaultColor == new Color ()) ? value : defaultColor;
-            _renderer = _renderer ?? GetComponent<SpriteRenderer> ();
+    public Color SetColor
+    {
+        set
+        {
+            defaultColor = (defaultColor == new Color()) ? value : defaultColor;
+            _renderer = _renderer ?? GetComponent<SpriteRenderer>();
             _renderer.color = value;
         }
 
     }
     #endregion
 
-    private void OnEnable () {
-        _renderer = GetComponent<SpriteRenderer> ();
+    private void OnEnable()
+    {
+        _renderer = GetComponent<SpriteRenderer>();
 
     }
 
-    public void HighlightNode (Color highlight, bool isHighlighting) {
-        switch (isHighlighting) {
+    public void HighlightNode(Color highlight, bool isHighlighting)
+    {
+        switch (isHighlighting)
+        {
 
             case true:
                 _renderer.color = highlight;
@@ -74,7 +86,8 @@ public class Node : MonoBehaviour {
     /// <param name="selectedNode">The node in question. </param>
     /// <param name="team">What team the one who selected it actually is. </param>
     /// <returns>A Node with a piece.</returns>
-    public static Node GetPiece (Node selectedNode, Team team) {
+    public static Node GetPiece(Node selectedNode, Team team)
+    {
         return (selectedNode.StoredPiece != null && selectedNode.BelongsTo == team) ? selectedNode : null;
     }
 
@@ -85,10 +98,11 @@ public class Node : MonoBehaviour {
     /// <param name="blueprint">An ID system that sets the correct data to the Node.</param>
     /// <param name="parent">A parent that sorts the Nodes for convenience sake. </param>
     /// <returns></returns>
-    public static Node CreateNode (Node prefab, int blueprint, Transform parent) {
-        Node newNode = Instantiate (prefab, parent);
-        UpdateNode (blueprint, newNode);
-        newNode.BelongsTo = (Node.Team) blueprint;
+    public static Node CreateNode(Node prefab, int blueprint, Transform parent)
+    {
+        Node newNode = Instantiate(prefab, parent);
+        UpdateNode(blueprint, newNode);
+        newNode.BelongsTo = (Node.Team)blueprint;
 
         return newNode;
     }
@@ -98,8 +112,10 @@ public class Node : MonoBehaviour {
     /// </summary>
     /// <param name="blueprint"> Used as an ID for setting up the color of the node. </param>
     /// <param name="newNode">The node in question. </param>
-    private static void UpdateNode (int blueprint, Node newNode) {
-        switch (blueprint) {
+    private static void UpdateNode(int blueprint, Node newNode)
+    {
+        switch (blueprint)
+        {
 
             case 2:
                 //Set color to Red.
@@ -128,7 +144,7 @@ public class Node : MonoBehaviour {
 
             case 7:
                 //Set color to Orange.
-                newNode.SetColor = new Color (1, 0.6f, 0);
+                newNode.SetColor = new Color(1, 0.6f, 0);
                 break;
 
             case 1:
@@ -137,12 +153,32 @@ public class Node : MonoBehaviour {
                 break;
 
             default:
-                newNode.SetColor = new Color ();
-                newNode.GetComponent<CircleCollider2D> ().enabled = false;
+                newNode.SetColor = new Color();
+                newNode.GetComponent<PolygonCollider2D>().enabled = false;
                 break;
         }
     }
 
+    static class Cache{
+        public static Vector2Int[] directions;
+        public static Node cachedNode;
+    }
+    public static Vector2Int DirectionToBoardCoordinate(Node go, int index)
+    {
+        if(Cache.cachedNode == null || Cache.cachedNode != go){
+            Cache.directions = new Vector2Int[]{
+            new Vector2Int((NodeManager.board.GetLength(0) - 1 <= go.CurrentBoardPosition.x) ? 0: 1, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 0), //Upper Right
+            new Vector2Int((NodeManager.board.GetLength(0) - 1 <= go.CurrentBoardPosition.x) ? 0: 1, (go.CurrentBoardPosition.x%2 == 1) ? 1 : -1), //Upper Left
+            new Vector2Int(0, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 1), //Middle Right
+            new Vector2Int(0, (go.CurrentBoardPosition.x%2 == 1) ? -1 : -1), //Middle Left
+            new Vector2Int((go.CurrentBoardPosition.x <= 0) ? 0: -1, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 0), //Bottom Right
+            new Vector2Int((go.CurrentBoardPosition.x <= 0) ? 0: -1, (go.CurrentBoardPosition.x%2 == 1) ? 1 : -1), //Buttom Left
+            };
+            Cache.cachedNode = go;
+        }
+        if (index > Cache.directions.Length) return Vector2Int.zero;
+        return Cache.directions[index];
+    }
     #endregion
 
 }
