@@ -9,7 +9,7 @@ namespace ChineseCheckers {
         static Node GetTargetNode (Node nodeInQuestion, Node source) {
 
             if (source == null) return null;
-            foreach (Node node in BoardManager.ValidMoves (source)) {
+            foreach (Node node in BoardManager.ValidMoves (source, false)) {
                 if (nodeInQuestion != node || node.StoredPiece != null || nodeInQuestion == source) continue;
                 Debug.Log ($" Found {nodeInQuestion} within {node}");
                 return nodeInQuestion;

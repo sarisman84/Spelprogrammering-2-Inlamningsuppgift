@@ -35,7 +35,7 @@ public class Piece : MonoBehaviour {
     }
 
     public static void MovePiece (Piece selectedPiece, Node current, Node destination) {
-        if (selectedPiece == null || current == null || destination == null) return;
+        //if (selectedPiece == null || current == null || destination == null) return;
         Debug.Log ($"Moving {selectedPiece} from {current} to {destination}");
         current.StoredPiece = null;
         selectedPiece.transform.position = destination.transform.position;

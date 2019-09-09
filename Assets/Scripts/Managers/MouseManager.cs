@@ -52,7 +52,7 @@ public class MouseManager : MonoBehaviour {
         Gizmos.DrawWireSphere (go.point, 0.1f);
         Gizmos.color = Color.red;
         if (currentNode != null)
-            foreach (var node in BoardManager.ValidMoves (currentNode)) {
+            foreach (var node in BoardManager.ValidMoves (currentNode, false)) {
                 if (node != null)
                     Gizmos.DrawWireSphere (node.transform.position, 0.5f);
             }
