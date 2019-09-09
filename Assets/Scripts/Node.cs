@@ -3,10 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Node : MonoBehaviour
-{
+public class Node : MonoBehaviour {
     public enum Team { Empty, Unoccupied, Red, Blue, Yellow, Green, Magenta, Orange }
-
 
     Vector2Int boardPosition;
     [SerializeField] Piece storedPiece;
@@ -16,61 +14,49 @@ public class Node : MonoBehaviour
 
     [SerializeField] Team currentTeam;
 
-    public Team BelongsTo
-    {
+    public Team BelongsTo {
         get => currentTeam;
         set => currentTeam = value;
     }
 
     #region Accessors
 
-
-    public Node[] GetNearestNodes
-    {
-        get
-        {
-            throw new NotImplementedException();
+    public Node[] GetNearestNodes {
+        get {
+            throw new NotImplementedException ();
         }
     }
 
-    public Vector2Int CurrentBoardPosition
-    {
+    public Vector2Int CurrentBoardPosition {
         get => boardPosition;
         set => boardPosition = value;
     }
 
-    public Piece StoredPiece
-    {
+    public Piece StoredPiece {
         get => storedPiece;
-        set
-        {
+        set {
             storedPiece = value;
 
         }
     }
 
-    public Color SetColor
-    {
-        set
-        {
-            defaultColor = (defaultColor == new Color()) ? value : defaultColor;
-            _renderer = _renderer ?? GetComponent<SpriteRenderer>();
+    public Color SetColor {
+        set {
+            defaultColor = (defaultColor == new Color ()) ? value : defaultColor;
+            _renderer = _renderer ?? GetComponent<SpriteRenderer> ();
             _renderer.color = value;
         }
 
     }
     #endregion
 
-    private void OnEnable()
-    {
-        _renderer = GetComponent<SpriteRenderer>();
+    private void OnEnable () {
+        _renderer = GetComponent<SpriteRenderer> ();
 
     }
 
-    public void HighlightNode(Color highlight, bool isHighlighting)
-    {
-        switch (isHighlighting)
-        {
+    public void HighlightNode (Color highlight, bool isHighlighting) {
+        switch (isHighlighting) {
 
             case true:
                 _renderer.color = highlight;
@@ -91,7 +77,6 @@ public class Node : MonoBehaviour
     /// <param name="team">What team the one who selected it actually is. </param>
     /// <returns>A Node with a piece.</returns>
 
-
     /// <summary>
     /// Similar to Instantiate(), CreateNode creates a node and sets the appropiate variables to it at once.
     /// </summary>
@@ -99,11 +84,10 @@ public class Node : MonoBehaviour
     /// <param name="blueprint">An ID system that sets the correct data to the Node.</param>
     /// <param name="parent">A parent that sorts the Nodes for convenience sake. </param>
     /// <returns></returns>
-    public static Node CreateNode(Node prefab, int blueprint, Transform parent)
-    {
-        Node newNode = Instantiate(prefab, parent);
-        SetTeamColor(blueprint, newNode);
-        newNode.BelongsTo = (Node.Team)blueprint;
+    public static Node CreateNode (Node prefab, int blueprint, Transform parent) {
+        Node newNode = Instantiate (prefab, parent);
+        SetTeamColor (blueprint, newNode);
+        newNode.BelongsTo = (Node.Team) blueprint;
 
         return newNode;
     }
@@ -113,11 +97,9 @@ public class Node : MonoBehaviour
     /// </summary>
     /// <param name="blueprint"> Used as an ID for setting up the color of the node. </param>
     /// <param name="newNode">The node in question. </param>
-    public static Color SetTeamColor(int blueprint, Node newNode)
-    {
-        Color newColor = new Color();
-        switch (blueprint)
-        {
+    public static Color SetTeamColor (int blueprint, Node newNode) {
+        Color newColor = new Color ();
+        switch (blueprint) {
 
             case 2:
                 //Set color to Red.
@@ -151,8 +133,8 @@ public class Node : MonoBehaviour
 
             case 7:
                 //Set color to Orange.
-                newNode.SetColor = new Color(1, 0.6f, 0);
-                newColor = new Color(1, 0.6f, 0);
+                newNode.SetColor = new Color (1, 0.6f, 0);
+                newColor = new Color (1, 0.6f, 0);
                 break;
 
             case 1:
@@ -162,18 +144,16 @@ public class Node : MonoBehaviour
                 break;
 
             default:
-                newNode.SetColor = new Color();
-                newColor = new Color();
-                newNode.GetComponent<PolygonCollider2D>().enabled = false;
+                newNode.SetColor = new Color ();
+                newColor = new Color ();
+                newNode.GetComponent<PolygonCollider2D> ().enabled = false;
                 break;
         }
         return newColor;
     }
-    public static Color SetTeamColor(int blueprint)
-    {
-        Color newColor = new Color();
-        switch (blueprint)
-        {
+    public static Color SetTeamColor (int blueprint) {
+        Color newColor = new Color ();
+        switch (blueprint) {
 
             case 2:
                 //Set color to Red.
@@ -208,7 +188,7 @@ public class Node : MonoBehaviour
             case 7:
                 //Set color to Orange.
 
-                newColor = new Color(1, 0.6f, 0);
+                newColor = new Color (1, 0.6f, 0);
                 break;
 
             case 1:
@@ -219,35 +199,61 @@ public class Node : MonoBehaviour
 
             default:
 
-                newColor = new Color();
+                newColor = new Color ();
 
                 break;
         }
         return newColor;
     }
 
-    static class Cache
-    {
+    static class Cache {
         public static Vector2Int[] directions;
         public static Node cachedNode;
     }
-    public static Vector2Int DirectionToBoardCoordinate(Node go, int index)
-    {
-        if (Cache.cachedNode == null || Cache.cachedNode != go)
-        {
-            Cache.directions = new Vector2Int[]{
-            new Vector2Int((ChineseCheckers.BoardManager.board.GetLength(0) - 1 <= go.CurrentBoardPosition.x) ? 0: 1, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 0), //Upper Right
-            new Vector2Int((ChineseCheckers.BoardManager.board.GetLength(0) - 1 <= go.CurrentBoardPosition.x) ? 0: 1, (go.CurrentBoardPosition.x%2 == 1) ? 1 : -1), //Upper Left
-            new Vector2Int(0, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 1), //Middle Right
-            new Vector2Int(0, (go.CurrentBoardPosition.x%2 == 1) ? -1 : -1), //Middle Left
-            new Vector2Int((go.CurrentBoardPosition.x <= 0) ? 0: -1, (go.CurrentBoardPosition.x%2 == 2) ? -1 : 0), //Bottom Right
-            new Vector2Int((go.CurrentBoardPosition.x <= 0) ? 0: -1, (go.CurrentBoardPosition.x%2 == 1) ? 1 : -1), //Buttom Left
+    public static Vector2Int DirectionToBoardCoordinate (Node go, int index) {
+        if (Cache.cachedNode == null || Cache.cachedNode != go) {
+            Cache.directions = new Vector2Int[] {
+            new Vector2Int ((ChineseCheckers.BoardManager.board.GetLength (0) - 1 <= go.CurrentBoardPosition.x) ? 0 : 1, (go.CurrentBoardPosition.x % 2 == 2) ? -1 : 0), //Upper Right
+            new Vector2Int ((ChineseCheckers.BoardManager.board.GetLength (0) - 1 <= go.CurrentBoardPosition.x) ? 0 : 1, (go.CurrentBoardPosition.x % 2 == 1) ? 1 : -1), //Upper Left
+            new Vector2Int (0, (go.CurrentBoardPosition.x % 2 == 2) ? -1 : 1), //Middle Right
+            new Vector2Int (0, (go.CurrentBoardPosition.x % 2 == 1) ? -1 : -1), //Middle Left
+            new Vector2Int ((go.CurrentBoardPosition.x <= 0) ? 0 : -1, (go.CurrentBoardPosition.x % 2 == 2) ? -1 : 0), //Bottom Right
+            new Vector2Int ((go.CurrentBoardPosition.x <= 0) ? 0 : -1, (go.CurrentBoardPosition.x % 2 == 1) ? 1 : -1), //Buttom Left
             };
             Cache.cachedNode = go;
         }
         if (index > Cache.directions.Length) return Vector2Int.zero;
         return Cache.directions[index];
     }
+
+    public static Vector2Int DirectionInBoard (Vector2Int startPos, int index) {
+        Vector2Int pos = Vector2Int.zero;
+        switch (index) {
+
+            case 0:
+                return new Vector2Int (pos.y, pos.x - 1); // Left
+            case 1:
+                return new Vector2Int (pos.y, pos.x + 1); // Right
+            case 2:
+                if (startPos.x % 2 == 0)
+                    return new Vector2Int (pos.y + 1, pos.x);
+                return new Vector2Int (pos.y + 1, pos.x + 1); //Top Right
+            case 3:
+                if (startPos.x % 2 != 0)
+                    return new Vector2Int (pos.y + 1, pos.x);
+                return new Vector2Int (pos.y + 1, pos.x - 1); //Top Left
+            case 4:
+                if (startPos.x % 2 != 0)
+                    return new Vector2Int (pos.y - 1, pos.x + 1); //Bot Right
+                return new Vector2Int (pos.y - 1, pos.x);
+            case 5:
+                if (startPos.x % 2 == 0)
+                    return new Vector2Int (pos.y - 1, pos.x - 1); //Bot Left
+                return new Vector2Int (pos.y - 1, pos.x);
+        }
+        return Vector2Int.zero;
+    }
+
     #endregion
 
 }

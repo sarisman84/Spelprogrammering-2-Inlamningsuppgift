@@ -5,9 +5,9 @@ using static ChineseCheckers.HexagonGrid;
 using UnityEngine;
 
 //Temporary script to test the rest of this project.
-public class GameManager : MonoBehaviour
-{
-    private const int V = 0, O = 1;
+public class GameManager : MonoBehaviour {
+    private const int V = (int) Node.Team.Empty,
+        O = (int) Node.Team.Unoccupied;
 
     /*
     2 = Yellow
@@ -21,26 +21,9 @@ public class GameManager : MonoBehaviour
     public Node nodePrefab;
     public Piece piecePrefab;
 
-    public int amountOfPlayers;
+    //public int amountOfPlayers;
 
-    int[,] blueprint = new int[,] {
-{V, V, V, V, V, V, V, 4, V, V, V, V, V,V,V },
-{V, V, V, V, V, V, 4, 4, V, V, V, V, V,V,V },
-{V, V, V, V, V, V, 4, 4, 4, V, V, V, V,V,V },
-{V, V, V, V, V, 4, 4, 4, 4, V, V, V, V,V,V },
-{V, 6, 6, 6, 6, O, O, O, O, O, 5, 5, 5,5,V },
-{V, 6, 6, 6, O, O, O, O, O, O, 5, 5, 5,V,V },
-{V, V, 6, 6, O, O, O, O, O, O, O, 5, 5,V,V },
-{V, V, 6, O, O, O, O, O, O, O, O, 5, V,V,V },
-{V, V, V, O, O, O, O, O, O, O, O, O, V,V,V },
-{V, V, 7, O, O, O, O, O, O, O, O, 3, V,V,V },
-{V, V, 7, 7, O, O, O, O, O, O, O, 3, 3,V,V },
-{V, 7, 7, 7, O, O, O, O, O, O, 3, 3, 3,V,V },
-{V, 7, 7, 7, 7, O, O, O, O, O, 3, 3, 3,3,V },
-{V, V, V, V, V, 2, 2, 2, 2, V, V, V, V,V,V },
-{V, V, V, V, V, V, 2, 2, 2, V, V, V, V,V,V },
-{V, V, V, V, V, V, 2, 2, V, V, V, V, V,V,V },
-{V, V, V, V, V, V, V, 2, V, V, V, V, V,V,V },
+    int[, ] blueprint = new int[, ] { { V, V, V, V, V, V, V, 4, V, V, V, V, V, V, V }, { V, V, V, V, V, V, 4, 4, V, V, V, V, V, V, V }, { V, V, V, V, V, V, 4, 4, 4, V, V, V, V, V, V }, { V, V, V, V, V, 4, 4, 4, 4, V, V, V, V, V, V }, { V, 6, 6, 6, 6, O, O, O, O, O, 5, 5, 5, 5, V }, { V, 6, 6, 6, O, O, O, O, O, O, 5, 5, 5, V, V }, { V, V, 6, 6, O, O, O, O, O, O, O, 5, 5, V, V }, { V, V, 6, O, O, O, O, O, O, O, O, 5, V, V, V }, { V, V, V, O, O, O, O, O, O, O, O, O, V, V, V }, { V, V, 7, O, O, O, O, O, O, O, O, 3, V, V, V }, { V, V, 7, 7, O, O, O, O, O, O, O, 3, 3, V, V }, { V, 7, 7, 7, O, O, O, O, O, O, 3, 3, 3, V, V }, { V, 7, 7, 7, 7, O, O, O, O, O, 3, 3, 3, 3, V }, { V, V, V, V, V, 2, 2, 2, 2, V, V, V, V, V, V }, { V, V, V, V, V, V, 2, 2, 2, V, V, V, V, V, V }, { V, V, V, V, V, V, 2, 2, V, V, V, V, V, V, V }, { V, V, V, V, V, V, V, 2, V, V, V, V, V, V, V },
 
     };
 
@@ -72,16 +55,14 @@ public class GameManager : MonoBehaviour
     0 = Empty. (Collisions and Textures are turned off)
     1-7 = Board peaces (Have a dedicated color per number as well as sets the team to each of the nodes corresponding the color).
      */
-    private void Awake()
-    {
+    private void Awake () {
 
-        BoardManager.board = BoardManager.board ?? CreateGrid(blueprint, nodePrefab);
-        BoardManager.InsertPiecesToBoard(new Node.Team[] { Node.Team.Red, Node.Team.Yellow }, piecePrefab);
+        BoardManager.board = BoardManager.board ?? CreateGrid (blueprint, nodePrefab);
+        BoardManager.InsertPiecesToBoard (new Node.Team[] { Node.Team.Red, Node.Team.Yellow }, piecePrefab);
 
     }
 
-    private void OnValidate()
-    {
+    private void OnValidate () {
         //BoardManager.board = BoardManager.board ?? CreateGrid(blueprint, nodePrefab);
     }
 
