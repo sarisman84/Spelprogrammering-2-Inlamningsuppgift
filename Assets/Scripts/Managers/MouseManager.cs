@@ -49,18 +49,25 @@ public class MouseManager : MonoBehaviour
         if (go.collider == null) return;
         Node node = go.collider.GetComponent<Node>();
         //Debug.Log(node.CurrentBoardPosition);
-
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            currentNode.HighlightNode(new Color(), false);
+            BoardManager.ResetValidNodes();
+            currentNode = null;
+        }
         if (!input) return;
 
-        currentNode = UserManager.GetNodeWithPiece(node, team);
-        selectedNode = UserManager.GetTargetNode(node, currentNode);
+        currentNode = currentNode ?? UserManager.GetNodeWithPiece(node, team);
+        selectedNode = (currentNode != null) ? UserManager.GetTargetNode(node, currentNode) : selectedNode;
 
         if (currentNode == null || selectedNode == null) return;
         Piece.MovePiece(currentNode.StoredPiece, currentNode, selectedNode);
         currentNode.HighlightNode(new Color(), false);
         BoardManager.ResetValidNodes();
-        currentNode = null;
+        currentNode = selectedNode;
+        currentNode.HighlightNode(Color.green, true);
         selectedNode = null;
+
 
 
 

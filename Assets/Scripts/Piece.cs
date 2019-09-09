@@ -7,7 +7,7 @@ public class Piece : MonoBehaviour
     Color defaultColor;
     SpriteRenderer _renderer;
 
-    Node.Team currentTeam;
+    [SerializeField] Node.Team currentTeam;
 
     public Node.Team BelongsTo
     {

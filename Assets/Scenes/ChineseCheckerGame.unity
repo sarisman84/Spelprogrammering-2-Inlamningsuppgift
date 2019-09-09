@@ -234,7 +234,7 @@ MonoBehaviour:
     type: 3}
   piecePrefab: {fileID: 3681646543225541178, guid: 8ff400f6a82be8240bc2a1fb4e93a647,
     type: 3}
-  amountOfPlayers: 4
+  amountOfPlayers: 0
 --- !u!4 &379069166
 Transform:
   m_ObjectHideFlags: 0
