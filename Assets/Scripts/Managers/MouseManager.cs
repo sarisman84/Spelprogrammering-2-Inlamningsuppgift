@@ -8,7 +8,7 @@ using UnityEngine;
 public class MouseManager : MonoBehaviour {
     #region Common Variables
     public LayerMask mask;
-    bool input;
+    [SerializeField] bool hasJumped = false;
 
     Vector3 mousePos;
 
@@ -19,8 +19,6 @@ public class MouseManager : MonoBehaviour {
 
     public Node.Team team;
     [SerializeField] Node currentNode, selectedNode;
-
-    [SerializeField] Node[] validMoves;
 
     private void Awake () {
         cam = Camera.main;
@@ -37,13 +35,15 @@ public class MouseManager : MonoBehaviour {
         Debug.DrawRay (mousePos, cam.transform.forward * 100f, Color.red);
 
         //Get an input from the left mouse button when pressed down.
-        input = Input.GetMouseButtonDown (0);
-        #endregion
 
+        #endregion
+        if (Input.GetKeyDown (KeyCode.Tab)) {
+            UserManager.WhenTurnEnds (ref hasJumped, ref currentNode, ref selectedNode);
+        }
         if (go.collider == null) return;
         Node node = go.collider.GetComponent<Node> ();
-
-        UserManager.OnActionTaken (node, ref currentNode, ref selectedNode, team, input, Input.GetKeyDown (KeyCode.Space));
+        if (!Input.GetMouseButtonDown (0)) return;
+        UserManager.OnActionTaken (node, team, ref hasJumped, ref currentNode, ref selectedNode);
 
     }
 
@@ -51,11 +51,14 @@ public class MouseManager : MonoBehaviour {
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere (go.point, 0.1f);
         Gizmos.color = Color.red;
-        if (currentNode != null)
-            foreach (var node in BoardManager.ValidMoves (currentNode, false)) {
-                if (node != null)
-                    Gizmos.DrawWireSphere (node.transform.position, 0.5f);
-            }
+        if (currentNode == null) return;
+        Node[] moves = UserManager.cachedValidMoves;
+
+        if (moves == null) return;
+        foreach (var node in moves) {
+            if (node != null)
+                Gizmos.DrawWireSphere (node.transform.position, 0.5f);
+        }
         Gizmos.color = Color.blue;
         if (selectedNode != null)
             Gizmos.DrawWireCube (selectedNode.transform.position, new Vector3 (0.5f, 0.5f, 0.5f));
