@@ -1,6 +1,11 @@
 
 using UnityEngine;
 using UnityEditor;
+
+
+/// <summary>
+/// Is being used for the GameMode list so that handling the list is much easier.
+/// </summary>
 public class GameManagerEditorWindow : ExtendedEditorWindow
 {
     public static void Open(GameManager managerObject)

@@ -1,7 +1,10 @@
-using System;
+
 using UnityEngine;
 using UnityEditor;
-
+/// <summary>
+/// This is meant as an custom editor extension in general.
+/// Is being used for the GameMode list so that handling the list is much easier.
+/// </summary>
 public class ExtendedEditorWindow : EditorWindow
 {
     protected SerializedObject serializedObject;

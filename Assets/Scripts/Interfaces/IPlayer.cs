@@ -6,7 +6,10 @@ using UnityEngine;
 
 public enum Team { Empty, Unoccupied, Red, Blue, Yellow, Green, Magenta, Orange }
 
-[SerializeField]
+
+/// <summary>
+/// An interface that allows classes to use a Team enum system and a few other more common properties.
+/// </summary>
 public interface IPlayer {
 
     bool HasDoneFirstMove { get; set; }

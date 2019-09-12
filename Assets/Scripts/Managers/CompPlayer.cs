@@ -5,8 +5,15 @@ using System.Linq;
 using ChineseCheckers;
 using UnityEngine;
 
-public class CompPlayer : MonoBehaviour, IPlayer {
+//Node: This script is not implemented yet. 
 
+/// <summary>
+/// The core class for computer based player behaivours.
+/// </summary>
+public class CompPlayer : MonoBehaviour, IPlayer
+{
+    
+    #region Variables
     [SerializeField] Node[] playerBase, cachedValidNodes;
     [SerializeField] Team currentTeam, opponent;
 
@@ -14,53 +21,75 @@ public class CompPlayer : MonoBehaviour, IPlayer {
 
     [SerializeField] Piece[] cachedPieces;
     bool hasJumped;
-    public Team BelongsTo {
+
+    #endregion
+
+    #region  Properties
+    public Team BelongsTo
+    {
         get => currentTeam;
         set => currentTeam = value;
     }
-    public Team CurrentOpponent {
+    public Team CurrentOpponent
+    {
         get => opponent;
         set => opponent = value;
     }
-    public Node[] PlayerBase {
+    public Node[] PlayerBase
+    {
         get => playerBase;
-        set {
+        set
+        {
             Piece[] playerPieces = new Piece[value.Length];
-            for (int i = 0; i < value.Length; i++) {
+            for (int i = 0; i < value.Length; i++)
+            {
                 playerPieces[i] = value[i].StoredPiece;
             }
             cachedPieces = cachedPieces ?? playerPieces;
             playerBase = value;
         }
     }
-    public Node SelectedPiece {
+    public Node SelectedPiece
+    {
         get => currentPiece;
         set => currentPiece = value;
     }
-    public Node DesiredTarget {
+    public Node DesiredTarget
+    {
         get => desiredNode;
         set => desiredNode = value;
     }
-    public bool HasDoneFirstMove {
+    public bool HasDoneFirstMove
+    {
         get => hasJumped;
         set => hasJumped = value;
     }
 
     public Node DetectedNode =>
-        throw new NotImplementedException ();
+        throw new NotImplementedException();
 
-    public Node[] CachedValidMoves {
+    public Node[] CachedValidMoves
+    {
         get => cachedValidNodes;
         set => cachedValidNodes = value;
     }
 
-    public Piece[] CachedPieces {
+    public Piece[] CachedPieces
+    {
         get => cachedPieces;
         set => cachedPieces = value;
     }
+    #endregion
 
-    public static IPlayer CreatePlayer (Team currentTeam, Team opponent) {
-        IPlayer player = new GameObject ($"Player {currentTeam} : Computer").AddComponent<CompPlayer> ();
+    /// <summary>
+    /// Create a player using the Interface IPlayer. Current method returns a ComputerPlayer.
+    /// </summary>
+    /// <param name="currentTeam"> What team this player will be in.</param>
+    /// <param name="opponent">What opponent will this player face.</param>
+    /// <returns>A newly created player. </returns>
+    public static IPlayer CreatePlayer(Team currentTeam, Team opponent)
+    {
+        IPlayer player = new GameObject($"Player {currentTeam} : Computer").AddComponent<CompPlayer>();
         player.BelongsTo = currentTeam;
         player.CurrentOpponent = opponent;
         return player;
@@ -69,7 +98,11 @@ public class CompPlayer : MonoBehaviour, IPlayer {
     /*
         First, read all of the available pieces that you have that can move and store them somewhere.
 
-        Second, pick the one that is going to be moved (minimax).
+        Second, pick a piece that is the best move possible.
+        To do so, i need to define the following:
+            1.What "position" is in the minimax method?
+            2.What are the maximizingEval and minimizingEval?
+
 
         Third, apply same move methods as the human player.
     

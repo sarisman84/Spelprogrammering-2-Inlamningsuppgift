@@ -2,8 +2,16 @@ using System;
 using ChineseCheckers;
 using UnityEngine;
 
-public class HumanPlayer : MonoBehaviour, IPlayer {
+//This class replaces the MouseManager class. 
 
+/// <summary>
+/// Official class for actual players in Chinese Checkers
+/// </summary>
+public class HumanPlayer : MonoBehaviour, IPlayer
+{
+
+    //Basic variables that store nessesary information to define what a player is.
+    #region Variables
     public LayerMask mask;
     [SerializeField] bool hasJumped = false;
     Vector3 mousePos;
@@ -13,90 +21,103 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
     [SerializeField] Team currentTeam, opponent;
     [SerializeField] Node[] playerBase;
     Node[] cachedValidMoves;
+    #endregion
 
+    //Advanced Properties that return a variable based on calculations and calls from other scripts.
+    #region Properties
     public Team BelongsTo { get => currentTeam; set => currentTeam = value; }
     public Team CurrentOpponent { get => opponent; set => opponent = value; }
     public Node[] PlayerBase { get => playerBase; set => playerBase = value; }
-    public Node SelectedPiece {
-        get {
-            if (currentNode != null) currentNode.HighlightNode (new Color (), false);
-            return currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece (DetectedNode, currentTeam, hasJumped, ref cachedValidMoves) : currentNode;
+    public Node SelectedPiece
+    {
+        get
+        {
+            if (currentNode != null) currentNode.HighlightNode(new Color(), false);
+            return currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece(DetectedNode, currentTeam, hasJumped, ref cachedValidMoves) : currentNode;
         }
-        set {
-            if (currentNode != null) currentNode.HighlightNode (new Color (), false);
-            currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece (value, currentTeam, hasJumped, ref cachedValidMoves) : currentNode;
+        set
+        {
+            if (currentNode != null) currentNode.HighlightNode(new Color(), false);
+            currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece(value, currentTeam, hasJumped, ref cachedValidMoves) : currentNode;
         }
     }
-    public Node DesiredTarget {
-        get {
-            return selectedNode = (currentNode != null) ? UserManager.AttemptToGetTarget (DetectedNode, currentNode, ref cachedValidMoves) : selectedNode;
+    public Node DesiredTarget
+    {
+        get
+        {
+            return selectedNode = (currentNode != null) ? UserManager.AttemptToGetTarget(DetectedNode, ref cachedValidMoves) : selectedNode;
         }
 
-        set {
+        set
+        {
             selectedNode = value;
         }
     }
-    public bool HasDoneFirstMove {
+    public bool HasDoneFirstMove
+    {
         get => hasJumped;
         set => hasJumped = value;
     }
-    public Node DetectedNode => (detectedObject.collider != null) ? detectedObject.collider.GetComponent<Node> () : null;
-    public Node[] CachedValidMoves {
+    public Node DetectedNode => (detectedObject.collider != null) ? detectedObject.collider.GetComponent<Node>() : null;
+    public Node[] CachedValidMoves
+    {
         get => cachedValidMoves;
-        set {
-            UserManager.ResetValidMoves (ref cachedValidMoves);
+        set
+        {
+            UserManager.ResetValidMoves(ref cachedValidMoves);
         }
     }
+    #endregion
 
-    public static IPlayer CreatePlayer (Team currentTeam, Team opponent) {
-        IPlayer player = new GameObject ($"Player {currentTeam}: Human").AddComponent<HumanPlayer> ();
+    /// <summary>
+    /// Creates a IPlayer instance of type Human.
+    /// </summary>
+    /// <param name="currentTeam">What team this player is in</param>
+    /// <param name="opponent">What team its opponent is in</param>
+    /// <returns>An IPlayer instance of type Human.</returns>
+    public static IPlayer CreatePlayer(Team currentTeam, Team opponent)
+    {
+        IPlayer player = new GameObject($"Player {currentTeam}: Human").AddComponent<HumanPlayer>();
         player.BelongsTo = currentTeam;
         player.CurrentOpponent = opponent;
         return player;
     }
 
-    private void OnEnable () {
+
+
+    //The rest of this script is taken straight from MouseManager, with a few changes to fit the new layout.
+    private void OnEnable()
+    {
         cam = Camera.main;
-        mask = LayerMask.NameToLayer ("Node");
+        mask = LayerMask.NameToLayer("Node");
     }
 
-    void Update () {
+    void Update()
+    {
         #region Gameobject Detection
         //First, get the mouse position from screen coordinates to world coordinates.
-        mousePos = cam.ScreenToWorldPoint (Input.mousePosition);
+        mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
 
-        //Then, set that position as the center of an Physics2D.OverlapCircle with a small radius. 
-        //AGAIN: THIS IS TEMPRORARY AND IS MEANT TO BE REPLACED LATER!!!
-        detectedObject = Physics2D.Raycast (mousePos - new Vector3 (0, 0, 10), cam.transform.forward, mask.value);
-        Debug.DrawRay (mousePos, cam.transform.forward * 100f, Color.red);
+        //Second, do a Raycast that detects an detectedObject which will be used in the properties above for evaluation.
+        detectedObject = Physics2D.Raycast(mousePos - new Vector3(0, 0, 10), cam.transform.forward, mask.value);
+        //Debug.DrawRay(mousePos, cam.transform.forward * 100f, Color.red);
 
         //Get an input from the left mouse button when pressed down.
 
         #endregion
-        if (Input.GetKeyDown (KeyCode.Tab)) {
-            UserManager.WhenTurnEnds (ref hasJumped, ref currentNode, ref selectedNode, ref cachedValidMoves);
+
+        //A temporary button to end a player's turn.
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            UserManager.WhenTurnEnds(ref hasJumped, ref currentNode, ref selectedNode, ref cachedValidMoves);
         }
-        if (!Input.GetMouseButtonDown (0)) return;
+        
+        if (!Input.GetMouseButtonDown(0)) return;
 
         if (DetectedNode == null) return;
-        UserManager.OnActionTaken (this);
+        UserManager.OnActionTaken(this);
 
     }
 
-    // private void OnDrawGizmos () {
-    //     Gizmos.color = Color.green;
-    //     Gizmos.DrawWireSphere (detectedObject.point, 0.1f);
-    //     Gizmos.color = Color.red;
-    //     if (currentNode == null) return;
-    //     Node[] moves = UserManager.cachedValidMoves;
 
-    //     if (moves == null) return;
-    //     foreach (var node in moves) {
-    //         if (node != null)
-    //             Gizmos.DrawWireSphere (node.transform.position, 0.5f);
-    //     }
-    //     Gizmos.color = Color.blue;
-    //     if (selectedNode != null)
-    //         Gizmos.DrawWireCube (selectedNode.transform.position, new Vector3 (0.5f, 0.5f, 0.5f));
-    // }
 }
