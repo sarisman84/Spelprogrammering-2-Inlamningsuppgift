@@ -6,9 +6,9 @@ public class Piece : MonoBehaviour {
     Color defaultColor;
     SpriteRenderer _renderer;
 
-    [SerializeField] Node.Team currentTeam;
+    [SerializeField] Team currentTeam;
 
-    public Node.Team BelongsTo {
+    public Team BelongsTo {
         get => currentTeam;
         set => currentTeam = value;
     }
@@ -36,7 +36,7 @@ public class Piece : MonoBehaviour {
 
     public static void MovePiece (Piece selectedPiece, Node current, Node destination) {
         //if (selectedPiece == null || current == null || destination == null) return;
-        Debug.Log ($"Moving {selectedPiece} from {current} to {destination}");
+        //Debug.Log ($"Moving {selectedPiece} from {current} to {destination}");
         current.StoredPiece = null;
         selectedPiece.transform.position = destination.transform.position;
         destination.StoredPiece = selectedPiece;
@@ -44,7 +44,7 @@ public class Piece : MonoBehaviour {
     }
 
     static Transform parent;
-    public static Piece CreatePiece (Piece prefab, Color playerColor, Node node, Node.Team team) {
+    public static Piece CreatePiece (Piece prefab, Color playerColor, Node node, Team team) {
         parent = parent ?? new GameObject ($"{prefab.name}'s list").transform;
         Piece newPiece = Instantiate (prefab, node.transform.position, Quaternion.identity, parent);
         newPiece.SetPieceColor = playerColor;

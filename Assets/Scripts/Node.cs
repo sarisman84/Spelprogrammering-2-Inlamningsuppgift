@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Node : MonoBehaviour {
-    public enum Team { Empty, Unoccupied, Red, Blue, Yellow, Green, Magenta, Orange }
+    
 
     Vector2Int boardPosition;
     [SerializeField] Piece storedPiece;
@@ -87,7 +87,7 @@ public class Node : MonoBehaviour {
     public static Node CreateNode (Node prefab, int blueprint, Transform parent) {
         Node newNode = Instantiate (prefab, parent);
         SetTeamColor (blueprint, newNode);
-        newNode.BelongsTo = (Node.Team) blueprint;
+        newNode.BelongsTo = (Team) blueprint;
 
         return newNode;
     }
