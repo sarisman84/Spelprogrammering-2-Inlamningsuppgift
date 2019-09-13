@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using ChineseCheckers;
+using TMPro;
 using UnityEngine;
 
 //Node: This script is not implemented yet. 
@@ -10,12 +12,12 @@ using UnityEngine;
 /// <summary>
 /// The core class for computer based player behaivours.
 /// </summary>
-public class CompPlayer : MonoBehaviour, IPlayer
-{
-    
+public class CompPlayer : MonoBehaviour, IPlayer {
+
     #region Variables
-    [SerializeField] Node[] playerBase, cachedValidNodes;
-    [SerializeField] Team currentTeam, opponent;
+    [SerializeField] Node[] cachedValidNodes;
+    [SerializeField] TeamGenerator currentTeam;
+    TeamGenerator opponent;
 
     [SerializeField] Node currentPiece, desiredNode;
 
@@ -25,60 +27,70 @@ public class CompPlayer : MonoBehaviour, IPlayer
     #endregion
 
     #region  Properties
-    public Team BelongsTo
-    {
-        get => currentTeam;
-        set => currentTeam = value;
-    }
-    public Team CurrentOpponent
-    {
+
+    public TeamGenerator CurrentOpponent {
         get => opponent;
         set => opponent = value;
     }
-    public Node[] PlayerBase
-    {
-        get => playerBase;
-        set
-        {
-            Piece[] playerPieces = new Piece[value.Length];
-            for (int i = 0; i < value.Length; i++)
-            {
-                playerPieces[i] = value[i].StoredPiece;
+
+    public Node SelectedPiece {
+        get {
+            Node newPiece = null;
+            if (cachedPieces == null) {
+                Piece[] pieceArray = new Piece[currentTeam.TeamBase.Length];
+                for (int i = 0; i < pieceArray.Length; i++) {
+                    pieceArray[i] = currentTeam.TeamBase[i].StoredPiece;
+                }
+                cachedPieces = pieceArray;
             }
-            cachedPieces = cachedPieces ?? playerPieces;
-            playerBase = value;
+            int index = UnityEngine.Random.Range (0, cachedPieces.Length);
+            if (index >= cachedPieces.Length) return null;
+            newPiece = UserManager.AttemptToGetPiece (cachedPieces[index].CurrentlyLiesIn, currentTeam.Team, hasJumped, false, ref cachedValidNodes);
+            if (cachedValidNodes.Length == 0) {
+                return null;
+            }
+            text.text = Value (newPiece.StoredPiece, opponent.TeamBase).ToString ();
+            text.color = TeamGenerator.SetColorBasedOnTeam (currentTeam.Team);
+            currentPiece = newPiece;
+            return currentPiece;
         }
-    }
-    public Node SelectedPiece
-    {
-        get => currentPiece;
+
         set => currentPiece = value;
     }
-    public Node DesiredTarget
-    {
-        get => desiredNode;
+    public Node DesiredTarget {
+        get {
+            int index = UnityEngine.Random.Range (0, cachedValidNodes.Length - 1);
+            if (index >= cachedValidNodes.Length) return desiredNode;
+            return desiredNode = (currentPiece != null) ? UserManager.AttemptToGetTarget (cachedValidNodes[index], ref cachedValidNodes) : desiredNode;
+        }
+
         set => desiredNode = value;
     }
-    public bool HasDoneFirstMove
-    {
+    public bool HasDoneFirstMove {
         get => hasJumped;
         set => hasJumped = value;
     }
 
     public Node DetectedNode =>
-        throw new NotImplementedException();
+        throw new NotImplementedException ();
 
-    public Node[] CachedValidMoves
-    {
+    public Node[] CachedValidMoves {
         get => cachedValidNodes;
         set => cachedValidNodes = value;
     }
 
-    public Piece[] CachedPieces
-    {
+    public Piece[] CachedPieces {
         get => cachedPieces;
         set => cachedPieces = value;
     }
+
+    public TeamGenerator CurrentTeam {
+        get =>
+            currentTeam;
+        set =>
+            currentTeam = value;
+    }
+
     #endregion
 
     /// <summary>
@@ -87,12 +99,45 @@ public class CompPlayer : MonoBehaviour, IPlayer
     /// <param name="currentTeam"> What team this player will be in.</param>
     /// <param name="opponent">What opponent will this player face.</param>
     /// <returns>A newly created player. </returns>
-    public static IPlayer CreatePlayer(Team currentTeam, Team opponent)
-    {
-        IPlayer player = new GameObject($"Player {currentTeam} : Computer").AddComponent<CompPlayer>();
-        player.BelongsTo = currentTeam;
-        player.CurrentOpponent = opponent;
+    static TextMeshPro text;
+    public TextMeshPro SetupText {
+        get => text;
+        set => text = value;
+    }
+    public static IPlayer CreatePlayer (Team team) {
+        CompPlayer player = new GameObject ($"Player {team} : Computer").AddComponent<CompPlayer> ();
+        Canvas parent = FindObjectOfType<Canvas> ();
+        player.SetupText = player.SetupText ?? new GameObject ("Max Distance").AddComponent<TextMeshPro> ();
+        player.SetupText.transform.parent = parent.transform;
         return player;
+    }
+
+    private void Start () {
+        StartCoroutine (DelayedUpdate ());
+    }
+    IEnumerator DelayedUpdate () {
+        while (true) {
+            UserManager.OnActionTaken (this);
+            yield return new WaitForSeconds (0.5f);
+        }
+
+    }
+
+    float Value (Piece knownPiece, Node[] targets) {
+        float maxDist = 0;
+        foreach (Node target in targets) {
+            float dist = Vector2.Distance (knownPiece.CurrentlyLiesIn.CurrentBoardPosition, target.CurrentBoardPosition);
+            if (target.StoredPiece != null && target.StoredPiece.BelongsTo == currentTeam.Team) continue;
+            maxDist += dist;
+        }
+        return maxDist;
+    }
+
+    void Minimax (Node[] knownValidPositions, int depth, bool maximizingPos) {
+
+        if (depth == 0) {
+            //Return current position at index.
+        }
     }
 
     /*
@@ -105,7 +150,7 @@ public class CompPlayer : MonoBehaviour, IPlayer
 
 
         Third, apply same move methods as the human player.
-    
-    
+        
+        
      */
 }

@@ -1,35 +1,28 @@
 using System;
 using UnityEngine;
 
-namespace ChineseCheckers
-{
-    public static class UserManager
-    {
+namespace ChineseCheckers {
+    public static class UserManager {
 
         /// <summary>
         /// Changes the highlight mode of a selectedNode based on set parameters.
         /// </summary>
         /// <param name="go">The selectedNode in question</param>
         /// <param name="isHighlighted">If said node will be highlighted or not</param>
-        static void OnInteract(Node go, bool isHighlighted)
-        {
+        static void OnInteract (Node go, bool isHighlighted) {
             if (go == null) return;
-            go.HighlightNode(Color.green, isHighlighted);
+            go.HighlightNode (Color.green, isHighlighted);
         }
-
-
 
         /// <summary>
         /// Resets the cached list of valid moves by disabling its colors and then emptying the array.
         /// </summary>
         /// <param name="cachedValidMoves">A reference to the list of valid positions</param>
-        public static void ResetValidMoves(ref Node[] cachedValidMoves)
-        {
+        public static void ResetValidMoves (ref Node[] cachedValidMoves) {
             if (cachedValidMoves == null) return;
-            foreach (var node in cachedValidMoves)
-            {
+            foreach (var node in cachedValidMoves) {
                 if (node == null) continue;
-                node.HighlightNode(new Color(), false);
+                node.HighlightNode (new Color (), false);
             }
             cachedValidMoves = null;
         }
@@ -38,12 +31,10 @@ namespace ChineseCheckers
         /// Resets the highlight color of the items within the array of valid nodes.false 
         /// </summary>
         /// <param name="cachedValidMoves">A reference to the list of valid positions</param>
-        static void ResetHigtlightOnValidMoves(ref Node[] cachedValidMoves)
-        {
+        static void ResetHigtlightOnValidMoves (ref Node[] cachedValidMoves) {
             if (cachedValidMoves == null) return;
-            foreach (var node in cachedValidMoves)
-            {
-                node.HighlightNode(new Color(), false);
+            foreach (var node in cachedValidMoves) {
+                node.HighlightNode (new Color (), false);
             }
         }
 
@@ -57,17 +48,16 @@ namespace ChineseCheckers
         /// <param name="doneFirstMove">If the user who called this method has already moved.</param>
         /// <param name="cachedValidMoves">A reference to an array of cachedValidMoves. </param>
         /// <returns>A valid node that holds a piece of the same team. </returns>
-        public static Node AttemptToGetPiece(Node selectedNode, Team team, bool doneFirstMove, ref Node[] cachedValidMoves)
-        {
+        public static Node AttemptToGetPiece (Node selectedNode, Team team, bool doneFirstMove, bool highlight, ref Node[] cachedValidMoves) {
             cachedValidMoves = null;
             Node newNode = null;
-            ResetHigtlightOnValidMoves(ref cachedValidMoves);
+            ResetHigtlightOnValidMoves (ref cachedValidMoves);
             // Debug.Log ($" {selectedNode}");
             newNode = (selectedNode.StoredPiece != null && selectedNode.StoredPiece.BelongsTo == team) ? selectedNode : newNode;
-            OnInteract(newNode, true);
+            OnInteract (newNode, highlight);
             // Debug.Log(selectedNode);
             if (newNode != null)
-                cachedValidMoves = BoardManager.ValidMoves(selectedNode, ref doneFirstMove);
+                cachedValidMoves = BoardManager.ValidMoves (selectedNode, ref doneFirstMove, highlight);
             doneFirstMove = true;
             return newNode;
 
@@ -78,13 +68,10 @@ namespace ChineseCheckers
         /// <param name="selectedNode">The inputed node to be tested</param>
         /// <param name="cachedValidMoves">A reference to the array of valid nodes</param>
         /// <returns>Either the selectedNode if it does find a valid correlation or null if it doesnt find any.</returns>
-        public static Node AttemptToGetTarget(Node selectedNode, ref Node[] cachedValidMoves)
-        {
-            if (cachedValidMoves == null) throw new NullReferenceException("List of valid moves is empty");
-            foreach (Node validNode in cachedValidMoves)
-            {
-                if (selectedNode == validNode && selectedNode.StoredPiece == null)
-                {
+        public static Node AttemptToGetTarget (Node selectedNode, ref Node[] cachedValidMoves) {
+            if (cachedValidMoves == null) throw new NullReferenceException ("List of valid moves is empty");
+            foreach (Node validNode in cachedValidMoves) {
+                if (selectedNode == validNode && selectedNode.StoredPiece == null) {
                     return selectedNode;
                 }
             }
@@ -98,16 +85,14 @@ namespace ChineseCheckers
         /// Interacts with the board, a selected piece and a desired position based on what type of player calls it.
         /// </summary>
         /// <param name="player">The type of player that use the IPlayer interface.</param>
-        public static void OnActionTaken(IPlayer player)
-        {
-            switch (player)
-            {
+        public static void OnActionTaken (IPlayer player) {
+            switch (player) {
 
                 case HumanPlayer humanPlayer:
-                    OnHumanActionTaken(player);
+                    OnHumanActionTaken (player);
                     break;
                 case CompPlayer computer:
-                    OnComputerActionTaken(player);
+                    OnComputerActionTaken (player);
                     break;
             }
 
@@ -117,28 +102,32 @@ namespace ChineseCheckers
         /// Gets called when the player is of type Computer.
         /// </summary>
         /// <param name="player">The type of player that use the IPlayer interface.</param>
-        private static void OnComputerActionTaken(IPlayer player)
-        {
-            throw new NotImplementedException();
+        private static void OnComputerActionTaken (IPlayer player) {
+            Node selectedPiece = player.SelectedPiece, desiredTarget = player.DesiredTarget;
+            if (selectedPiece != null && desiredTarget != null) {
+
+                Piece.MovePiece (selectedPiece.StoredPiece, selectedPiece, desiredTarget);
+                player.SelectedPiece = null;
+                //player.HasDoneFirstMove = true;
+                player.CachedValidMoves = null;
+                player.DesiredTarget = null;
+            }
         }
         /// <summary>
         /// Gets called when the player is of type Human.
         /// </summary>
         /// <param name="player">he type of player that use the IPlayer interface.</param>
-        private static void OnHumanActionTaken(IPlayer player)
-        {
+        private static void OnHumanActionTaken (IPlayer player) {
 
-            if (player.SelectedPiece != null && player.DesiredTarget != null)
-            {
+            if (player.SelectedPiece != null && player.DesiredTarget != null) {
 
-                Piece.MovePiece(player.SelectedPiece.StoredPiece, player.SelectedPiece, player.DesiredTarget);
+                Piece.MovePiece (player.SelectedPiece.StoredPiece, player.SelectedPiece, player.DesiredTarget);
                 player.HasDoneFirstMove = true;
                 player.SelectedPiece = player.DesiredTarget;
                 player.CachedValidMoves = null;
                 player.DesiredTarget = null;
             }
         }
-
 
         #endregion
 
@@ -149,27 +138,20 @@ namespace ChineseCheckers
         /// <param name="savedNode">A reference to a stored piece node. </param>
         /// <param name="savedTargetNode">A reference to a target node. </param>
         /// <param name="cachedValidNodes">A reference to a list of all valid moves.</param>
-        public static void WhenTurnEnds(ref bool doneFirstMove, ref Node savedNode, ref Node savedTargetNode, ref Node[] cachedValidNodes)
-        {
+        public static void WhenTurnEnds (ref bool doneFirstMove, ref Node savedNode, ref Node savedTargetNode, ref Node[] cachedValidNodes) {
             //Reset everything
             doneFirstMove = false;
-            ResetValidMoves(ref cachedValidNodes);
-            OnInteract(savedNode, false);
-            if (savedNode != null)
-            {
-                savedNode.HighlightNode(new Color(), false);
+            ResetValidMoves (ref cachedValidNodes);
+            OnInteract (savedNode, false);
+            if (savedNode != null) {
+                savedNode.HighlightNode (new Color (), false);
                 savedNode = null;
             }
-            if (savedTargetNode != null)
-            {
+            if (savedTargetNode != null) {
                 savedTargetNode = null;
             }
 
         }
-
-
-
-
 
     }
 }

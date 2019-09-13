@@ -16,7 +16,7 @@ namespace ChineseCheckers {
         /// <param name="selectedNode">The source in which it will check those avaliable nodes from</param>
         /// <param name="doneFirstMove">If the user who called this method has already done his first move</param>
         /// <returns>An array of avaliable nodes</returns>
-        public static Node[] ValidMoves (Node selectedNode, ref bool doneFirstMove) {
+        public static Node[] ValidMoves (Node selectedNode, ref bool doneFirstMove, bool highlight) {
             if (selectedNode == null) {
                 throw new NullReferenceException ("Selected node is missing.");
             }
@@ -28,7 +28,7 @@ namespace ChineseCheckers {
                 if (OutOfBounds (newPos)) continue;
                 Node resultedNode = board[newPos.x, newPos.y];
                 if (resultedNode == null || resultedNode.BelongsTo == Team.Empty) continue;
-                Node finalNode = ConfirmResults (resultedNode, currentDirection, doneFirstMove);
+                Node finalNode = ConfirmResults (resultedNode, currentDirection, doneFirstMove, highlight);
                 if (finalNode == null) continue;
                 validMoves.Add (finalNode);
             }
@@ -36,7 +36,6 @@ namespace ChineseCheckers {
 
         }
 
-        
         /// <summary>
         /// Helper method that confirms if the resulted node has a stored piece or not.
         /// </summary>
@@ -44,24 +43,25 @@ namespace ChineseCheckers {
         /// <param name="index">The current index when this particular method was called in</param>
         /// <param name="doneFirstMove">If the player has already done his first move.</param>
         /// <returns>Either a result that has no StoredPiece in the node or a new node that was found by checking in the same cardinal direction, using the same logic.</returns>
-        private static Node ConfirmResults (Node resultedNode, int index, bool doneFirstMove) {
+        private static Node ConfirmResults (Node resultedNode, int index, bool doneFirstMove, bool highlight) {
             if (resultedNode.StoredPiece != null) {
                 Vector2Int currentPos = resultedNode.CurrentBoardPosition;
                 Vector2Int newPos = currentPos + Node.DirectionInBoard (currentPos, index);
                 if (OutOfBounds (newPos)) return null;
                 Node newResultedNode = board[newPos.x, newPos.y];
                 if (newResultedNode == null || newResultedNode.BelongsTo == Team.Empty || newResultedNode.StoredPiece != null) return null;
-                newResultedNode.HighlightNode (Color.yellow, true);
+
+                newResultedNode.HighlightNode (Color.yellow, highlight);
                 return newResultedNode;
             }
             if (!doneFirstMove) {
-                resultedNode.HighlightNode (Color.cyan, true);
+                if (highlight)
+                    resultedNode.HighlightNode (Color.cyan, highlight);
                 return resultedNode;
             }
             return null;
 
         }
-
 
         /// <summary>
         /// Helper method that checks if the inputed value is out of bounds in the boards array

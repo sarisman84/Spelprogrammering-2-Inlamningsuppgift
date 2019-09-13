@@ -334,76 +334,14 @@ MonoBehaviour:
   piecePrefab: {fileID: 3681646543225541178, guid: 8ff400f6a82be8240bc2a1fb4e93a647,
     type: 3}
   modes:
-  - matchup:
-    - firstPlayer:
-        isComputer: 0
-        team: 2
-      secondPlayer:
+  - matches: []
+  - matches: []
+  - matches: []
+  - matches: []
+  - matches:
+    - player:
+        playerTeam: 2
         isComputer: 1
-        team: 4
-    oddAmountOfPlayers: 0
-  - matchup:
-    - firstPlayer:
-        isComputer: 0
-        team: 2
-      secondPlayer:
-        isComputer: 1
-        team: 7
-    - firstPlayer:
-        isComputer: 1
-        team: 7
-      secondPlayer:
-        isComputer: 1
-        team: 3
-    - firstPlayer:
-        isComputer: 1
-        team: 3
-      secondPlayer:
-        isComputer: 0
-        team: 2
-    oddAmountOfPlayers: 1
-  - matchup:
-    - firstPlayer:
-        isComputer: 0
-        team: 2
-      secondPlayer:
-        isComputer: 1
-        team: 4
-    - firstPlayer:
-        isComputer: 1
-        team: 3
-      secondPlayer:
-        isComputer: 1
-        team: 6
-    oddAmountOfPlayers: 0
-  - matchup:
-    - firstPlayer:
-        isComputer: 0
-        team: 2
-      secondPlayer:
-        isComputer: 1
-        team: 4
-    - firstPlayer:
-        isComputer: 1
-        team: 3
-      secondPlayer:
-        isComputer: 1
-        team: 6
-    - firstPlayer:
-        isComputer: 1
-        team: 7
-      secondPlayer:
-        isComputer: 1
-        team: 5
-    oddAmountOfPlayers: 0
-  - matchup:
-    - firstPlayer:
-        isComputer: 1
-        team: 2
-      secondPlayer:
-        isComputer: 1
-        team: 4
-    oddAmountOfPlayers: 0
   selectedMode: 4
   dropdown: {fileID: 457436922}
 --- !u!4 &379069166
