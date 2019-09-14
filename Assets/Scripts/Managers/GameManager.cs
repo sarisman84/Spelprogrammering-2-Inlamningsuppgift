@@ -86,7 +86,6 @@ public class GameManager : MonoBehaviour {
 
                 public Team playerTeam;
                 public bool isComputer;
-                public IPlayer player;
             }
             public Player player;
 
@@ -104,7 +103,7 @@ public class GameManager : MonoBehaviour {
     public TMPro.TMP_Dropdown dropdown;
 
     //A list of all players.
-    IPlayer[] allPlayers;
+    public static IPlayer[] allPlayers;
 
     //public int amountOfPlayers;
 
@@ -123,7 +122,7 @@ public class GameManager : MonoBehaviour {
     }
     public void StartGame () {
 
-        PlayerMatchup.StartNewGame (modes[(int) selectedMode], piecePrefab);
+        allPlayers = PlayerMatchup.StartNewGame (modes[(int) selectedMode], piecePrefab);
 
     }
     #endregion

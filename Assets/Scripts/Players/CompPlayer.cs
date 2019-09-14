@@ -12,7 +12,8 @@ using UnityEngine;
 /// <summary>
 /// The core class for computer based player behaivours.
 /// </summary>
-public class CompPlayer : MonoBehaviour, IPlayer {
+public class CompPlayer : MonoBehaviour, IPlayer
+{
 
     #region Variables
     [SerializeField] Node[] cachedValidNodes;
@@ -28,63 +29,80 @@ public class CompPlayer : MonoBehaviour, IPlayer {
 
     #region  Properties
 
-    public TeamGenerator CurrentOpponent {
+    public TeamGenerator CurrentOpponent
+    {
         get => opponent;
         set => opponent = value;
     }
 
-    public Node SelectedPiece {
-        get {
+    public Node SelectedPiece
+    {
+        get
+        {
             Node newPiece = null;
-            if (cachedPieces == null) {
+            if (cachedPieces == null)
+            {
                 Piece[] pieceArray = new Piece[currentTeam.TeamBase.Length];
-                for (int i = 0; i < pieceArray.Length; i++) {
+                for (int i = 0; i < pieceArray.Length; i++)
+                {
                     pieceArray[i] = currentTeam.TeamBase[i].StoredPiece;
                 }
                 cachedPieces = pieceArray;
             }
-            int index = UnityEngine.Random.Range (0, cachedPieces.Length);
+            int index = UnityEngine.Random.Range(0, cachedPieces.Length);
             if (index >= cachedPieces.Length) return null;
-            newPiece = UserManager.AttemptToGetPiece (cachedPieces[index].CurrentlyLiesIn, currentTeam.Team, hasJumped, false, ref cachedValidNodes);
-            if (cachedValidNodes.Length == 0) {
+            newPiece = UserManager.AttemptToGetPiece(cachedPieces[index].CurrentlyLiesIn, currentTeam.Team, hasJumped, false, ref cachedValidNodes);
+            if (cachedValidNodes.Length == 0)
+            {
                 return null;
             }
-            text.text = Value (newPiece.StoredPiece, opponent.TeamBase).ToString ();
-            text.color = TeamGenerator.SetColorBasedOnTeam (currentTeam.Team);
+            opponent = opponent ?? UserManager.SetOpponent(this);
+            if (text != null && opponent != null)
+            {
+                text.text = Value(newPiece.StoredPiece, opponent.TeamBase).ToString();
+                text.color = TeamGenerator.SetColorBasedOnTeam(currentTeam.Team);
+            }
+
             currentPiece = newPiece;
             return currentPiece;
         }
 
         set => currentPiece = value;
     }
-    public Node DesiredTarget {
-        get {
-            int index = UnityEngine.Random.Range (0, cachedValidNodes.Length - 1);
+    public Node DesiredTarget
+    {
+        get
+        {
+            int index = UnityEngine.Random.Range(0, cachedValidNodes.Length - 1);
             if (index >= cachedValidNodes.Length) return desiredNode;
-            return desiredNode = (currentPiece != null) ? UserManager.AttemptToGetTarget (cachedValidNodes[index], ref cachedValidNodes) : desiredNode;
+            return desiredNode = (currentPiece != null) ? UserManager.AttemptToGetTarget(cachedValidNodes[index], ref cachedValidNodes) : desiredNode;
         }
 
         set => desiredNode = value;
     }
-    public bool HasDoneFirstMove {
+    public bool HasDoneFirstMove
+    {
         get => hasJumped;
         set => hasJumped = value;
     }
 
     public Node DetectedNode =>
-        throw new NotImplementedException ();
+        throw new NotImplementedException();
 
-    public Node[] CachedValidMoves {
+    public Node[] CachedValidMoves
+    {
         get => cachedValidNodes;
         set => cachedValidNodes = value;
     }
 
-    public Piece[] CachedPieces {
+    public Piece[] CachedPieces
+    {
         get => cachedPieces;
         set => cachedPieces = value;
     }
 
-    public TeamGenerator CurrentTeam {
+    public TeamGenerator CurrentTeam
+    {
         get =>
             currentTeam;
         set =>
@@ -100,42 +118,51 @@ public class CompPlayer : MonoBehaviour, IPlayer {
     /// <param name="opponent">What opponent will this player face.</param>
     /// <returns>A newly created player. </returns>
     static TextMeshPro text;
-    public TextMeshPro SetupText {
+    public TextMeshPro SetupText
+    {
         get => text;
         set => text = value;
     }
-    public static IPlayer CreatePlayer (Team team) {
-        CompPlayer player = new GameObject ($"Player {team} : Computer").AddComponent<CompPlayer> ();
-        Canvas parent = FindObjectOfType<Canvas> ();
-        player.SetupText = player.SetupText ?? new GameObject ("Max Distance").AddComponent<TextMeshPro> ();
+    public static IPlayer CreatePlayer(Team team)
+    {
+        CompPlayer player = new GameObject($"Player {team} : Computer").AddComponent<CompPlayer>();
+        Canvas parent = FindObjectOfType<Canvas>();
+        player.SetupText = player.SetupText ?? new GameObject("Max Distance").AddComponent<TextMeshPro>();
         player.SetupText.transform.parent = parent.transform;
         return player;
     }
 
-    private void Start () {
-        StartCoroutine (DelayedUpdate ());
+    private void Start()
+    {
+        StartCoroutine(DelayedUpdate());
     }
-    IEnumerator DelayedUpdate () {
-        while (true) {
-            UserManager.OnActionTaken (this);
-            yield return new WaitForSeconds (0.5f);
+    IEnumerator DelayedUpdate()
+    {
+        while (true)
+        {
+            UserManager.OnActionTaken(this);
+            yield return new WaitForSeconds(0.5f);
         }
 
     }
 
-    float Value (Piece knownPiece, Node[] targets) {
+    float Value(Piece knownPiece, Node[] targets)
+    {
         float maxDist = 0;
-        foreach (Node target in targets) {
-            float dist = Vector2.Distance (knownPiece.CurrentlyLiesIn.CurrentBoardPosition, target.CurrentBoardPosition);
+        foreach (Node target in targets)
+        {
+            float dist = Vector2.Distance(knownPiece.CurrentlyLiesIn.CurrentBoardPosition, target.CurrentBoardPosition);
             if (target.StoredPiece != null && target.StoredPiece.BelongsTo == currentTeam.Team) continue;
             maxDist += dist;
         }
         return maxDist;
     }
 
-    void Minimax (Node[] knownValidPositions, int depth, bool maximizingPos) {
+    void Minimax(Node[] knownValidPositions, int depth, bool maximizingPos)
+    {
 
-        if (depth == 0) {
+        if (depth == 0)
+        {
             //Return current position at index.
         }
     }

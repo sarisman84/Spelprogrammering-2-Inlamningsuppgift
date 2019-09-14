@@ -5,7 +5,8 @@ using System.Linq;
 using ChineseCheckers;
 using UnityEngine;
 [System.Serializable]
-public class PlayerMatchup {
+public class PlayerMatchup
+{
     //public enum Team { Empty, Unoccupied, Red, Blue, Yellow, Green, Magenta, Orange }
 
     /// <summary>
@@ -13,30 +14,35 @@ public class PlayerMatchup {
     /// </summary>
     /// <param name="player">An IPlayer variable that is being used to see if all of PlayerBase nodes are full of its opponents pieces.</param>
     /// <returns>True if all pieces in the PlayerBase nodes are of the player's opponent</returns>
-    public static bool HasPlayerWon (IPlayer player) {
-        if (player == null) return false;
-        if (player.CurrentOpponent.TeamBase.All (p => p != null && p.StoredPiece != null && p.StoredPiece.BelongsTo == player.CurrentOpponent.Team)) {
-            Debug.Log ($"Player {player.CurrentOpponent} has won!");
+    public static bool HasPlayerWon(IPlayer player)
+    {
+        if (player == null || player.CurrentOpponent == null) return false;
+        if (player.CurrentOpponent.TeamBase.All(p => p != null && p.StoredPiece != null && p.StoredPiece.BelongsTo == player.CurrentOpponent.Team))
+        {
+            Debug.Log($"Player {player.CurrentOpponent} has won!");
             return true;
         }
 
         return false;
     }
 
-    static IPlayer CreatePlayer (GameManager.GameMode.Match.Player player) {
-        IPlayer newPlayer = (player.isComputer) ? CompPlayer.CreatePlayer (player.playerTeam) : HumanPlayer.CreatePlayer (player.playerTeam);
+    static IPlayer CreatePlayer(GameManager.GameMode.Match.Player player)
+    {
+        IPlayer newPlayer = (player.isComputer) ? CompPlayer.CreatePlayer(player.playerTeam) : HumanPlayer.CreatePlayer(player.playerTeam);
         return newPlayer;
     }
 
-    static IPlayer OnCreatingPlayer (GameManager.GameMode.Match.Player player, TeamGenerator team) {
+    static IPlayer OnCreatingPlayer(GameManager.GameMode.Match.Player player, TeamGenerator team)
+    {
         GameManager.GameMode.Match.Player newPlayer = player;
         Team playerTeam = newPlayer.playerTeam;
-        switch (playerTeam) {
+        switch (playerTeam)
+        {
             case Team.Empty:
             case Team.Unoccupied:
                 return null;
         }
-        IPlayer iPlayer = CreatePlayer (newPlayer);
+        IPlayer iPlayer = CreatePlayer(newPlayer);
         iPlayer.CurrentTeam = team;
         return iPlayer;
 
@@ -50,33 +56,41 @@ public class PlayerMatchup {
     /// <param name="piecePrefab">A prefab reference to the piece gameObject in order to be created. </param>
     /// <param name="modes">A reference to the Gamemodes enum, which is being used to see if the current mode is GameModes.Debug</param>
     /// <returns>A jaggered array of all players (first and second players). </returns>
-    public static void StartNewGame (GameManager.GameMode gameMode, Piece piecePrefab) {
+    public static IPlayer[] StartNewGame(GameManager.GameMode gameMode, Piece piecePrefab)
+    {
 
+        List<IPlayer> allPlayers = new List<IPlayer>();
         TeamGenerator[] teams = new TeamGenerator[6];
-        for (int t = 0; t < 6; t++) {
-            teams[t] = new TeamGenerator ();
-            teams[t].Team = (Team) (t + 2);
-            Debug.Log ($"{(Team) (t + 2)} at {t} using {t+2}");
-            List<Node> nodeList = new List<Node> ();
-            for (int y = 0; y < BoardManager.board.GetLength (0); y++) {
-                for (int x = 0; x < BoardManager.board.GetLength (1); x++) {
+        for (int t = 0; t < 6; t++)
+        {
+            teams[t] = new TeamGenerator();
+            teams[t].Team = (Team)(t + 2);
+            Debug.Log($"{(Team)(t + 2)} at {t} using {t + 2}");
+            List<Node> nodeList = new List<Node>();
+            for (int y = 0; y < BoardManager.board.GetLength(0); y++)
+            {
+                for (int x = 0; x < BoardManager.board.GetLength(1); x++)
+                {
                     Node node = BoardManager.board[y, x];
-                    if (node.BelongsTo == teams[t].Team) {
-                        nodeList.Add (node);
+                    if (node.BelongsTo == teams[t].Team)
+                    {
+                        nodeList.Add(node);
                     }
                 }
             }
-            teams[t].TeamBase = nodeList.ToArray ();
+            teams[t].TeamBase = nodeList.ToArray();
         }
 
-        for (int i = 0; i < gameMode.matches.Length; i++) {
+        for (int i = 0; i < gameMode.matches.Length; i++)
+        {
 
             GameManager.GameMode.Match.Player newPlayer = gameMode.matches[i].player;
-            Debug.Log ($"using {i} to spawn this player ({teams[(int) newPlayer.playerTeam -2].Team})");
-            newPlayer.player = OnCreatingPlayer (newPlayer, teams[(int) newPlayer.playerTeam - 2]);
-            PlacePieces (newPlayer.player, piecePrefab);
-
+            Debug.Log($"using {i} to spawn this player ({teams[(int)newPlayer.playerTeam - 2].Team})");
+            IPlayer _newPlayer = OnCreatingPlayer(newPlayer, teams[(int)newPlayer.playerTeam - 2]);
+            PlacePieces(_newPlayer, piecePrefab);
+            allPlayers.Add(_newPlayer);
         }
+        return allPlayers.ToArray();
 
         // IPlayer[] secondPlayers = new IPlayer[players.Length];
         // IPlayer[] firstPlayers = new IPlayer[players.Length];
@@ -112,20 +126,24 @@ public class PlayerMatchup {
     /// </summary>
     /// <param name="players"> The current player that owns the pieces. </param>
     /// <param name="piecePrefab">A prefab reference to create said pieces. </param>
-    private static void PlacePieces (IPlayer player, Piece piecePrefab) {
+    private static void PlacePieces(IPlayer player, Piece piecePrefab)
+    {
         if (player == null) return;
         if (player.CurrentTeam == null || player.CurrentTeam.Team == Team.Empty || player.CurrentTeam.Team == Team.Unoccupied) return;
-        List<Node> playerBase = new List<Node> ();
-        for (int y = 0; y < BoardManager.board.GetLength (0); y++) {
-            for (int x = 0; x < BoardManager.board.GetLength (1); x++) {
+        List<Node> playerBase = new List<Node>();
+        for (int y = 0; y < BoardManager.board.GetLength(0); y++)
+        {
+            for (int x = 0; x < BoardManager.board.GetLength(1); x++)
+            {
                 Node node = BoardManager.board[y, x];
-                if (node.BelongsTo == player.CurrentTeam.Team) {
-                    node.StoredPiece = Piece.CreatePiece (piecePrefab, Color.black, node, player.CurrentTeam.Team);
-                    playerBase.Add (node);
+                if (node.BelongsTo == player.CurrentTeam.Team)
+                {
+                    node.StoredPiece = Piece.CreatePiece(piecePrefab, TeamGenerator.SetColorBasedOnTeam(player.CurrentTeam.Team), node, player.CurrentTeam.Team);
+                    playerBase.Add(node);
                 }
             }
         }
-        player.CurrentTeam.TeamBase = playerBase.ToArray ();
+        player.CurrentTeam.TeamBase = playerBase.ToArray();
     }
 
 }

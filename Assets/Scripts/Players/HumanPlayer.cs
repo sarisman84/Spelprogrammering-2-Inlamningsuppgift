@@ -72,8 +72,8 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
     /// <param name="opponent">What team its opponent is in</param>
     /// <returns>An IPlayer instance of type Human.</returns>
     public static IPlayer CreatePlayer (Team team) {
-        IPlayer player = new GameObject ($"Player {team}: Human").AddComponent<HumanPlayer> ();
-        //player.CurrentOpponent = opponent;
+        HumanPlayer player = new GameObject ($"Player {team}: Human").AddComponent<HumanPlayer> ();
+        player.CurrentTeam = UserManager.SetOpponent(player);
         return player;
     }
 
