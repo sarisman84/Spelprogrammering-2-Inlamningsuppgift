@@ -98,22 +98,8 @@ namespace ChineseCheckers
         /// <param name="doneFirstMove">If the user who called this method has already moved.</param>
         /// <param name="cachedValidMoves">A reference to an array of cachedValidMoves. </param>
         /// <returns>A valid node that holds a piece of the same team. </returns>
-        public static Node AttemptToGetPiece(Node selectedNode, Team team, bool doneFirstMove, bool highlight, ref Node[] cachedValidMoves)
-        {
-            cachedValidMoves = null;
-            Node newNode = null;
-            ResetHigtlightOnValidMoves(ref cachedValidMoves);
-            // Debug.Log ($" {selectedNode}");
-            newNode = (selectedNode.StoredPiece != null && selectedNode.StoredPiece.BelongsTo == team) ? selectedNode : newNode;
-            OnInteract(newNode, highlight);
-            // Debug.Log(selectedNode);
-            if (newNode != null)
-                cachedValidMoves = BoardManager.ValidMoves(selectedNode, ref doneFirstMove, highlight);
-            doneFirstMove = true;
-            return newNode;
-
-        }
-        public static Node AttemptToGetPiece(Node selectedNode, Team team, ref bool doneFirstMove, bool highlight, ref Node[] cachedValidMoves)
+        
+        public static Node AttemptToGetPiece(Node selectedNode, Team team, bool highlight, ref Node[] cachedValidMoves)
         {
             cachedValidMoves = null;
             Node newNode = null;

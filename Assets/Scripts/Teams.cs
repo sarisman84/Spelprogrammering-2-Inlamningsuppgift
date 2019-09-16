@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum Team { Empty, Unoccupied, Red, Yellow, Blue, Magenta, Orange, Green, BigRed, Debug, BigBlue, BigOrange, BigGreen, BigMagenta, BigYellow, BigRedToOrange, BigOrangeToGreen, BigGreenToBlue, BigBlueToYellow, BigYellowToMagenta, BigMagentaToRed }
+public enum Team { Empty, Unoccupied, Red, Yellow, Blue, Magenta, Orange, Green, BigRed, Debug, BigBlue, BigRedToOrange, BigMagentaToRed, BigBlueToYellow, BigGreenToBlue, BigOrange, BigGreen, BigMagenta, BigYellow, BigOrangeToGreen, BigYellowToMagenta }
 
 [System.Serializable]
 public class TeamGenerator {

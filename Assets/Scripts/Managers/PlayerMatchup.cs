@@ -61,10 +61,12 @@ public class PlayerMatchup {
             for (int y = 0; y < BoardManager.board.GetLength (0); y++) {
                 for (int x = 0; x < BoardManager.board.GetLength (1); x++) {
                     Node node = BoardManager.board[y, x];
-                    if (teams.Any (p => p.Team != Team.BigRed || p.Team != Team.BigBlue)) {
-                        node.BelongsTo = (node.BelongsTo == Team.BigRed || node.BelongsTo == Team.BigBlue) ? Team.Unoccupied : node.BelongsTo;
-                    } else if (gameMode.matches.Length == 2) {
-                        node.BelongsTo = (node.BelongsTo == Team.BigRed) ? Team.Red : (node.BelongsTo == Team.BigBlue) ? Team.Blue : node.BelongsTo;
+                    if (gameMode.matches.Length == 2) {
+                        node.BelongsTo = (node.BelongsTo == Team.BigRed || node.BelongsTo == Team.BigRedToOrange || node.BelongsTo == Team.BigMagentaToRed) ? Team.Red : node.BelongsTo;
+                        node.BelongsTo = (node.BelongsTo == Team.BigBlue || node.BelongsTo == Team.BigGreenToBlue || node.BelongsTo == Team.BigBlueToYellow) ? Team.Blue : node.BelongsTo;
+                    } else {
+                        node.BelongsTo = (node.BelongsTo == Team.BigRed || node.BelongsTo == Team.BigRedToOrange || node.BelongsTo == Team.BigMagentaToRed) ? Team.Unoccupied : node.BelongsTo;
+                        node.BelongsTo = (node.BelongsTo == Team.BigBlue || node.BelongsTo == Team.BigGreenToBlue || node.BelongsTo == Team.BigBlueToYellow) ? Team.Unoccupied : node.BelongsTo;
                     }
                     if (node.BelongsTo == teams[t].Team) {
                         nodeList.Add (node);

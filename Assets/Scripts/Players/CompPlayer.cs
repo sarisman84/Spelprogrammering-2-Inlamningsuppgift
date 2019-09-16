@@ -12,13 +12,14 @@ using UnityEngine;
 /// <summary>
 /// The core class for computer based player behaivours.
 /// </summary>
-public class CompPlayer : MonoBehaviour, IPlayer
-{
+public class CompPlayer : MonoBehaviour, IPlayer {
 
     #region Variables
     [SerializeField] Node[] cachedValidNodes;
     [SerializeField] TeamGenerator currentTeam;
     TeamGenerator opponent;
+
+    float maxValue;
 
     [SerializeField] Node currentPiece, desiredNode;
 
@@ -29,39 +30,22 @@ public class CompPlayer : MonoBehaviour, IPlayer
 
     #region  Properties
 
-    public TeamGenerator CurrentOpponent
-    {
+    public TeamGenerator CurrentOpponent {
         get => opponent;
         set => opponent = value;
     }
 
-    public Node SelectedPiece
-    {
-        get
-        {
+    public Node SelectedPiece {
+        get {
             Node newPiece = null;
-            if (cachedPieces == null)
-            {
-                Piece[] pieceArray = new Piece[currentTeam.TeamBase.Length];
-                for (int i = 0; i < pieceArray.Length; i++)
-                {
-                    pieceArray[i] = currentTeam.TeamBase[i].StoredPiece;
-                }
-                cachedPieces = pieceArray;
-            }
-            int index = UnityEngine.Random.Range(0, cachedPieces.Length);
+            GetBaseNodes ();
+            int index = UnityEngine.Random.Range (0, cachedPieces.Length);
             if (index >= cachedPieces.Length) return null;
-            newPiece = UserManager.AttemptToGetPiece(cachedPieces[index].CurrentlyLiesIn, currentTeam.Team, hasJumped, false, ref cachedValidNodes);
-            if (cachedValidNodes.Length == 0)
-            {
+            newPiece = UserManager.AttemptToGetPiece (cachedPieces[index].CurrentlyLiesIn, currentTeam.Team, false, ref cachedValidNodes);
+            if (cachedValidNodes.Length == 0) {
                 return null;
             }
-            opponent = opponent ?? UserManager.SetOpponent(this);
-            if (text != null && opponent != null)
-            {
-                text.text = Value(cachedValidNodes[UnityEngine.Random.Range(0, cachedValidNodes.Length - 1)], opponent.TeamBase).ToString();
-                text.color = TeamGenerator.SetColorBasedOnTeam(currentTeam.Team);
-            }
+            opponent = opponent ?? UserManager.SetOpponent (this);
 
             currentPiece = newPiece;
             return currentPiece;
@@ -69,40 +53,60 @@ public class CompPlayer : MonoBehaviour, IPlayer
 
         set => currentPiece = value;
     }
-    public Node DesiredTarget
-    {
-        get
-        {
-            int index = UnityEngine.Random.Range(0, cachedValidNodes.Length - 1);
+
+    private void FindOptimalPlay () {
+        List<Piece> moveablePieces = new List<Piece> ();
+        foreach (var piece in cachedPieces) {
+            if (BoardManager.TestPath (piece.CurrentlyLiesIn)) {
+                moveablePieces.Add (piece);
+            }
+        }
+        if (moveablePieces.Count == 0) return;
+
+    }
+
+    
+
+    private void GetBaseNodes () {
+
+        if (cachedPieces == null) {
+            Piece[] pieceArray = new Piece[currentTeam.TeamBase.Length];
+            for (int i = 0; i < pieceArray.Length; i++) {
+                pieceArray[i] = currentTeam.TeamBase[i].StoredPiece;
+            }
+            cachedPieces = pieceArray;
+        }
+
+    }
+
+    public Node DesiredTarget {
+        get {
+            int index = UnityEngine.Random.Range (0, cachedValidNodes.Length - 1);
             if (index >= cachedValidNodes.Length) return desiredNode;
-            return desiredNode = (currentPiece != null) ? UserManager.AttemptToGetTarget(cachedValidNodes[index], ref cachedValidNodes) : desiredNode;
+            return desiredNode = (currentPiece != null) ? UserManager.AttemptToGetTarget (cachedValidNodes[index], ref cachedValidNodes) : desiredNode;
         }
 
         set => desiredNode = value;
     }
-    public bool HasDoneFirstMove
-    {
+    public bool HasDoneFirstMove {
         get => hasJumped;
         set => hasJumped = value;
     }
 
     public Node DetectedNode =>
-        throw new NotImplementedException();
+        throw new NotImplementedException ();
 
-    public Node[] CachedValidMoves
-    {
+    public Node[] CachedValidMoves {
         get => cachedValidNodes;
         set => cachedValidNodes = value;
     }
 
-    public Piece[] CachedPieces
-    {
+    public Piece[] CachedPieces {
         get => cachedPieces;
         set => cachedPieces = value;
     }
 
-    public TeamGenerator CurrentTeam
-    {
+    public TeamGenerator CurrentTeam {
         get =>
             currentTeam;
         set =>
@@ -111,6 +115,8 @@ public class CompPlayer : MonoBehaviour, IPlayer
 
     #endregion
 
+    //current value / max value
+
     /// <summary>
     /// Create a player using the Interface IPlayer. Current method returns a ComputerPlayer.
     /// </summary>
@@ -118,40 +124,33 @@ public class CompPlayer : MonoBehaviour, IPlayer
     /// <param name="opponent">What opponent will this player face.</param>
     /// <returns>A newly created player. </returns>
     static TextMeshPro text;
-    public TextMeshPro SetupText
-    {
+    public TextMeshPro SetupText {
         get => text;
         set => text = value;
     }
-    public static IPlayer CreatePlayer(Team team)
-    {
-        CompPlayer player = new GameObject($"Player {team} : Computer").AddComponent<CompPlayer>();
-        Canvas parent = FindObjectOfType<Canvas>();
-        player.SetupText = player.SetupText ?? new GameObject("Max Distance").AddComponent<TextMeshPro>();
+    public static IPlayer CreatePlayer (Team team) {
+        CompPlayer player = new GameObject ($"Player {team} : Computer").AddComponent<CompPlayer> ();
+        Canvas parent = FindObjectOfType<Canvas> ();
+        player.SetupText = player.SetupText ?? new GameObject ("Max Distance").AddComponent<TextMeshPro> ();
         player.SetupText.transform.parent = parent.transform;
         return player;
     }
 
-    private void Start()
-    {
-        StartCoroutine(DelayedUpdate());
+    private void Start () {
+        StartCoroutine (DelayedUpdate ());
     }
-    IEnumerator DelayedUpdate()
-    {
-        while (true)
-        {
-            UserManager.OnActionTaken(this);
-            yield return new WaitForSeconds(0.5f);
+    IEnumerator DelayedUpdate () {
+        while (true) {
+            UserManager.OnActionTaken (this);
+            yield return new WaitForSeconds (0.5f);
         }
 
     }
 
-    float Value(Node currentPosition, Node[] targets)
-    {
+    float Value (Node currentPosition, Node[] targets) {
         float maxDist = 0;
-        foreach (Node target in targets)
-        {
-            float dist = Vector2.Distance(currentPosition.CurrentBoardPosition, target.CurrentBoardPosition);
+        foreach (Node target in targets) {
+            float dist = Vector2.Distance (currentPosition.CurrentBoardPosition, target.CurrentBoardPosition);
             maxDist += dist;
         }
         return maxDist;

@@ -10,99 +10,26 @@ namespace ChineseCheckers {
 
         public static Node[, ] board;
 
-        /// <summary>
-        /// When called, it checks for any available node that has no pieces stored in it in a cardinal direction on the board.
-        /// </summary>
-        /// <param name="selectedNode">The source in which it will check those avaliable nodes from</param>
-        /// <param name="doneFirstMove">If the user who called this method has already done his first move</param>
-        /// <returns>An array of avaliable nodes</returns>
-        public static Node[] ValidMoves (Node selectedNode, ref bool doneFirstMove, bool highlight) {
-            if (selectedNode == null) {
-                throw new NullReferenceException ("Selected node is missing.");
-            }
+        public static bool TestPath (Node source) {
             List<Node> validMoves = new List<Node> ();
-            Vector2Int currentPos = selectedNode.CurrentBoardPosition;
-            for (int currentDirection = 0; currentDirection < 6; currentDirection++) {
-                Vector2Int dir = Node.DirectionInBoard (selectedNode.CurrentBoardPosition, currentDirection);
-                Vector2Int newPos = currentPos + dir;
-                if (OutOfBounds (newPos)) continue;
-                Node resultedNode = board[newPos.x, newPos.y];
-                if (resultedNode == null || resultedNode.BelongsTo == Team.Empty) continue;
-
-                Node finalNode = ConfirmResults (resultedNode, currentDirection, doneFirstMove, highlight);
-
-                if (finalNode == null) continue;
-                validMoves.Add (finalNode);
-            }
-            return validMoves.ToArray ();
-
-        }
-
-        /// <summary>
-        /// Helper method that confirms if the resulted node has a stored piece or not.
-        /// </summary>
-        /// <param name="resultedNode">The node that is being tested</param>
-        /// <param name="index">The current index when this particular method was called in</param>
-        /// <param name="doneFirstMove">If the player has already done his first move.</param>
-        /// <returns>Either a result that has no StoredPiece in the node or a new node that was found by checking in the same cardinal direction, using the same logic.</returns>
-        private static Node ConfirmResults (Node resultedNode, int currentDirection, bool doneFirstMove, bool highlight) {
-            if (resultedNode.StoredPiece != null) {
-                Vector2Int currentPos = resultedNode.CurrentBoardPosition;
-                Vector2Int newPos = currentPos + Node.DirectionInBoard (currentPos, currentDirection);
-                if (OutOfBounds (newPos)) {
-                    return null;
+            for (int i = 0; i < 6; i++) {
+                Node node = GetValidNode (source, validMoves, i);
+                if (node == null) continue;
+                if (node.StoredPiece != null) {
+                    Node potentialPath = GetValidNode (node, validMoves, i);
+                    if (potentialPath == null) continue;
+                    if (potentialPath.StoredPiece == null) {
+                        validMoves.Add (potentialPath);
+                    }
+                    continue;
                 }
-                Node newResultedNode = board[newPos.x, newPos.y];
-                if (newResultedNode == null || newResultedNode.BelongsTo == Team.Empty || newResultedNode.StoredPiece != null) return null;
-                newResultedNode.HighlightNode (Color.yellow, highlight);
-                return newResultedNode;
-            }
-            if (!doneFirstMove) {
+                validMoves.Add (node);
 
-                resultedNode.HighlightNode (Color.cyan, highlight);
-
-                return resultedNode;
             }
 
-            return null;
-
+            if (validMoves != null) return true;
+            return false;
         }
-
-        // public static Node[] MoveTree(Node source, bool highlight, ref bool searchedMainMoves)
-        // {
-        //     if (source == null) throw new NullReferenceException("Cant find available paths without a source! (Source variable is null)");
-        //     List<Node> validMoves = new List<Node>();
-        //     Vector2Int currentPos = source.CurrentBoardPosition;
-        //     Node potentialPath = null;
-        //     for (int currentDirection = 0; currentDirection < 6; currentDirection++)
-        //     {
-        //         Vector2Int dir = Node.DirectionInBoard(source.CurrentBoardPosition, currentDirection);
-        //         Vector2Int newPos = currentPos + dir;
-        //         if (OutOfBounds(newPos)) continue;
-        //         potentialPath = board[newPos.x, newPos.y];
-        //         if (potentialPath.BelongsTo == Team.Empty) continue;
-        //         if (potentialPath.StoredPiece == null && !searchedMainMoves)
-        //         {
-        //             potentialPath.HighlightNode(Color.cyan, highlight);
-        //             validMoves.Add(potentialPath);
-        //         }
-        //         if (potentialPath.StoredPiece != null)
-        //         {
-        //             Vector2Int pos = potentialPath.CurrentBoardPosition;
-        //             Vector2Int _newPos = pos + Node.DirectionInBoard(pos, currentDirection);
-        //             potentialPath = board[_newPos.x, _newPos.y];
-        //             if (potentialPath.BelongsTo == Team.Empty) continue;
-        //             if (potentialPath.StoredPiece == null)
-        //             {
-        //                 validMoves.Add(potentialPath);
-        //                 potentialPath.HighlightNode(Color.yellow, highlight);
-        //                 MoveTree(potentialPath, highlight, currentDirection);
-        //             }
-        //         }
-        //     }
-
-        //     return validMoves.ToArray();
-        // }
 
         public static Node[] Path (Node source, bool highlight) {
             List<Node> validMoves = new List<Node> ();
@@ -111,10 +38,10 @@ namespace ChineseCheckers {
 
         private static List<Node> GetPath (Node source, List<Node> validMoves, bool highlight, bool searchAllAvailablePaths) {
             for (int curDir = 0; curDir < 6; curDir++) {
-                Node node = GetValidNode (source, validMoves, curDir, highlight);
+                Node node = GetValidNode (source, validMoves, curDir);
                 if (node == null) continue;
                 if (node.StoredPiece != null) {
-                    Node potentialPath = GetValidNode (node, validMoves, curDir, highlight);
+                    Node potentialPath = GetValidNode (node, validMoves, curDir);
                     if (potentialPath != null && potentialPath.StoredPiece == null) {
                         potentialPath.HighlightNode (Color.yellow, highlight);
                         validMoves.Add (potentialPath);
@@ -137,7 +64,7 @@ namespace ChineseCheckers {
 
         }
 
-        static Node GetValidNode (Node source, List<Node> validMoves, int index, bool highlight) {
+        static Node GetValidNode (Node source, List<Node> validMoves, int index) {
             if (source == null) return null;
             Vector2Int pos = source.CurrentBoardPosition, boardDir = Node.DirectionInBoard (pos, index), newPos = pos + boardDir;
             if (OutOfBounds (newPos)) return null;

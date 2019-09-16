@@ -78,9 +78,10 @@ public class Node : MonoBehaviour {
     public static Node CreateNode (Node prefab, int blueprint, Transform parent) {
         Node newNode = Instantiate (prefab, parent);
         newNode.SetColor = SetTeamColor (blueprint, newNode);
-        newNode.BelongsTo = (blueprint > 10) ? (Team) 1 : (Team) blueprint;
 
+        newNode.BelongsTo = (blueprint > 14) ? (Team) 1 : (Team) blueprint;
         return newNode;
+
     }
 
     /// <summary>
