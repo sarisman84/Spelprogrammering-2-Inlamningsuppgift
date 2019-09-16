@@ -39,12 +39,12 @@ public class HumanPlayer : MonoBehaviour, IPlayer
         get
         {
             if (currentNode != null) currentNode.HighlightNode(new Color(), false);
-            return currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece(DetectedNode, currentTeam.Team, hasJumped, true, ref cachedValidMoves) : currentNode;
+            return currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece(DetectedNode, currentTeam.Team, ref hasJumped, true, ref cachedValidMoves) : currentNode;
         }
         set
         {
             if (currentNode != null) currentNode.HighlightNode(new Color(), false);
-            currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece(value, currentTeam.Team, hasJumped, true, ref cachedValidMoves) : currentNode;
+            currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece(value, currentTeam.Team, ref hasJumped, true, ref cachedValidMoves) : currentNode;
         }
     }
     public Node DesiredTarget

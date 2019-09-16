@@ -5,11 +5,24 @@ using static ChineseCheckers.HexagonGrid;
 using UnityEngine;
 
 public enum GameModes { TwoPlayer, ThreePlayer, FourPlayer, SixPlayer, Debug }
-public class GameManager : MonoBehaviour
-{
+public class GameManager : MonoBehaviour {
     #region  Blueprint for Board
-    private const int V = (int)Team.Empty,
-        O = (int)Team.Unoccupied;
+    private const int
+    V = (int) Team.Empty,
+        O = (int) Team.Unoccupied,
+        B = (int) Team.BigBlue,
+        R = (int) Team.BigRed,
+        Y = (int) Team.BigYellow,
+        yO = (int) Team.BigOrange,
+        G = (int) Team.BigGreen,
+        M = (int) Team.BigMagenta,
+        RO = (int) Team.BigRedToOrange,
+        OG = (int) Team.BigOrangeToGreen,
+        GB = (int) Team.BigGreenToBlue,
+        BY = (int) Team.BigBlueToYellow,
+        YM = (int) Team.BigYellowToMagenta,
+        MR = (int) Team.BigMagentaToRed,
+        D = (int)Team.Debug;
 
     /*
     2 = Yellow
@@ -65,10 +78,49 @@ public class GameManager : MonoBehaviour
 
        */
 
-    int[,] blueprint = new int[,] { { V, V, V, V, V, V, V, 2, V, V, V, V, V, V, V }, { V, V, V, V, V, V, 2, 2, V, V, V, V, V, V, V }, { V, V, V, V, V, V, 2, 2, 2, V, V, V, V, V, V }, { V, V, V, V, V, 2, 2, 2, 2, V, V, V, V, V, V }, { V, 6, 6, 6, 6, O, O, O, O, O, 5, 5, 5, 5, V }, { V, 6, 6, 6, O, O, O, O, O, O, 5, 5, 5, V, V }, { V, V, 6, 6, O, O, O, O, O, O, O, 5, 5, V, V }, { V, V, 6, O, O, O, O, O, O, O, O, 5, V, V, V }, { V, V, V, O, O, O, O, O, O, O, O, O, V, V, V }, { V, V, 7, O, O, O, O, O, O, O, O, 3, V, V, V }, { V, V, 7, 7, O, O, O, O, O, O, O, 3, 3, V, V }, { V, 7, 7, 7, O, O, O, O, O, O, 3, 3, 3, V, V }, { V, 7, 7, 7, 7, O, O, O, O, O, 3, 3, 3, 3, V }, { V, V, V, V, V, 4, 4, 4, 4, V, V, V, V, V, V }, { V, V, V, V, V, V, 4, 4, 4, V, V, V, V, V, V }, { V, V, V, V, V, V, 4, 4, V, V, V, V, V, V, V }, { V, V, V, V, V, V, V, 4, V, V, V, V, V, V, V },
+    int[, ] blueprint = new int[, ] { 
+        { V, V, V, V, V, V, V, 2, V, V, V, V, V, V, V }, 
+         { V, V, V, V, V, V, 2, 2, V, V, V, V, V, V, V }, 
+        { V, V, V, V, V, V, 2, 2, 2, V, V, V, V, V, V }, 
+         { V, V, V, V, V, 2, 2, 2, 2, V, V, V, V, V, V }, 
+        { V, 6, 6, 6, 6, RO, R, R, R, MR, 5, 5, 5, 5, V }, 
+         { V, 6, 6, 6, yO, O, O, O, O, M, 5, 5, 5, V, V }, 
+        { V, V, 6, 6, yO, O, O, O, O, O, M, 5, 5, V, V }, 
+         { V, V, 6, yO, O, O, O, O, O, O, M, 5, V, V, V }, 
+        { V, V, V, OG, O, O, O, O, O, O, O, YM, V, V, V }, 
+         { V, V, 7, G, O, O, O, O, O, O, Y, 3, V, V, V }, 
+        { V, V, 7, 7, G, O, O, O, O, O, Y, 3, 3, V, V }, 
+         { V, 7, 7, 7, G, O, O, O, O, Y, 3, 3, 3, V, V }, 
+        { V, 7, 7, 7, 7, GB, B, B, B, BY, 3, 3, 3, 3, V }, 
+         { V, V, V, V, V, 4, 4, 4, 4, V, V, V, V, V, V }, 
+        { V, V, V, V, V, V, 4, 4, 4, V, V, V, V, V, V }, 
+         { V, V, V, V, V, V, 4, 4, V, V, V, V, V, V, V }, 
+        { V, V, V, V, V, V, V, 4, V, V, V, V, V, V, V },
 
     };
 
+     int[, ] debugBlueprint = new int[, ] { 
+        { V, V, V, V, V, V, V, 2, V, V, V, V, V, V, V }, 
+         { V, V, V, V, V, V, 2, 2, V, V, V, V, V, V, V }, 
+        { V, V, V, V, V, V, 2, 2, 2, V, V, V, V, V, V }, 
+         { V, V, V, V, V, 2, 2, 2, 2, V, V, V, V, V, V }, 
+        { V, 6, 6, 6, 6, RO, R, R, R, MR, 5, 5, 5, 5, V }, 
+         { V, 6, 6, 6, yO, O, O, O, O, M, 5, 5, 5, V, V }, 
+        { V, V, 6, 6, yO, O, O, O, O, O, M, 5, 5, V, V }, 
+         { V, V, 6, yO, O, D, O, D, O, D, M, 5, V, V, V }, 
+        { V, V, V, OG, D, O, D, O, D, O, D, YM, V, V, V }, 
+          { V, V, 7, G, O, D, O, D, O, D, Y, 3, V, V, V }, 
+        { V, V, 7, 7, G, O, O, O, O, O, Y, 3, 3, V, V }, 
+         { V, 7, 7, 7, G, O, O, O, O, Y, 3, 3, 3, V, V }, 
+        { V, 7, 7, 7, 7, GB, B, B, B, BY, 3, 3, 3, 3, V }, 
+         { V, V, V, V, V, 4, 4, 4, 4, V, V, V, V, V, V }, 
+        { V, V, V, V, V, V, 4, 4, 4, V, V, V, V, V, V }, 
+         { V, V, V, V, V, V, 4, 4, V, V, V, V, V, V, V }, 
+        { V, V, V, V, V, V, V, 4, V, V, V, V, V, V, V },
+
+    };
+
+    
     #endregion
 
     /// <summary>
@@ -79,14 +131,11 @@ public class GameManager : MonoBehaviour
     public Piece piecePrefab;
 
     [System.Serializable]
-    public class GameMode
-    {
+    public class GameMode {
         [System.Serializable]
-        public class Match
-        {
+        public class Match {
             [System.Serializable]
-            public class Player
-            {
+            public class Player {
 
                 public Team playerTeam;
                 public bool isComputer;
@@ -113,45 +162,38 @@ public class GameManager : MonoBehaviour
     //public int amountOfPlayers;
 
     #region UI Button Logic
-    public void Add()
-    {
-        modes.Add(new GameMode());
+    public void Add () {
+        modes.Add (new GameMode ());
     }
 
-    public void Remove()
-    {
+    public void Remove () {
         if (modes.Count <= 0) return;
-        modes.RemoveAt(modes.Count - 1);
+        modes.RemoveAt (modes.Count - 1);
     }
 
-    public void SelectMode(int mode)
-    {
-        selectedMode = (GameModes)mode;
+    public void SelectMode (int mode) {
+        selectedMode = (GameModes) mode;
     }
-    public void StartGame()
-    {
+    public void StartGame () {
 
-        allPlayers = PlayerMatchup.StartNewGame(modes[(int)selectedMode], piecePrefab);
+        allPlayers = PlayerMatchup.StartNewGame (modes[(int) selectedMode], piecePrefab);
 
     }
     #endregion
 
-    private void Awake()
-    {
+    private void Awake () {
         //Create a board at the start of the game
-        BoardManager.board = BoardManager.board ?? CreateGrid(blueprint, nodePrefab);
+        BoardManager.board = BoardManager.board ?? CreateGrid (blueprint, nodePrefab);
     }
 
-    private void Update()
-    {
+    private void Update () {
         if (dropdown.enabled)
-            selectedMode = (GameModes)dropdown.value;
+            selectedMode = (GameModes) dropdown.value;
 
         if (allPlayers == null) return;
-        foreach (var item in allPlayers)
-        {
+        foreach (var item in allPlayers) {
             if (item == null) continue;
-            if (PlayerMatchup.HasPlayerWon(item)) { }
+            if (PlayerMatchup.HasPlayerWon (item)) { }
         }
 
     }
