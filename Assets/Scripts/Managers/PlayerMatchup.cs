@@ -39,7 +39,6 @@ public class PlayerMatchup
         switch (playerTeam)
         {
             case Team.Empty:
-            case Team.Unoccupied:
                 return null;
         }
         IPlayer iPlayer = CreatePlayer(newPlayer);
@@ -60,12 +59,12 @@ public class PlayerMatchup
     {
 
         List<IPlayer> allPlayers = new List<IPlayer>();
-        TeamGenerator[] teams = new TeamGenerator[6];
-        for (int t = 0; t < 6; t++)
+        TeamGenerator[] teams = new TeamGenerator[8];
+        for (int t = 0; t < 8; t++)
         {
             teams[t] = new TeamGenerator();
-            teams[t].Team = (Team)(t + 2);
-            Debug.Log($"{(Team)(t + 2)} at {t} using {t + 2}");
+            teams[t].Team = (Team)(t);
+           // Debug.Log($"{(Team)(t)} at {t} using {t}");
             List<Node> nodeList = new List<Node>();
             for (int y = 0; y < BoardManager.board.GetLength(0); y++)
             {
@@ -85,39 +84,14 @@ public class PlayerMatchup
         {
 
             GameManager.GameMode.Match.Player newPlayer = gameMode.matches[i].player;
-            Debug.Log($"using {i} to spawn this player ({teams[(int)newPlayer.playerTeam - 2].Team})");
-            IPlayer _newPlayer = OnCreatingPlayer(newPlayer, teams[(int)newPlayer.playerTeam - 2]);
+            //Debug.Log($"using {i} to spawn this player ({teams[(int)newPlayer.playerTeam - 2].Team})");
+            IPlayer _newPlayer = OnCreatingPlayer(newPlayer, teams[(int)newPlayer.playerTeam]);
             PlacePieces(_newPlayer, piecePrefab);
             allPlayers.Add(_newPlayer);
         }
         return allPlayers.ToArray();
 
-        // IPlayer[] secondPlayers = new IPlayer[players.Length];
-        // IPlayer[] firstPlayers = new IPlayer[players.Length];
-        // if (oddAmmPlayers) {
-        //     for (int i = 0; i < players.Length; i++) {
 
-        //         firstPlayers[i] = (players[i].firstPlayer.team == Team.Empty || players[i].firstPlayer.team == Team.Unoccupied) ? null : CreatePlayer (players[i].firstPlayer);
-        //         firstPlayers[i].CurrentOpponent = (i - 1 < 0) ? null : firstPlayers[i - 1];
-        //         firstPlayers[0].CurrentOpponent = firstPlayers[firstPlayers.Length - 1];
-        //         PlacePieces (firstPlayers[i], piecePrefab);
-        //     }
-
-        // }
-
-        // for (int i = 0; i < players.Length; i++) {
-        //     firstPlayers[i] = (players[i].firstPlayer.team == Team.Empty || players[i].firstPlayer.team == Team.Unoccupied) ? null : CreatePlayer (players[i].firstPlayer, players[i].secondPlayer);
-        //     secondPlayers[i] = (players[i].secondPlayer.team == Team.Empty || players[i].secondPlayer.team == Team.Unoccupied) ? null : CreatePlayer (players[i].secondPlayer, players[i].firstPlayer);
-        //     PlacePieces (firstPlayers[i], piecePrefab);
-        //     if (modes == GameModes.Debug) {
-        //         PlacePieces (secondPlayers[i]);
-        //         continue;
-        //     }
-        //     PlacePieces (secondPlayers[i], piecePrefab);
-
-        // }
-
-        // return new IPlayer[][] { firstPlayers, secondPlayers };
 
     }
 
@@ -129,7 +103,7 @@ public class PlayerMatchup
     private static void PlacePieces(IPlayer player, Piece piecePrefab)
     {
         if (player == null) return;
-        if (player.CurrentTeam == null || player.CurrentTeam.Team == Team.Empty || player.CurrentTeam.Team == Team.Unoccupied) return;
+        if (player.CurrentTeam == null || player.CurrentTeam.Team == Team.Empty) return;
         List<Node> playerBase = new List<Node>();
         for (int y = 0; y < BoardManager.board.GetLength(0); y++)
         {

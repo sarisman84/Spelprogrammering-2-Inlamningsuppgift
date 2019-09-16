@@ -59,7 +59,7 @@ public class CompPlayer : MonoBehaviour, IPlayer
             opponent = opponent ?? UserManager.SetOpponent(this);
             if (text != null && opponent != null)
             {
-                text.text = Value(newPiece.StoredPiece, opponent.TeamBase).ToString();
+                text.text = Value(cachedValidNodes[UnityEngine.Random.Range(0, cachedValidNodes.Length - 1)], opponent.TeamBase).ToString();
                 text.color = TeamGenerator.SetColorBasedOnTeam(currentTeam.Team);
             }
 
@@ -146,26 +146,34 @@ public class CompPlayer : MonoBehaviour, IPlayer
 
     }
 
-    float Value(Piece knownPiece, Node[] targets)
+    float Value(Node currentPosition, Node[] targets)
     {
         float maxDist = 0;
         foreach (Node target in targets)
         {
-            float dist = Vector2.Distance(knownPiece.CurrentlyLiesIn.CurrentBoardPosition, target.CurrentBoardPosition);
-            if (target.StoredPiece != null && target.StoredPiece.BelongsTo == currentTeam.Team) continue;
+            float dist = Vector2.Distance(currentPosition.CurrentBoardPosition, target.CurrentBoardPosition);
             maxDist += dist;
         }
         return maxDist;
     }
 
-    void Minimax(Node[] knownValidPositions, int depth, bool maximizingPos)
-    {
+    // int i;
+    // float Minimax(Node[] knownValidPositions, int depth, bool maximizingPos)
+    // {
 
-        if (depth == 0)
-        {
-            //Return current position at index.
-        }
-    }
+    //     if (depth == 0)
+    //     {
+    //         return Value(knownValidPositions[i], opponent.TeamBase);
+    //     }
+
+    //     if(maximizingPos){
+    //         float maxEval = Mathf.NegativeInfinity;
+    //         foreach (var validPos in knownValidPositions)
+    //         {
+    //             float eval = 
+    //         }
+    //     }
+    // }
 
     /*
         First, read all of the available pieces that you have that can move and store them somewhere.

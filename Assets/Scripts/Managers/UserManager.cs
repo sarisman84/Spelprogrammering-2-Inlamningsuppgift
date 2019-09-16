@@ -113,6 +113,24 @@ namespace ChineseCheckers
             return newNode;
 
         }
+        public static Node AttemptToGetPiece(Node selectedNode, Team team, ref bool doneFirstMove, bool highlight, ref Node[] cachedValidMoves)
+        {
+            cachedValidMoves = null;
+            Node newNode = null;
+            ResetHigtlightOnValidMoves(ref cachedValidMoves);
+            // Debug.Log ($" {selectedNode}");
+            newNode = (selectedNode.StoredPiece != null && selectedNode.StoredPiece.BelongsTo == team) ? selectedNode : newNode;
+            OnInteract(newNode, highlight);
+            // Debug.Log(selectedNode);
+            if (newNode != null)
+                cachedValidMoves = BoardManager.Path(selectedNode, highlight);
+            //doneFirstMove = true;
+            return newNode;
+
+        }
+
+
+
         /// <summary>
         /// When called, this method attemps to get a valid target by comparing if the inputed node is equal to one of the valid nodes inside the cachedValidNodes array.
         /// </summary>
