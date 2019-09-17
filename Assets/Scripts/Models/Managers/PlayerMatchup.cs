@@ -49,7 +49,7 @@ public class PlayerMatchup {
     /// <param name="piecePrefab">A prefab reference to the piece gameObject in order to be created. </param>
     /// <param name="modes">A reference to the Gamemodes enum, which is being used to see if the current mode is GameModes.Debug</param>
     /// <returns>A jaggered array of all players (first and second players). </returns>
-    public static IPlayer[] StartNewGame (GameManager.GameMode gameMode, Piece piecePrefab) {
+    public static IPlayer[] StartNewGame (GameManager.GameMode gameMode, PieceObject piecePrefab) {
 
         List<IPlayer> allPlayers = new List<IPlayer> ();
         TeamGenerator[] teams = new TeamGenerator[15];
@@ -93,15 +93,17 @@ public class PlayerMatchup {
     /// </summary>
     /// <param name="players"> The current player that owns the pieces. </param>
     /// <param name="piecePrefab">A prefab reference to create said pieces. </param>
-    private static void PlacePieces (IPlayer player, Piece piecePrefab) {
+    private static void PlacePieces (IPlayer player, PieceObject piecePrefab) {
         if (player == null) return;
         if (player.CurrentTeam == null || player.CurrentTeam.Team == Team.Empty) return;
         List<Node> playerBase = new List<Node> ();
+        Transform parent = new GameObject($"{player}'s pieces").transform;
         for (int y = 0; y < BoardManager.board.GetLength (0); y++) {
             for (int x = 0; x < BoardManager.board.GetLength (1); x++) {
                 Node node = BoardManager.board[y, x];
                 if (node.BelongsTo == player.CurrentTeam.Team) {
-                    node.StoredPiece = Piece.CreatePiece (piecePrefab, TeamGenerator.SetColorBasedOnTeam (player.CurrentTeam.Team), node, player.CurrentTeam.Team);
+                    node.StoredPiece =  new Piece(piecePrefab, TeamGenerator.SetColorBasedOnTeam(player.CurrentTeam.Team), node, player.CurrentTeam.Team, parent);
+                    //Piece.CreatePiece (piecePrefab, TeamGenerator.SetColorBasedOnTeam (player.CurrentTeam.Team), node, player.CurrentTeam.Team);
                     playerBase.Add (node);
                 }
             }

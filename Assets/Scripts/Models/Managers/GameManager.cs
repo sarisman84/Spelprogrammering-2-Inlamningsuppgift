@@ -127,8 +127,8 @@ public class GameManager : MonoBehaviour {
     /// This region defines a variety of different classes that hold certain information, this is made this way so that Unity can serialize it into the editor
     /// </summary>
     #region Game Setup
-    public Node nodePrefab;
-    public Piece piecePrefab;
+    public NodeObject nodePrefab;
+    public PieceObject piecePrefab;
 
     [System.Serializable]
     public class GameMode {

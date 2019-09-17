@@ -13,7 +13,7 @@ namespace ChineseCheckers
         /// </summary>
         /// <param name="go">The selectedNode in question</param>
         /// <param name="isHighlighted">If said node will be highlighted or not</param>
-        static void OnInteract(Node go, bool isHighlighted)
+        static void OnInteract(NodeObject go, bool isHighlighted)
         {
             if (go == null) return;
             go.HighlightNode(Color.green, isHighlighted);
@@ -70,7 +70,7 @@ namespace ChineseCheckers
             foreach (var node in cachedValidMoves)
             {
                 if (node == null) continue;
-                node.HighlightNode(new Color(), false);
+                node.Object.ResetColor();
             }
             cachedValidMoves = null;
         }
@@ -84,7 +84,7 @@ namespace ChineseCheckers
             if (cachedValidMoves == null) return;
             foreach (var node in cachedValidMoves)
             {
-                node.HighlightNode(new Color(), false);
+                node.Object.ResetColor();
             }
         }
 
@@ -106,7 +106,7 @@ namespace ChineseCheckers
             ResetHigtlightOnValidMoves(ref cachedValidMoves);
             // Debug.Log ($" {selectedNode}");
             newNode = (selectedNode.StoredPiece != null && selectedNode.StoredPiece.BelongsTo == team) ? selectedNode : newNode;
-            OnInteract(newNode, highlight);
+            OnInteract(newNode.Object, highlight);
             // Debug.Log(selectedNode);
             if (newNode != null)
                 cachedValidMoves = BoardManager.Path(selectedNode, highlight);
@@ -207,10 +207,10 @@ namespace ChineseCheckers
             //Reset everything
             doneFirstMove = false;
             ResetValidMoves(ref cachedValidNodes);
-            OnInteract(savedNode, false);
+            OnInteract(savedNode.Object, false);
             if (savedNode != null)
             {
-                savedNode.HighlightNode(new Color(), false);
+                savedNode.Object.HighlightNode(new Color(), false);
                 savedNode = null;
             }
             if (savedTargetNode != null)

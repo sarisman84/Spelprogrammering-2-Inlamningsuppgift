@@ -43,11 +43,11 @@ namespace ChineseCheckers {
                 if (node.StoredPiece != null) {
                     Node potentialPath = GetValidNode (node, validMoves, curDir);
                     if (potentialPath != null && potentialPath.StoredPiece == null) {
-                        potentialPath.HighlightNode (Color.yellow, highlight);
+                        potentialPath.Object.HighlightNode (Color.yellow, highlight);
                         validMoves.Add (potentialPath);
                         List<Node> newPath = GetPath (potentialPath, validMoves, highlight, false);
                         foreach (var path in newPath) {
-                            if (validMoves.Find (p => p == path)) continue;
+                            if (validMoves.Any (p => p == path)) continue;
                             validMoves.Add (path);
                         }
                     }
@@ -55,7 +55,7 @@ namespace ChineseCheckers {
 
                 }
                 if (searchAllAvailablePaths) {
-                    node.HighlightNode (Color.cyan, highlight);
+                    node.Object.HighlightNode (Color.cyan, highlight);
                     validMoves.Add (node);
                 }
 
@@ -69,7 +69,7 @@ namespace ChineseCheckers {
             Vector2Int pos = source.CurrentBoardPosition, boardDir = Node.DirectionInBoard (pos, index), newPos = pos + boardDir;
             if (OutOfBounds (newPos)) return null;
             Node potetialNode = GetNodeInBoardPos (newPos);
-            if (potetialNode.BelongsTo == Team.Empty || validMoves.Find (p => p == potetialNode)) return null;
+            if (potetialNode.BelongsTo == Team.Empty || validMoves.Any (p => p == potetialNode)) return null;
 
             //potetialNode.HighlightNode(Color.cyan, highlight);
             return potetialNode;

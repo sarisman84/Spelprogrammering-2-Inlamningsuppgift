@@ -34,11 +34,11 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
 
     public Node SelectedPiece {
         get {
-            if (currentNode != null) currentNode.HighlightNode (new Color (), false);
+            if (currentNode != null) currentNode.Object.HighlightNode (new Color (), false);
             return currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece (DetectedNode, currentTeam.Team, true, ref cachedValidMoves) : currentNode;
         }
         set {
-            if (currentNode != null) currentNode.HighlightNode (new Color (), false);
+            if (currentNode != null) currentNode.Object.HighlightNode (new Color (), false);
             currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece (value, currentTeam.Team, true, ref cachedValidMoves) : currentNode;
         }
     }
@@ -55,7 +55,7 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
         get => hasJumped;
         set => hasJumped = value;
     }
-    public Node DetectedNode => (detectedObject.collider != null) ? detectedObject.collider.GetComponent<Node> () : null;
+    public Node DetectedNode => (detectedObject.collider != null) ? detectedObject.collider.GetComponent<NodeObject> ().Properties: null;
     public Node[] CachedValidMoves {
         get => cachedValidMoves;
         set {
