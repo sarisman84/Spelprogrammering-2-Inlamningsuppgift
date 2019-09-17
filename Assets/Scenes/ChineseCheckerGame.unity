@@ -329,9 +329,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dd302d9a3ca4474a8ab22775b917fc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nodePrefab: {fileID: 2224252667815240707, guid: c6f591369c7c49d4b9f858644a5d2466,
+  nodePrefab: {fileID: 3201317427561205795, guid: c6f591369c7c49d4b9f858644a5d2466,
     type: 3}
-  piecePrefab: {fileID: 3681646543225541178, guid: 8ff400f6a82be8240bc2a1fb4e93a647,
+  piecePrefab: {fileID: 4878257341517510858, guid: 8ff400f6a82be8240bc2a1fb4e93a647,
     type: 3}
   modes:
   - matches: []
