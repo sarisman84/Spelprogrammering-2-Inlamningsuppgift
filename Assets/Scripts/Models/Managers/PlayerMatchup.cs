@@ -15,7 +15,7 @@ public class PlayerMatchup {
     /// <returns>True if all pieces in the PlayerBase nodes are of the player's opponent</returns>
     public static bool HasPlayerWon (IPlayer player) {
         if (player == null || player.CurrentOpponent == null) return false;
-        if (player.CurrentOpponent.TeamBase.All (p => p != null && p.StoredPiece != null && p.StoredPiece.BelongsTo == player.CurrentOpponent.Team)) {
+        if (player.CurrentOpponent.CurrentTeam.TeamBase.All (p => p != null && p.StoredPiece != null && p.StoredPiece.BelongsTo == player.CurrentOpponent.CurrentTeam.Team)) {
             Debug.Log ($"Player {player.CurrentOpponent} has won!");
             return true;
         }
@@ -23,8 +23,8 @@ public class PlayerMatchup {
         return false;
     }
 
-    static IPlayer CreatePlayer (GameManager.GameMode.Match.Player player) {
-        IPlayer newPlayer = (player.isComputer) ? CompPlayer.CreatePlayer (player.playerTeam) : HumanPlayer.CreatePlayer (player.playerTeam);
+    static IPlayer CreatePlayer (GameManager.GameMode.Match.Player player, TeamGenerator team) {
+        IPlayer newPlayer = (player.isComputer) ? CompPlayer.CreatePlayer (player.playerTeam, team) : HumanPlayer.CreatePlayer (player.playerTeam);
         return newPlayer;
     }
 
@@ -35,8 +35,8 @@ public class PlayerMatchup {
             case Team.Empty:
                 return null;
         }
-        IPlayer iPlayer = CreatePlayer (newPlayer);
-        iPlayer.CurrentTeam = team;
+        IPlayer iPlayer = CreatePlayer (newPlayer, team);
+        
         return iPlayer;
 
     }
@@ -84,8 +84,27 @@ public class PlayerMatchup {
             PlacePieces (_newPlayer, piecePrefab);
             allPlayers.Add (_newPlayer);
         }
+
         return allPlayers.ToArray ();
 
+    }
+
+    public static IEnumerator TurnSystem () {
+        IPlayer[] allPlayers = GameManager.allPlayers;
+        int i = 0;
+        while (true) {
+            if (i == allPlayers.Length) i = 0;
+
+            //Do the computer's turn.
+            UserManager.OnActionTaken (allPlayers[i]);
+            if (allPlayers[i].EndTurn) {
+
+                allPlayers[i].EndTurn = false;
+                i++;
+            }
+            yield return null;
+
+        }
     }
 
     /// <summary>
@@ -96,19 +115,18 @@ public class PlayerMatchup {
     private static void PlacePieces (IPlayer player, PieceObject piecePrefab) {
         if (player == null) return;
         if (player.CurrentTeam == null || player.CurrentTeam.Team == Team.Empty) return;
-        List<Node> playerBase = new List<Node> ();
-        Transform parent = new GameObject($"{player}'s pieces").transform;
-        for (int y = 0; y < BoardManager.board.GetLength (0); y++) {
-            for (int x = 0; x < BoardManager.board.GetLength (1); x++) {
-                Node node = BoardManager.board[y, x];
-                if (node.BelongsTo == player.CurrentTeam.Team) {
-                    node.StoredPiece =  new Piece(piecePrefab, TeamGenerator.SetColorBasedOnTeam(player.CurrentTeam.Team), node, player.CurrentTeam.Team, parent);
-                    //Piece.CreatePiece (piecePrefab, TeamGenerator.SetColorBasedOnTeam (player.CurrentTeam.Team), node, player.CurrentTeam.Team);
-                    playerBase.Add (node);
-                }
+        List<Piece> playerPieces = new List<Piece> ();
+        Transform parent = new GameObject ($"{player}'s pieces").transform;
+        foreach (var node in player.CurrentTeam.TeamBase) {
+            if (node.BelongsTo == player.CurrentTeam.Team) {
+                node.StoredPiece = new Piece (piecePrefab, TeamGenerator.SetColorBasedOnTeam (player.CurrentTeam.Team), node, player.CurrentTeam.Team, parent);
+                //Piece.CreatePiece (piecePrefab, TeamGenerator.SetColorBasedOnTeam (player.CurrentTeam.Team), node, player.CurrentTeam.Team);
+                playerPieces.Add (node.StoredPiece);
             }
         }
-        player.CurrentTeam.TeamBase = playerBase.ToArray ();
+        
+        player.CurrentTeam.TeamsPieces = playerPieces;
+
     }
 
 }

@@ -10,6 +10,7 @@ public enum Team { Empty, Unoccupied, Red, Yellow, Blue, Magenta, Orange, Green,
 public class TeamGenerator {
     [SerializeField] Team currentTeam;
     [SerializeField] Node[] teamBase;
+    [SerializeField] List<Piece> teamPieces;
     public Team Team {
         get => currentTeam;
         set => currentTeam = value;
@@ -85,6 +86,11 @@ public class TeamGenerator {
     public Node[] TeamBase {
         get => teamBase;
         set => teamBase = value;
+    }
+
+    public List<Piece> TeamsPieces{
+        get => teamPieces;
+        set => teamPieces = value;
     }
 
 }

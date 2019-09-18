@@ -15,9 +15,9 @@ using UnityEngine;
 public class CompPlayer : MonoBehaviour, IPlayer {
 
     #region Variables
-    [SerializeField] Node[] cachedValidNodes;
+    [SerializeField] List<Node> cachedValidNodes;
     [SerializeField] TeamGenerator currentTeam;
-    TeamGenerator opponent;
+    IPlayer opponent;
 
     float maxValue;
 
@@ -30,8 +30,8 @@ public class CompPlayer : MonoBehaviour, IPlayer {
 
     #region  Properties
 
-    public TeamGenerator CurrentOpponent {
-        get => opponent;
+    public IPlayer CurrentOpponent {
+        get => opponent = opponent ?? UserManager.SetOpponent (this);
         set => opponent = value;
     }
 
@@ -42,7 +42,7 @@ public class CompPlayer : MonoBehaviour, IPlayer {
             int index = UnityEngine.Random.Range (0, cachedPieces.Length);
             if (index >= cachedPieces.Length) return null;
             newPiece = UserManager.AttemptToGetPiece (cachedPieces[index].CurrentlyLiesIn, currentTeam.Team, false, ref cachedValidNodes);
-            if (cachedValidNodes.Length == 0) {
+            if (cachedValidNodes.Count == 0) {
                 return null;
             }
             opponent = opponent ?? UserManager.SetOpponent (this);
@@ -54,20 +54,74 @@ public class CompPlayer : MonoBehaviour, IPlayer {
         set => currentPiece = value;
     }
 
-    private void FindOptimalPlay () {
-        List<Piece> moveablePieces = new List<Piece> ();
-        foreach (var piece in cachedPieces) {
-            if (BoardManager.TestPath (piece.CurrentlyLiesIn)) {
-                moveablePieces.Add (piece);
+    public static List<Board> FindAllPossiblePaths (int depth, IPlayer currentPlayer, Board currentBoard) {
+        switch (currentPlayer) {
+
+            case CompPlayer comp:
+                comp.GetBaseNodes ();
+                break;
+        }
+        List<Board> listOfTempBoards = new List<Board> ();
+        if (depth == 0) { return listOfTempBoards; }
+
+        if (currentPlayer != currentPlayer.CurrentOpponent) {
+            float minValue = float.MaxValue;
+            Board simulatedBoard = BoardManager.board.Copy ();
+            List<Piece> simulatedOwnedPieces = new List<Piece> ();
+            foreach (Node node in simulatedBoard.board) {
+                if (node.StoredPiece != null && node.StoredPiece.BelongsTo == currentPlayer.CurrentTeam.Team)
+                    simulatedOwnedPieces.Add (node.StoredPiece);
+            }
+            foreach (var piece in simulatedOwnedPieces) {
+                List<Node> path = BoardManager.Path (piece.CurrentlyLiesIn, false, currentBoard.board);
+                foreach (var node in path) {
+                    Board newBoard = BoardManager.board.Copy ();
+                    Piece.SimulatingMovePiece (piece, piece.CurrentlyLiesIn, node);
+                    float eval = Value (piece, currentPlayer.CurrentOpponent.CurrentTeam.TeamBase);
+                    minValue = Mathf.Min (eval, minValue);
+                    newBoard.value = minValue;
+                    listOfTempBoards.Add (newBoard);
+                    List<Board> board = FindAllPossiblePaths (depth - 1, currentPlayer.CurrentOpponent, newBoard);
+                    listOfTempBoards.AddRange (board);
+                }
+
+            }
+        } else if (currentPlayer == currentPlayer.CurrentOpponent) {
+            float maxValue = float.MinValue;
+            Board simulatedBoard = BoardManager.board.Copy ();
+            List<Piece> simulatedOwnedPieces = new List<Piece> ();
+            foreach (Node node in simulatedBoard.board) {
+                if (node.StoredPiece != null && node.StoredPiece.BelongsTo == currentPlayer.CurrentTeam.Team)
+                    simulatedOwnedPieces.Add (node.StoredPiece);
+            }
+            foreach (var piece in simulatedOwnedPieces) {
+                List<Node> path = BoardManager.Path (piece.CurrentlyLiesIn, false, currentBoard.board);
+                foreach (var node in path) {
+                    Board newBoard = BoardManager.board.Copy ();
+                    Piece.SimulatingMovePiece (piece, piece.CurrentlyLiesIn, node);
+                    float eval = Value (piece, currentPlayer.CurrentOpponent.CurrentTeam.TeamBase);
+                    maxValue = Mathf.Max (eval, maxValue);
+                    newBoard.value = maxValue;
+
+                    listOfTempBoards.Add (newBoard);
+
+                    List<Board> board = FindAllPossiblePaths (depth - 1, currentPlayer, newBoard);
+                    listOfTempBoards.AddRange (board);
+                }
+
             }
         }
-        if (moveablePieces.Count == 0) return;
+
+        return listOfTempBoards;
 
     }
 
-    
+    class EvaluatedMove {
+        List<Node> tempBoard;
+        public float value;
+    }
 
-    private void GetBaseNodes () {
+    public void GetBaseNodes () {
 
         if (cachedPieces == null) {
             Piece[] pieceArray = new Piece[currentTeam.TeamBase.Length];
@@ -81,8 +135,8 @@ public class CompPlayer : MonoBehaviour, IPlayer {
 
     public Node DesiredTarget {
         get {
-            int index = UnityEngine.Random.Range (0, cachedValidNodes.Length - 1);
-            if (index >= cachedValidNodes.Length) return desiredNode;
+            int index = UnityEngine.Random.Range (0, cachedValidNodes.Count - 1);
+            if (index >= cachedValidNodes.Count) return desiredNode;
             return desiredNode = (currentPiece != null) ? UserManager.AttemptToGetTarget (cachedValidNodes[index], ref cachedValidNodes) : desiredNode;
         }
 
@@ -96,7 +150,7 @@ public class CompPlayer : MonoBehaviour, IPlayer {
     public Node DetectedNode =>
         throw new NotImplementedException ();
 
-    public Node[] CachedValidMoves {
+    public List<Node> CachedValidMoves {
         get => cachedValidNodes;
         set => cachedValidNodes = value;
     }
@@ -128,11 +182,20 @@ public class CompPlayer : MonoBehaviour, IPlayer {
         get => text;
         set => text = value;
     }
-    public static IPlayer CreatePlayer (Team team) {
+    bool endTurn = false;
+    bool IPlayer.EndTurn {
+        get =>
+            endTurn;
+        set =>
+            endTurn = value;
+    }
+
+    public static IPlayer CreatePlayer (Team team, TeamGenerator gen) {
         CompPlayer player = new GameObject ($"Player {team} : Computer").AddComponent<CompPlayer> ();
         Canvas parent = FindObjectOfType<Canvas> ();
         player.SetupText = player.SetupText ?? new GameObject ("Max Distance").AddComponent<TextMeshPro> ();
         player.SetupText.transform.parent = parent.transform;
+        player.CurrentTeam = gen;
         return player;
     }
 
@@ -141,18 +204,20 @@ public class CompPlayer : MonoBehaviour, IPlayer {
     }
     IEnumerator DelayedUpdate () {
         while (true) {
-            UserManager.OnActionTaken (this);
+
+            // UserManager.OnActionTaken (this);
             yield return new WaitForSeconds (0.5f);
         }
 
     }
 
-    float Value (Node currentPosition, Node[] targets) {
+    static float Value (Piece piece, Node[] targets) {
         float maxDist = 0;
         foreach (Node target in targets) {
-            float dist = Vector2.Distance (currentPosition.CurrentBoardPosition, target.CurrentBoardPosition);
+            float dist = Vector2.Distance (piece.CurrentlyLiesIn.CurrentBoardPosition, target.CurrentBoardPosition);
             maxDist += dist;
         }
+
         return maxDist;
     }
 

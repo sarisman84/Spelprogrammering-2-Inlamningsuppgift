@@ -14,8 +14,10 @@ public interface IPlayer {
     Node DesiredTarget { get; set; }
     Node DetectedNode { get; }
 
-    Node[] CachedValidMoves { get; set; }
+    List<Node> CachedValidMoves { get; set; }
     TeamGenerator CurrentTeam { get; set; }
-    TeamGenerator CurrentOpponent { get; set; }
+    IPlayer CurrentOpponent { get; set; }
+
+    bool EndTurn { get; set; }
 
 }

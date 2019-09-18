@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour {
         BY = (int) Team.BigBlueToYellow,
         YM = (int) Team.BigYellowToMagenta,
         MR = (int) Team.BigMagentaToRed,
-        D = (int)Team.Debug;
+        D = (int) Team.Debug;
 
     /*
     2 = Yellow
@@ -78,49 +78,14 @@ public class GameManager : MonoBehaviour {
 
        */
 
-    int[, ] blueprint = new int[, ] { 
-        { V, V, V, V, V, V, V, 2, V, V, V, V, V, V, V }, 
-         { V, V, V, V, V, V, 2, 2, V, V, V, V, V, V, V }, 
-        { V, V, V, V, V, V, 2, 2, 2, V, V, V, V, V, V }, 
-         { V, V, V, V, V, 2, 2, 2, 2, V, V, V, V, V, V }, 
-        { V, 6, 6, 6, 6, RO, R, R, R, MR, 5, 5, 5, 5, V }, 
-         { V, 6, 6, 6, yO, O, O, O, O, M, 5, 5, 5, V, V }, 
-        { V, V, 6, 6, yO, O, O, O, O, O, M, 5, 5, V, V }, 
-         { V, V, 6, yO, O, O, O, O, O, O, M, 5, V, V, V }, 
-        { V, V, V, OG, O, O, O, O, O, O, O, YM, V, V, V }, 
-         { V, V, 7, G, O, O, O, O, O, O, Y, 3, V, V, V }, 
-        { V, V, 7, 7, G, O, O, O, O, O, Y, 3, 3, V, V }, 
-         { V, 7, 7, 7, G, O, O, O, O, Y, 3, 3, 3, V, V }, 
-        { V, 7, 7, 7, 7, GB, B, B, B, BY, 3, 3, 3, 3, V }, 
-         { V, V, V, V, V, 4, 4, 4, 4, V, V, V, V, V, V }, 
-        { V, V, V, V, V, V, 4, 4, 4, V, V, V, V, V, V }, 
-         { V, V, V, V, V, V, 4, 4, V, V, V, V, V, V, V }, 
-        { V, V, V, V, V, V, V, 4, V, V, V, V, V, V, V },
+    int[, ] blueprint = new int[, ] { { V, V, V, V, V, V, V, 2, V, V, V, V, V, V, V }, { V, V, V, V, V, V, 2, 2, V, V, V, V, V, V, V }, { V, V, V, V, V, V, 2, 2, 2, V, V, V, V, V, V }, { V, V, V, V, V, 2, 2, 2, 2, V, V, V, V, V, V }, { V, 6, 6, 6, 6, RO, R, R, R, MR, 5, 5, 5, 5, V }, { V, 6, 6, 6, yO, O, O, O, O, M, 5, 5, 5, V, V }, { V, V, 6, 6, yO, O, O, O, O, O, M, 5, 5, V, V }, { V, V, 6, yO, O, O, O, O, O, O, M, 5, V, V, V }, { V, V, V, OG, O, O, O, O, O, O, O, YM, V, V, V }, { V, V, 7, G, O, O, O, O, O, O, Y, 3, V, V, V }, { V, V, 7, 7, G, O, O, O, O, O, Y, 3, 3, V, V }, { V, 7, 7, 7, G, O, O, O, O, Y, 3, 3, 3, V, V }, { V, 7, 7, 7, 7, GB, B, B, B, BY, 3, 3, 3, 3, V }, { V, V, V, V, V, 4, 4, 4, 4, V, V, V, V, V, V }, { V, V, V, V, V, V, 4, 4, 4, V, V, V, V, V, V }, { V, V, V, V, V, V, 4, 4, V, V, V, V, V, V, V }, { V, V, V, V, V, V, V, 4, V, V, V, V, V, V, V },
 
     };
 
-     int[, ] debugBlueprint = new int[, ] { 
-        { V, V, V, V, V, V, V, 2, V, V, V, V, V, V, V }, 
-         { V, V, V, V, V, V, 2, 2, V, V, V, V, V, V, V }, 
-        { V, V, V, V, V, V, 2, 2, 2, V, V, V, V, V, V }, 
-         { V, V, V, V, V, 2, 2, 2, 2, V, V, V, V, V, V }, 
-        { V, 6, 6, 6, 6, RO, R, R, R, MR, 5, 5, 5, 5, V }, 
-         { V, 6, 6, 6, yO, O, O, O, O, M, 5, 5, 5, V, V }, 
-        { V, V, 6, 6, yO, O, O, O, O, O, M, 5, 5, V, V }, 
-         { V, V, 6, yO, O, D, O, D, O, D, M, 5, V, V, V }, 
-        { V, V, V, OG, D, O, D, O, D, O, D, YM, V, V, V }, 
-          { V, V, 7, G, O, D, O, D, O, D, Y, 3, V, V, V }, 
-        { V, V, 7, 7, G, O, O, O, O, O, Y, 3, 3, V, V }, 
-         { V, 7, 7, 7, G, O, O, O, O, Y, 3, 3, 3, V, V }, 
-        { V, 7, 7, 7, 7, GB, B, B, B, BY, 3, 3, 3, 3, V }, 
-         { V, V, V, V, V, 4, 4, 4, 4, V, V, V, V, V, V }, 
-        { V, V, V, V, V, V, 4, 4, 4, V, V, V, V, V, V }, 
-         { V, V, V, V, V, V, 4, 4, V, V, V, V, V, V, V }, 
-        { V, V, V, V, V, V, V, 4, V, V, V, V, V, V, V },
+    int[, ] debugBlueprint = new int[, ] { { V, V, V, V, V, V, V, 2, V, V, V, V, V, V, V }, { V, V, V, V, V, V, 2, 2, V, V, V, V, V, V, V }, { V, V, V, V, V, V, 2, 2, 2, V, V, V, V, V, V }, { V, V, V, V, V, 2, 2, 2, 2, V, V, V, V, V, V }, { V, 6, 6, 6, 6, RO, R, R, R, MR, 5, 5, 5, 5, V }, { V, 6, 6, 6, yO, O, O, O, O, M, 5, 5, 5, V, V }, { V, V, 6, 6, yO, O, O, O, O, O, M, 5, 5, V, V }, { V, V, 6, yO, O, D, O, D, O, D, M, 5, V, V, V }, { V, V, V, OG, D, O, D, O, D, O, D, YM, V, V, V }, { V, V, 7, G, O, D, O, D, O, D, Y, 3, V, V, V }, { V, V, 7, 7, G, O, O, O, O, O, Y, 3, 3, V, V }, { V, 7, 7, 7, G, O, O, O, O, Y, 3, 3, 3, V, V }, { V, 7, 7, 7, 7, GB, B, B, B, BY, 3, 3, 3, 3, V }, { V, V, V, V, V, 4, 4, 4, 4, V, V, V, V, V, V }, { V, V, V, V, V, V, 4, 4, 4, V, V, V, V, V, V }, { V, V, V, V, V, V, 4, 4, V, V, V, V, V, V, V }, { V, V, V, V, V, V, V, 4, V, V, V, V, V, V, V },
 
     };
 
-    
     #endregion
 
     /// <summary>
@@ -177,6 +142,7 @@ public class GameManager : MonoBehaviour {
     public void StartGame () {
 
         allPlayers = PlayerMatchup.StartNewGame (modes[(int) selectedMode], piecePrefab);
+        StartCoroutine (PlayerMatchup.TurnSystem ());
 
     }
     #endregion
@@ -189,12 +155,6 @@ public class GameManager : MonoBehaviour {
     private void Update () {
         if (dropdown.enabled)
             selectedMode = (GameModes) dropdown.value;
-
-        if (allPlayers == null) return;
-        foreach (var item in allPlayers) {
-            if (item == null) continue;
-            if (PlayerMatchup.HasPlayerWon (item)) { }
-        }
 
     }
 

@@ -5,11 +5,9 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace ChineseCheckers
-{
+namespace ChineseCheckers {
 
-    public sealed class HexagonGrid
-    {
+    public sealed class HexagonGrid {
 
         //I need to do the following:
 
@@ -31,9 +29,8 @@ namespace ChineseCheckers
         const float deltaX = 0.5f;
         const float deltaY = 0.8660254f;
 
-        static Vector2 SetPosition(Vector2Int boardPos)
-        {
-            return new Vector2(boardPos.x + deltaX * boardPos.y, boardPos.y * deltaY);
+        static Vector2 SetPosition (Vector2Int boardPos) {
+            return new Vector2 (boardPos.x + deltaX * boardPos.y, boardPos.y * deltaY);
         }
 
         /// <summary>
@@ -42,24 +39,22 @@ namespace ChineseCheckers
         /// <param name="blueprint"> This is used as a way to "shape" the board. Create an int[,] to set the boards size as well as how it will be shaped.</param>
         /// <param name="prefab">The prefab in question that is going to be used as a board piece. </param>
         /// <returns>A list of board pieces that shape a board. </returns>
-        public static Node[,] CreateGrid(int[,] blueprint, NodeObject prefab)
-        {
-            Transform parent = new GameObject($"{prefab.name}'s list ").transform;
-            Node[,] tempGrid = new Node[blueprint.GetLength(0), blueprint.GetLength(1)];
+        public static Board CreateGrid (int[, ] blueprint, NodeObject prefab) {
+            Transform parent = new GameObject ($"{prefab.name}'s list ").transform;
+            Board board = new Board ();
+            board.board = new Node[blueprint.GetLength (0), blueprint.GetLength (1)];
             int xPos;
-            for (int y = 0; y < blueprint.GetLength(0); y++)
-            {
-                for (int x = 0; x < blueprint.GetLength(1); x++)
-                {
+            for (int y = 0; y < blueprint.GetLength (0); y++) {
+                for (int x = 0; x < blueprint.GetLength (1); x++) {
                     xPos = x - y / 2;
-                    tempGrid[y, x] = new Node(prefab, $"Node:{y},{x}", SetPosition(new Vector2Int(xPos, y)), blueprint[y, x], parent);
+                     board[y, x] = new Node (prefab, $"Node:{y},{x}", SetPosition (new Vector2Int (xPos, y)), blueprint[y, x], parent);
                     // Node.CreateNode (prefab, blueprint[y, x], parent);
-                    tempGrid[y, x].CurrentBoardPosition = new Vector2Int(y, x);
+                    board[y, x].CurrentBoardPosition = new Vector2Int (y, x);
 
                 }
 
             }
-            return tempGrid;
+            return board;
         }
 
     }

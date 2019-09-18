@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ChineseCheckers;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ using UnityEngine;
 public class HumanPlayer : MonoBehaviour, IPlayer {
 
     //Basic variables that store nessesary information to define what a player is.
+
     #region Variables
     public LayerMask mask;
     [SerializeField] bool hasJumped = false;
@@ -18,13 +20,13 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
     RaycastHit2D detectedObject;
     [SerializeField] Node currentNode, selectedNode;
     [SerializeField] TeamGenerator currentTeam;
-    TeamGenerator opponent;
-    Node[] cachedValidMoves;
+    IPlayer opponent;
+    List<Node> cachedValidMoves;
     #endregion
 
     //Advanced Properties that return a variable based on calculations and calls from other scripts.
     #region Properties
-    public TeamGenerator CurrentOpponent { get => opponent; set => opponent = value; }
+    public IPlayer CurrentOpponent { get => opponent; set => opponent = value; }
     public TeamGenerator CurrentTeam {
         get =>
             currentTeam;
@@ -34,6 +36,7 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
 
     public Node SelectedPiece {
         get {
+
             if (currentNode != null) currentNode.Object.HighlightNode (new Color (), false);
             return currentNode = (cachedValidMoves == null) ? UserManager.AttemptToGetPiece (DetectedNode, currentTeam.Team, true, ref cachedValidMoves) : currentNode;
         }
@@ -55,25 +58,27 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
         get => hasJumped;
         set => hasJumped = value;
     }
-    public Node DetectedNode => (detectedObject.collider != null) ? detectedObject.collider.GetComponent<NodeObject> ().Properties: null;
-    public Node[] CachedValidMoves {
+    public Node DetectedNode => (detectedObject.collider != null) ? detectedObject.collider.GetComponent<NodeObject> ().Properties : null;
+    public List<Node> CachedValidMoves {
         get => cachedValidMoves;
         set {
             UserManager.ResetValidMoves (ref cachedValidMoves);
         }
     }
 
+    bool IPlayer.EndTurn { get =>
+            throw new NotImplementedException (); set =>
+            throw new NotImplementedException (); }
+
     #endregion
 
     /// <summary>
     /// Creates a IPlayer instance of type Human.
     /// </summary>
-    /// <param name="currentTeam">What team this player is in</param>
-    /// <param name="opponent">What team its opponent is in</param>
     /// <returns>An IPlayer instance of type Human.</returns>
     public static IPlayer CreatePlayer (Team team) {
         HumanPlayer player = new GameObject ($"Player {team}: Human").AddComponent<HumanPlayer> ();
-        player.CurrentTeam = UserManager.SetOpponent (player);
+        player.CurrentOpponent = UserManager.SetOpponent (player);
         return player;
     }
 
