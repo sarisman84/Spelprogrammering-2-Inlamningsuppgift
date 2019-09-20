@@ -8,9 +8,13 @@ public class Piece {
     Node currentNode;
     [SerializeField] Team currentTeam;
 
-    public Node CurrentlyLiesIn {
+    public Vector2Int CurrentPosition {
+        get => currentNode.CurrentBoardPosition;
+    }
+
+    public Node NodeReference{
+        set => currentNode = value;
         get => currentNode;
-        private set => currentNode = value;
     }
     public Team BelongsTo {
         get => currentTeam;
@@ -29,7 +33,7 @@ public class Piece {
         current.StoredPiece = null;
         selectedPiece.Object.transform.position = destination.Object.transform.position;
         destination.StoredPiece = selectedPiece;
-        selectedPiece.CurrentlyLiesIn = destination;
+        selectedPiece.NodeReference = destination;
 
     }
 
@@ -37,7 +41,7 @@ public class Piece {
         current.StoredPiece = null;
         //selectedPiece.Object.transform.position = destination.Object.transform.position;
         destination.StoredPiece = selectedPiece;
-        selectedPiece.CurrentlyLiesIn = destination;
+        selectedPiece.NodeReference = destination;
     }
 
     public Piece (PieceObject prefab, Color playerColor, Node node, Team team, Transform parent) {
@@ -45,7 +49,7 @@ public class Piece {
         newPiece.Properties = this;
         newPiece.SetPieceColor = playerColor;
         newPiece.Properties.BelongsTo = team;
-        newPiece.Properties.CurrentlyLiesIn = node;
+        newPiece.Properties.NodeReference = node;
         viewReference = newPiece;
 
     }
