@@ -341,7 +341,10 @@ MonoBehaviour:
   - matches:
     - player:
         playerTeam: 2
-        isComputer: 0
+        isComputer: 1
+    - player:
+        playerTeam: 4
+        isComputer: 1
   selectedMode: 4
   dropdown: {fileID: 457436922}
 --- !u!4 &379069166
