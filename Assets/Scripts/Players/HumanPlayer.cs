@@ -22,6 +22,7 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
     [SerializeField] TeamGenerator currentTeam;
     IPlayer opponent;
     List<Node> cachedValidMoves;
+    List<Piece> cachedPieces;
     #endregion
 
     //Advanced Properties that return a variable based on calculations and calls from other scripts.
@@ -65,10 +66,32 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
             UserManager.ResetValidMoves (ref cachedValidMoves);
         }
     }
+    public List<Piece> GetBaseNodes () {
 
-    bool IPlayer.EndTurn { get =>
-            throw new NotImplementedException (); set =>
-            throw new NotImplementedException (); }
+        if (cachedPieces == null || cachedPieces.Count == 0) {
+            List<Piece> pieceArray = new List<Piece> ();
+            for (int i = 0; i < currentTeam.TeamBase.Length; i++) {
+                pieceArray.Add (currentTeam.TeamBase[i].StoredPiece);
+            }
+            cachedPieces = pieceArray;
+            return pieceArray;
+        }
+        return cachedPieces;
+
+    }
+
+    public List<Piece> CachedPieces {
+        get => cachedPieces ?? GetBaseNodes();
+        set => cachedPieces = value;
+    }
+
+    bool endTurn;
+    bool IPlayer.EndTurn {
+        get =>
+            endTurn;
+        set =>
+            endTurn = value;
+    }
 
     #endregion
 
@@ -76,9 +99,10 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
     /// Creates a IPlayer instance of type Human.
     /// </summary>
     /// <returns>An IPlayer instance of type Human.</returns>
-    public static IPlayer CreatePlayer (Team team) {
+    public static IPlayer CreatePlayer (Team team, TeamGenerator gen) {
         HumanPlayer player = new GameObject ($"Player {team}: Human").AddComponent<HumanPlayer> ();
         player.CurrentOpponent = UserManager.SetOpponent (player);
+        player.CurrentTeam = gen;
         return player;
     }
 
@@ -105,11 +129,6 @@ public class HumanPlayer : MonoBehaviour, IPlayer {
         if (Input.GetKeyDown (KeyCode.Tab)) {
             UserManager.WhenTurnEnds (ref hasJumped, ref currentNode, ref selectedNode, ref cachedValidMoves);
         }
-
-        if (!Input.GetMouseButtonDown (0)) return;
-
-        if (DetectedNode == null) return;
-        UserManager.OnActionTaken (this);
 
     }
 

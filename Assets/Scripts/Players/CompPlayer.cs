@@ -12,8 +12,7 @@ using UnityEngine;
 /// <summary>
 /// The core class for computer based player behaivours.
 /// </summary>
-public class CompPlayer : MonoBehaviour, IPlayer
-{
+public class CompPlayer : MonoBehaviour, IPlayer {
 
     #region Variables
     [SerializeField] List<Node> cachedValidNodes;
@@ -31,26 +30,22 @@ public class CompPlayer : MonoBehaviour, IPlayer
 
     #region  Properties
 
-    public IPlayer CurrentOpponent
-    {
-        get => opponent = opponent ?? UserManager.SetOpponent(this);
+    public IPlayer CurrentOpponent {
+        get => opponent = opponent ?? UserManager.SetOpponent (this);
         set => opponent = value;
     }
 
-    public Node SelectedPiece
-    {
-        get
-        {
+    public Node SelectedPiece {
+        get {
             Node newPiece = null;
-            GetBaseNodes();
-            int index = UnityEngine.Random.Range(0, cachedPieces.Count);
+            GetBaseNodes ();
+            int index = UnityEngine.Random.Range (0, cachedPieces.Count);
             if (index >= cachedPieces.Count) return null;
-            newPiece = UserManager.AttemptToGetPiece(cachedPieces[index].NodeReference, currentTeam.Team, false, ref cachedValidNodes);
-            if (cachedValidNodes.Count == 0)
-            {
+            newPiece = UserManager.AttemptToGetPiece (cachedPieces[index].NodeReference, currentTeam.Team, false, ref cachedValidNodes);
+            if (cachedValidNodes.Count == 0) {
                 return null;
             }
-            opponent = opponent ?? UserManager.SetOpponent(this);
+            opponent = opponent ?? UserManager.SetOpponent (this);
 
             currentPiece = newPiece;
             return currentPiece;
@@ -58,7 +53,6 @@ public class CompPlayer : MonoBehaviour, IPlayer
 
         set => currentPiece = value;
     }
-
 
     /// <summary>
     /// A Minimax method that simulates a board with a move and then proceeds to evaluate a score.
@@ -68,139 +62,119 @@ public class CompPlayer : MonoBehaviour, IPlayer
     /// <param name="currentBoard">The default state of the board in which we will simulate from</param>
     /// <param name="maximizingPlayer">Dictates which player's turn it is.</param>
     /// <returns>A list of boards each with its own evaluated score.</returns>
-    public static List<Board> FindAllPossiblePaths(int depth, IPlayer currentPlayer, Board currentBoard, bool maximizingPlayer)
-    {
-        switch (currentPlayer)
-        {
-            //If the player is of type CompPlayer, get its BaseNodes.
-            case CompPlayer comp:
-                comp.GetBaseNodes();
-                break;
-        }
-        List<Board> listOfTempBoards = new List<Board>();
-        if (depth == 0) { return listOfTempBoards; }
+    public static List<Board> FindAllPossiblePaths (int depth, IPlayer currentPlayer, bool maximizingPlayer, Board currentBoard, List<Board> listOfSims) {
 
-        if (!maximizingPlayer)
-        {
-            float minValue = float.MaxValue;
-            Board simulatedBoard = BoardManager.board.Copy();
-            List<Piece> simulatedOwnedPieces = new List<Piece>();
-            foreach (Node node in simulatedBoard.board)
-            {
-                if (node.StoredPiece != null && node.StoredPiece.BelongsTo == currentPlayer.CurrentTeam.Team)
-                    simulatedOwnedPieces.Add(node.StoredPiece);
-            }
-            foreach (var piece in simulatedOwnedPieces)
-            {
-                List<Node> path = BoardManager.Path(piece.NodeReference, false, currentBoard.board);
-                foreach (var node in path)
-                {
-                    //Create a new simulated board.
-                    Board newBoard = BoardManager.board.Copy();
-                    //Simulate a move
-                    Piece.SimulatingMovePiece(piece, piece.NodeReference, node);
-                    //Evaluate a score on said move based on the current position and the distance to the enemy's base.
-                    float eval = Value(piece, currentPlayer.CurrentTeam.TeamBase);
-                    minValue = Mathf.Min(eval, minValue);
-                    newBoard.value = minValue;
-                    listOfTempBoards.Add(newBoard);
-                    //Do a recursive call on the method with the oppisite sides turn to simulate.
-                    List<Board> board = FindAllPossiblePaths(depth - 1, currentPlayer, newBoard, true);
-                    //Add the newly found results from the previous recursive call into a list.
-                    listOfTempBoards.AddRange(board);
+        if (depth == 0) return listOfSims;
+
+        if (!maximizingPlayer) {
+            Board testingBoard = currentBoard.Clone ();
+            List<Piece> pieceList = new List<Piece> ();
+            SimulatePieces (currentPlayer, testingBoard, pieceList);
+            SimulateMoves (currentPlayer, currentBoard, listOfSims, pieceList);
+            float minEval = float.MaxValue;
+            Board bestBoard = null;
+            foreach (var sim in listOfSims) {
+                if (sim.value < minEval) {
+                    bestBoard = sim;
+                    minEval = sim.value;
                 }
-
             }
+            //listOfSims.Add (bestBoard);
+            List<Board> results = FindAllPossiblePaths (depth - 1, currentPlayer, true, bestBoard, listOfSims);
+            Debug.Log (results.Count);
+            listOfSims.AddRange (results);
         }
-        else if (maximizingPlayer)
-        {
-            float maxValue = float.MinValue;
-            Board simulatedBoard = BoardManager.board.Copy();
-            List<Piece> simulatedOwnedPieces = new List<Piece>();
-            foreach (Node node in simulatedBoard.board)
-            {
-                if (node.StoredPiece != null && node.StoredPiece.BelongsTo == currentPlayer.CurrentOpponent.CurrentTeam.Team)
-                    simulatedOwnedPieces.Add(node.StoredPiece);
-            }
-            foreach (var piece in simulatedOwnedPieces)
-            {
-                List<Node> path = BoardManager.Path(piece.NodeReference, false, currentBoard.board);
-                foreach (var node in path)
-                {
-                    //Create a new simulated board.
-                    Board newBoard = BoardManager.board.Copy();
-                    //Simulate a move
-                    Piece.SimulatingMovePiece(piece, piece.NodeReference, node);
-                    //Evaluate a score on said move based on the current position and the distance to the enemy's base.
-                    float eval = Value(piece, currentPlayer.CurrentOpponent.CurrentTeam.TeamBase);
-                    maxValue = Mathf.Max(eval, maxValue);
-                    newBoard.value = maxValue;
-
-                    listOfTempBoards.Add(newBoard);
-                    //Do a recursive call on the method with the oppisite sides turn to simulate.
-                    List<Board> board = FindAllPossiblePaths(depth - 1, currentPlayer, newBoard, false);
-                    //Add the newly found results from the previous recursive call into a list.F
-                    listOfTempBoards.AddRange(board);
+        if (maximizingPlayer) {
+            if(currentBoard == null) return listOfSims;
+            Board testingBoard = currentBoard.Clone ();
+            List<Piece> pieceList = new List<Piece> ();
+            SimulatePieces (currentPlayer.CurrentOpponent, testingBoard, pieceList);
+            SimulateMoves (currentPlayer.CurrentOpponent, currentBoard, listOfSims, pieceList);
+            float maxEval = float.MinValue;
+            Board bestBoard = null;
+            foreach (var sim in listOfSims) {
+                if (sim.value < maxEval) {
+                    bestBoard = sim;
+                    maxEval = sim.value;
                 }
-
             }
+            //listOfSims.Add (bestBoard);
+            List<Board> results = FindAllPossiblePaths (depth - 1, currentPlayer, true, bestBoard, listOfSims);
+            Debug.Log (results.Count);
+            listOfSims.AddRange (results);
         }
+
         //Return the results.
-        return listOfTempBoards;
+        return listOfSims;
 
     }
 
+    private static void SimulatePieces (IPlayer currentPlayer, Board testingBoard, List<Piece> pieceList) {
+        foreach (Node board in testingBoard) {
+            if (board.StoredPiece != null && board.BelongsTo == currentPlayer.CurrentTeam.Team) {
+                pieceList.Add (board.StoredPiece);
+            }
+        }
+    }
 
+    private static void SimulateMoves (IPlayer currentPlayer, Board currentBoard, List<Board> listOfSims, List<Piece> pieceList) {
+        foreach (var piece in pieceList) {
+            foreach (var node in BoardManager.Path (piece.NodeReference, false)) {
+                Board simulatedBoard = currentBoard.Clone ();
+                //Make move via coords on simulated board.
+                Vector2Int startPos = piece.CurrentPosition;
+                Vector2Int endPos = node.CurrentBoardPosition;
+                Piece.SimulateMovePiece (currentBoard, startPos, endPos);
+                float eval = Value (piece, currentPlayer.CurrentOpponent.CurrentTeam.TeamBase);
+                simulatedBoard.value = eval;
+                listOfSims.Add (simulatedBoard);
+            }
+        }
 
-    public void GetBaseNodes()
-    {
+    }
 
-        if (cachedPieces == null || cachedPieces.Count == 0)
-        {
-            List<Piece> pieceArray = new List<Piece>();
-            for (int i = 0; i < currentTeam.TeamBase.Length; i++)
-            {
-                pieceArray.Add(currentTeam.TeamBase[i].StoredPiece);
+    public List<Piece> GetBaseNodes () {
+
+        if (cachedPieces == null || cachedPieces.Count == 0) {
+            List<Piece> pieceArray = new List<Piece> ();
+            for (int i = 0; i < currentTeam.TeamBase.Length; i++) {
+                pieceArray.Add (currentTeam.TeamBase[i].StoredPiece);
             }
             cachedPieces = pieceArray;
+            return pieceArray;
         }
+        return cachedPieces;
 
     }
 
-    public Node DesiredTarget
-    {
-        get
-        {
-            int index = UnityEngine.Random.Range(0, cachedValidNodes.Count - 1);
+    public Node DesiredTarget {
+        get {
+            int index = UnityEngine.Random.Range (0, cachedValidNodes.Count - 1);
             if (index >= cachedValidNodes.Count) return desiredNode;
-            return desiredNode = (currentPiece != null) ? UserManager.AttemptToGetTarget(cachedValidNodes[index], ref cachedValidNodes) : desiredNode;
+            return desiredNode = (currentPiece != null) ? UserManager.AttemptToGetTarget (cachedValidNodes[index], ref cachedValidNodes) : desiredNode;
         }
 
         set => desiredNode = value;
     }
-    public bool HasDoneFirstMove
-    {
+    public bool HasDoneFirstMove {
         get => hasJumped;
         set => hasJumped = value;
     }
 
     public Node DetectedNode =>
-        throw new NotImplementedException();
+        throw new NotImplementedException ();
 
-    public List<Node> CachedValidMoves
-    {
+    public List<Node> CachedValidMoves {
         get => cachedValidNodes;
         set => cachedValidNodes = value;
     }
 
-    public List<Piece> CachedPieces
-    {
-        get => cachedPieces;
+    public List<Piece> CachedPieces {
+        get => cachedPieces ?? GetBaseNodes ();
         set => cachedPieces = value;
     }
 
-    public TeamGenerator CurrentTeam
-    {
+    public TeamGenerator CurrentTeam {
         get =>
             currentTeam;
         set =>
@@ -218,39 +192,32 @@ public class CompPlayer : MonoBehaviour, IPlayer
     /// <param name="opponent">What opponent will this player face.</param>
     /// <returns>A newly created player. </returns>
     static TextMeshPro text;
-    public TextMeshPro SetupText
-    {
+    public TextMeshPro SetupText {
         get => text;
         set => text = value;
     }
     bool endTurn = false;
-    public bool EndTurn
-    {
+    public bool EndTurn {
         get =>
             endTurn;
         set =>
             endTurn = value;
     }
 
-    public static IPlayer CreatePlayer(Team team, TeamGenerator gen)
-    {
-        CompPlayer player = new GameObject($"Player {team} : Computer").AddComponent<CompPlayer>();
-        Canvas parent = FindObjectOfType<Canvas>();
-        player.SetupText = player.SetupText ?? new GameObject("Max Distance").AddComponent<TextMeshPro>();
+    public static IPlayer CreatePlayer (Team team, TeamGenerator gen) {
+        CompPlayer player = new GameObject ($"Player {team} : Computer").AddComponent<CompPlayer> ();
+        Canvas parent = FindObjectOfType<Canvas> ();
+        player.SetupText = player.SetupText ?? new GameObject ("Max Distance").AddComponent<TextMeshPro> ();
         player.SetupText.transform.parent = parent.transform;
         player.CurrentTeam = gen;
         return player;
     }
 
-
-
-    static float Value(Piece piece, Node[] targets)
-    {
+    static float Value (Piece piece, Node[] targets) {
         float maxDist = 0;
         if (targets == null) return maxDist;
-        foreach (Node target in targets)
-        {
-            float dist = Vector2.Distance(piece.CurrentPosition, target.CurrentBoardPosition);
+        foreach (Node target in targets) {
+            float dist = Vector2.Distance (piece.CurrentPosition, target.CurrentBoardPosition);
             maxDist += dist;
         }
 

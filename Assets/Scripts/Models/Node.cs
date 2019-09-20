@@ -49,6 +49,13 @@ public class Node {
         viewReference = newNode;
     }
 
+    public Node(Node origin){
+        if(origin == null) return;
+        boardPosition = origin.CurrentBoardPosition;
+        currentTeam = origin.BelongsTo;
+        storedPiece = origin.storedPiece != null ? new Piece(origin.StoredPiece) : origin.storedPiece;
+    }
+
     /// <summary>
     /// Updates the color and data contained within the Node with the new data inputed.
     /// </summary>

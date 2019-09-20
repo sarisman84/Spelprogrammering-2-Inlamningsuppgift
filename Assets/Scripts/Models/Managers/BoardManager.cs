@@ -25,23 +25,24 @@ namespace ChineseCheckers {
         }
         public int Length => board.Length;
 
-        public Board Copy () {
+        public Board Clone () {
             Board copy = new Board ();
             copy.board = new Node[board.GetLength (0), board.GetLength (1)];
             for (int y = 0; y < board.GetLength (0); y++) {
                 for (int x = 0; x < board.GetLength (1); x++) {
-                    copy.board[y, x] = board[y, x];
+                    copy.board[y, x] = new Node (board[y, x]);
                 }
             }
             return copy;
         }
+
+        public IEnumerator GetEnumerator () => board.GetEnumerator ();
 
     }
     public abstract class BoardManager {
 
         public static Board board;
 
-   
         /// <summary>
         /// Searches for any available nodes in the default board.
         /// </summary>
@@ -50,7 +51,8 @@ namespace ChineseCheckers {
         /// <returns>A list of valid moves.</returns>
         public static List<Node> Path (Node source, bool highlight) {
             List<Node> validMoves = new List<Node> ();
-            return GetPath (source, validMoves, highlight, true);
+            List<Node> results = GetPath (source, validMoves, highlight, true);
+            return results;
         }
         /// <summary>
         /// Searches for any avaliable nodes in a simulated board.
@@ -61,7 +63,8 @@ namespace ChineseCheckers {
         /// <returns>A list of valid moves.</returns>
         public static List<Node> Path (Node source, bool highlight, Node[, ] tempBoard) {
             List<Node> validMoves = new List<Node> ();
-            return GetPath (source, validMoves, highlight, true, tempBoard);
+            List<Node> results = GetPath (source, validMoves, highlight, true, tempBoard);
+            return results;
         }
 
         private static List<Node> GetPath (Node source, List<Node> validMoves, bool highlight, bool searchAllAvailablePaths) {
@@ -80,12 +83,16 @@ namespace ChineseCheckers {
                         validMoves.Add (potentialPath);
                         //Once you do the recursive call, add the found result back to the original list.
                         List<Node> newPath = GetPath (potentialPath, validMoves, highlight, false);
-                        validMoves.AddRange(newPath);
+                        foreach (var path in newPath) {
+                            if (validMoves.Any (p => p == path)) continue;
+                            validMoves.Add (path);
+                        }
                     }
                     continue;
 
                 }
                 //If the searchAllAvaliablePaths bool is true, allow it to search for any nodes with no piece in them in the said directons
+                if (validMoves.Any (p => p == node)) continue;
                 if (searchAllAvailablePaths) {
                     node.Object.HighlightNode (Color.cyan, highlight);
                     validMoves.Add (node);
@@ -96,7 +103,7 @@ namespace ChineseCheckers {
             return validMoves;
 
         }
-       
+
         //The method below practically does the same, just that it uses a simulated board to do its search.
         private static List<Node> GetPath (Node source, List<Node> validMoves, bool highlight, bool searchAllAvailablePaths, Node[, ] tempBoard) {
             for (int curDir = 0; curDir < 6; curDir++) {
@@ -137,7 +144,7 @@ namespace ChineseCheckers {
             Vector2Int pos = source.CurrentBoardPosition, boardDir = Node.DirectionInBoard (pos, index), newPos = pos + boardDir;
             if (OutOfBounds (newPos)) return null;
             Node potetialNode = GetNodeInBoardPos (newPos);
-            if (potetialNode.BelongsTo == Team.Empty || validMoves.Any (p => p == potetialNode)) return null;
+            if (potetialNode == null || potetialNode.BelongsTo == Team.Empty || validMoves.Any (p => p == potetialNode)) return null;
 
             //potetialNode.HighlightNode(Color.cyan, highlight);
             return potetialNode;
@@ -172,7 +179,6 @@ namespace ChineseCheckers {
             return (newPos.x > board.GetLength (0) - 1 || newPos.y > board.GetLength (1) - 1 || newPos.x <= 0 || newPos.y <= 0);
         }
 
-
         /// <summary>
         /// Helper method that checks if he inputed value in the simulated board is out of bounds.
         /// </summary>
@@ -192,7 +198,7 @@ namespace ChineseCheckers {
         private static Node GetNodeInBoardPos (Vector2Int pos) {
             return board[pos.x, pos.y];
         }
-        
+
         /// <summary>
         /// A shortcut to get a node in the simulated board position.
         /// </summary>

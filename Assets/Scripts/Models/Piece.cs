@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using ChineseCheckers;
 using UnityEngine;
 
 [System.Serializable]
@@ -12,7 +13,7 @@ public class Piece {
         get => currentNode.CurrentBoardPosition;
     }
 
-    public Node NodeReference{
+    public Node NodeReference {
         set => currentNode = value;
         get => currentNode;
     }
@@ -29,17 +30,39 @@ public class Piece {
     #region Global Methods
     public static void MovePiece (Piece selectedPiece, Node current, Node destination) {
         //if (selectedPiece == null || current == null || destination == null) return;
-        //Debug.Log ($"Moving {selectedPiece} from {current} to {destination}");
+        Debug.Log ($"Moving {selectedPiece} from {current} to {destination}");
         current.StoredPiece = null;
+        // Debug.Log (current.StoredPiece);
+        // UnityEditor.EditorApplication.isPaused = true;
         selectedPiece.Object.transform.position = destination.Object.transform.position;
         destination.StoredPiece = selectedPiece;
         selectedPiece.NodeReference = destination;
 
     }
 
+    public static void SimulateMovePiece (Node current, Node destination) {
+        Debug.Log ($"Current: {current}, Destination {destination}");
+        foreach (Node node in BoardManager.board) {
+            if (node == current || node == destination) {
+                Debug.LogError ($"Duplicate found");
+            }
+        }
+        destination.StoredPiece = current.StoredPiece;
+        current.StoredPiece = null;
+
+    }
+
+    public static void SimulateMovePiece (Board customBoard, Vector2Int startPos, Vector2Int endPos) {
+        customBoard[endPos.x, endPos.y] = customBoard[startPos.x, startPos.y];
+        customBoard[startPos.x, startPos.y] = null;
+    }
+
     public static void SimulatingMovePiece (Piece selectedPiece, Node current, Node destination) {
         current.StoredPiece = null;
         //selectedPiece.Object.transform.position = destination.Object.transform.position;
+        // Debug.Log (current.StoredPiece);
+        // UnityEditor.EditorApplication.isPaused = true;
+        //Debug.Log ($"Moving {selectedPiece} from {current} to {destination}");
         destination.StoredPiece = selectedPiece;
         selectedPiece.NodeReference = destination;
     }
@@ -51,6 +74,12 @@ public class Piece {
         newPiece.Properties.BelongsTo = team;
         newPiece.Properties.NodeReference = node;
         viewReference = newPiece;
+
+    }
+
+    public Piece (Piece origin) {
+        currentTeam = origin.currentTeam;
+        currentNode = origin.currentNode;
 
     }
     #endregion
