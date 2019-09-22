@@ -67,7 +67,7 @@ public class CompPlayer : MonoBehaviour, IPlayer {
         if (depth == 0) return listOfSims;
 
         if (!maximizingPlayer) {
-            Board testingBoard = currentBoard.Clone ();
+            Node[,] testingBoard = currentBoard.Clone ();
             List<Piece> pieceList = new List<Piece> ();
             SimulatePieces (currentPlayer, testingBoard, pieceList);
             SimulateMoves (currentPlayer, currentBoard, listOfSims, pieceList);
@@ -86,7 +86,7 @@ public class CompPlayer : MonoBehaviour, IPlayer {
         }
         if (maximizingPlayer) {
             if(currentBoard == null) return listOfSims;
-            Board testingBoard = currentBoard.Clone ();
+            Node[,] testingBoard = currentBoard.Clone ();
             List<Piece> pieceList = new List<Piece> ();
             SimulatePieces (currentPlayer.CurrentOpponent, testingBoard, pieceList);
             SimulateMoves (currentPlayer.CurrentOpponent, currentBoard, listOfSims, pieceList);
@@ -109,9 +109,9 @@ public class CompPlayer : MonoBehaviour, IPlayer {
 
     }
 
-    private static void SimulatePieces (IPlayer currentPlayer, Board testingBoard, List<Piece> pieceList) {
+    private static void SimulatePieces (IPlayer currentPlayer, Node[,] testingBoard, List<Piece> pieceList) {
         foreach (Node board in testingBoard) {
-            if (board.StoredPiece != null && board.BelongsTo == currentPlayer.CurrentTeam.Team) {
+            if (board != null && board.StoredPiece != null && board.BelongsTo == currentPlayer.CurrentTeam.Team) {
                 pieceList.Add (board.StoredPiece);
             }
         }
@@ -120,14 +120,17 @@ public class CompPlayer : MonoBehaviour, IPlayer {
     private static void SimulateMoves (IPlayer currentPlayer, Board currentBoard, List<Board> listOfSims, List<Piece> pieceList) {
         foreach (var piece in pieceList) {
             foreach (var node in BoardManager.Path (piece.NodeReference, false)) {
-                Board simulatedBoard = currentBoard.Clone ();
+                Board newBoard = new Board();
+                Node[,] simulatedBoard = currentBoard.Clone ();
+                
                 //Make move via coords on simulated board.
                 Vector2Int startPos = piece.CurrentPosition;
-                Vector2Int endPos = node.CurrentBoardPosition;
+                Vector2Int endPos = node.CurrentPosition;
                 Piece.SimulateMovePiece (currentBoard, startPos, endPos);
                 float eval = Value (piece, currentPlayer.CurrentOpponent.CurrentTeam.TeamBase);
-                simulatedBoard.value = eval;
-                listOfSims.Add (simulatedBoard);
+                newBoard.value = eval;
+                newBoard.board = simulatedBoard;
+                listOfSims.Add (newBoard);
             }
         }
 
@@ -217,7 +220,7 @@ public class CompPlayer : MonoBehaviour, IPlayer {
         float maxDist = 0;
         if (targets == null) return maxDist;
         foreach (Node target in targets) {
-            float dist = Vector2.Distance (piece.CurrentPosition, target.CurrentBoardPosition);
+            float dist = Vector2.Distance (piece.CurrentPosition, target.CurrentPosition);
             maxDist += dist;
         }
 

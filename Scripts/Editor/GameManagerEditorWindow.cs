@@ -25,12 +25,12 @@ public class GameManagerEditorWindow : ExtendedEditorWindow
         EditorGUILayout.Space();
         if (GUILayout.Button("Add new Element"))
         {
-            manager.Add();
+            //manager.Add();
             serializedObject.Update();
         }
         if (GUILayout.Button("Remove latest Element"))
         {
-            manager.Remove();
+            //manager.Remove();
             serializedObject.Update();
         }
         EditorGUILayout.EndVertical();

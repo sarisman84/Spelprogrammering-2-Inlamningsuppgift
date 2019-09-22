@@ -58,9 +58,9 @@ public class PlayerMatchup {
             teams[t].Team = (Team) (t);
             // Debug.Log($"{(Team)(t)} at {t} using {t}");
             List<Node> nodeList = new List<Node> ();
-            for (int y = 0; y < BoardManager.board.GetLength (0); y++) {
-                for (int x = 0; x < BoardManager.board.GetLength (1); x++) {
-                    Node node = BoardManager.board[y, x];
+            for (int y = 0; y < BoardManager.originalBoard.GetLength (0); y++) {
+                for (int x = 0; x < BoardManager.originalBoard.GetLength (1); x++) {
+                    Node node = BoardManager.originalBoard[y, x];
                     if (gameMode.matches.Length == 2) {
                         node.BelongsTo = (node.BelongsTo == Team.BigRed || node.BelongsTo == Team.BigRedToOrange || node.BelongsTo == Team.BigMagentaToRed) ? Team.Red : node.BelongsTo;
                         node.BelongsTo = (node.BelongsTo == Team.BigBlue || node.BelongsTo == Team.BigGreenToBlue || node.BelongsTo == Team.BigBlueToYellow) ? Team.Blue : node.BelongsTo;

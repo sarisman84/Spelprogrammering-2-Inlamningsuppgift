@@ -49,7 +49,24 @@ namespace ChineseCheckers {
                     xPos = x - y / 2;
                      board[y, x] = new Node (prefab, $"Node:{y},{x}", SetPosition (new Vector2Int (xPos, y)), blueprint[y, x], parent);
                     // Node.CreateNode (prefab, blueprint[y, x], parent);
-                    board[y, x].CurrentBoardPosition = new Vector2Int (y, x);
+                    board[y, x].CurrentPosition = new Vector2Int (y, x);
+
+                }
+
+            }
+            return board;
+        }
+
+        public static Node[,] CreateGridArray(int[, ] blueprint, NodeObject prefab){
+            Transform parent = new GameObject ($"{prefab.name}'s list ").transform;
+            Node[,] board = new Node[blueprint.GetLength (0), blueprint.GetLength (1)];
+            int xPos;
+            for (int y = 0; y < blueprint.GetLength (0); y++) {
+                for (int x = 0; x < blueprint.GetLength (1); x++) {
+                    xPos = x - y / 2;
+                     board[y, x] = new Node (prefab, $"Node:{y},{x}", SetPosition (new Vector2Int (xPos, y)), blueprint[y, x], parent);
+                    // Node.CreateNode (prefab, blueprint[y, x], parent);
+                    board[y, x].CurrentPosition = new Vector2Int (y, x);
 
                 }
 
