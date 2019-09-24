@@ -9,6 +9,6 @@ public class ComputerPlayer : UserModel
     }
     public override void OnTurnTaken()
     {
-        throw new System.NotImplementedException();
+        
     }
 }

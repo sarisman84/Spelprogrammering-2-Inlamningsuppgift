@@ -14,7 +14,24 @@ public class HumanPlayer : UserModel
     public HumanPlayer(Team team)
     {
         currentTeam = team;
+
+        Team opponent = GetOpponent(currentTeam);
+        opponentsBase = new List<Vector2Int>();
+        foreach (Node node in originalBoard.boardArray)
+        {
+            if (node.belongsTo == opponent)
+                opponentsBase.Add(node.currentPosition);
+
+        }
+
     }
+
+    
+
+
+
+    [SerializeField] Piece selectedPiece;
+    [SerializeField] Node selectedNode;
     public override void OnTurnTaken()
     {
 
@@ -28,9 +45,12 @@ public class HumanPlayer : UserModel
             NodeObject foundNode = hit2D.collider.GetComponent<NodeObject>();
             if (foundNode != null)
             {
-                GetSelectedPiece(foundNode);
+
                 GetTarget(foundNode);
-                MovePiece(this.selectedPiece, this.selectedNode);
+                GetSelectedPiece(foundNode);
+                MovePiece();
+
+
 
             }
 
@@ -41,25 +61,31 @@ public class HumanPlayer : UserModel
 
     }
 
-    private void MovePiece(Piece selectedPiece, Node selectedNode)
+    private void MovePiece()
     {
-        if (this.selectedPiece == null || this.selectedNode == null) return;
+        if (selectedPiece == null || selectedNode == null) return;
 
-        PieceObject pieceToMove = originalBoard.GetVisualPiece(this.selectedPiece.currentPosition);
-        //Model move
-        originalBoard.RemovePieceAt(this.selectedPiece.currentPosition);
-        this.selectedPiece.currentPosition = this.selectedNode.currentPosition;
-        originalBoard.InsertPieceAt(this.selectedNode.currentPosition, this.selectedPiece);
-
-        //View move
-        pieceToMove.transform.position = this.selectedNode.worldPosition;
-        pieceToMove.boardCoordinate = this.selectedNode.currentPosition;
-        originalBoard.RemovePieceViewAt(pieceToMove.boardCoordinate);
-        originalBoard.InsertPieceViewAt(this.selectedNode.currentPosition, pieceToMove);
-        selectedPiece = null;
-        this.selectedPiece = null;
+        Piece pieceToMove = selectedPiece;
+        Node target = selectedNode;
+        this.playerPieces.Remove(selectedPiece);
+        PieceObject pieceViewToMove = originalBoard.GetVisualPiece(pieceToMove.currentPosition);
         selectedNode = null;
-        this.selectedNode = null;
+        selectedPiece = null;
+
+
+        //Update pieceArray
+        originalBoard.RemovePieceAt(pieceToMove.currentPosition);
+        pieceToMove.currentPosition = target.currentPosition;
+        originalBoard.InsertPieceAt(pieceToMove.currentPosition, pieceToMove);
+        this.playerPieces.Add(pieceToMove);
+        Debug.Log($"Selected Piece:{pieceToMove.currentPosition}|Selected Target:{target.currentPosition}");
+
+        //Update Visuals
+        originalBoard.RemovePieceViewAt(pieceViewToMove.currentBoardPosition);
+        pieceViewToMove.currentBoardPosition = target.currentPosition;
+        pieceViewToMove.transform.position = target.worldPosition;
+        originalBoard.InsertPieceViewAt(pieceViewToMove.currentBoardPosition, pieceViewToMove);
+
         ResetPath();
     }
 
@@ -82,27 +108,20 @@ public class HumanPlayer : UserModel
     List<Node> path;
     private void GetSelectedPiece(NodeObject foundNode)
     {
-        Node node = FromBoard(foundNode);
+
         //find a piece within said node that is of the same team and store it.
         //Reset any previous paths recorded.
         ResetPath();
-        foreach (Piece piece in this.playerPieces)
-        {
 
-            if (piece.currentPosition == node.currentPosition)
-            {
-                this.selectedPiece = piece;
-                break;
-            }
-
-        }
-        if (this.selectedPiece != null)
-        {
-            path = GetPath(BoardModel.originalBoard.GetNode(this.selectedPiece.currentPosition), new List<Node>(), true, this);
-
-        }
-
+        selectedPiece = (selectedNode != null) ? selectedPiece : originalBoard.GetPiece(foundNode.boardCoordinate);
         if (selectedPiece == null) return;
+
+
+        path = GetPath(BoardModel.originalBoard.GetNode(this.selectedPiece.currentPosition), new List<Node>(), true, this);
+
+
+
+
 
     }
 
@@ -125,6 +144,7 @@ public class HumanPlayer : UserModel
 
     private static Node FromBoard(Piece foundNode)
     {
+        if (foundNode == null) return null;
         return originalBoard.GetNode(foundNode.currentPosition);
     }
 

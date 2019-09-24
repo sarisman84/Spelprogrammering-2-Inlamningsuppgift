@@ -36,6 +36,8 @@ public class PieceObject : MonoBehaviour
             case PieceColor.Blue: _renderer.color = CustomColor("#000099"); break;
 
             case PieceColor.Magenta: _renderer.color = CustomColor("#660066"); break;
+
+            case PieceColor.Unoccupied: _renderer.color = Color.gray; break;
         }
     }
 

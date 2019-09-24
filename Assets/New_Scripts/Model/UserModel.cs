@@ -8,22 +8,21 @@ using static BoardModel;
 public enum Team { None, Unoccupied, Red, Orange, Yellow, Green, Blue, Magenta, BigRed, BigGreen = 11 }
 public abstract class UserModel : MonoBehaviour
 {
-    [SerializeField] protected Piece selectedPiece;
-    [SerializeField] protected Node selectedNode;
+
     public Team currentTeam;
     public List<Piece> playerPieces;
 
-    protected bool hasTurnEnded;
+    public List<Vector2Int> opponentsBase;
 
 
     public abstract void OnTurnTaken();
 
+    public bool HasWon => opponentsBase.All(pos => originalBoard.pieceArray[pos.x, pos.y].belongsTo == currentTeam);
 
     protected List<Node> GetPath(Node source, List<Node> savedResults, bool searchForGeneralMoves, UserModel owner)
     {
         for (int curDir = 0; curDir < 6; curDir++)
         {
-            if (owner.currentTeam != source.belongsTo) continue;
             Node potentialNode = GetValidMove(source, savedResults, curDir);
             if (potentialNode == null) continue;
             if (originalBoard.GetPiece(potentialNode.currentPosition) != null)
@@ -106,5 +105,35 @@ public abstract class UserModel : MonoBehaviour
                 return new Vector2Int(1, 0);//Bottom Left
         }
         return Vector2Int.zero;
+    }
+
+
+
+
+    protected Team GetOpponent(Team currentTeam)
+    {
+        switch (currentTeam)
+        {
+
+            case Team.Red:
+                return Team.Green;
+
+            case Team.Orange:
+                return Team.Blue;
+
+            case Team.Yellow:
+                return Team.Magenta;
+
+            case Team.Green:
+                return Team.Red;
+
+            case Team.Blue:
+                return Team.Orange;
+
+            case Team.Magenta:
+                return Team.Yellow;
+
+        }
+        return currentTeam;
     }
 }

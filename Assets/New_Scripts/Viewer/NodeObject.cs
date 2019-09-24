@@ -36,7 +36,7 @@ public class NodeObject : MonoBehaviour
         newNode.boardCoordinate = boardCoord;
         newNode.childRenderer = newNode.transform.GetChild(0).gameObject.GetComponentInChildren<SpriteRenderer>();
         newNode.evenCounter = newNode.GetComponentInChildren<TMP_Text>();
-        newNode.evenCounter.text = $"{newNode.boardCoordinate.x % 2}";
+        newNode.evenCounter.text = $"{newNode.boardCoordinate}";
         return newNode;
 
     }
@@ -136,7 +136,6 @@ public class NodeObject : MonoBehaviour
 
             default:
                 col2D.enabled = false;
-
                 break;
         }
     }

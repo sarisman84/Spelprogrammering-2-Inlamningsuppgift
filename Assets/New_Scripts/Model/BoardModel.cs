@@ -15,7 +15,7 @@ public enum NodeColor
 
 public enum PieceColor
 {
-    Red = 2, Orange, Yellow, Green, Blue, Magenta
+    Red = 2, Orange, Yellow, Green, Blue, Magenta, Unoccupied = 1
 }
 
 
