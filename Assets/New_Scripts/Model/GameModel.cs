@@ -1,97 +1,81 @@
-
-using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using static BoardModel;
-public class GameModel
-{
+public class GameModel {
 
-    public static List<UserModel> StartNewGame(List<Player> desiredPlayers, PieceObject prefab)
-    {
+    public static List<UserModel> StartNewGame (List<Player> desiredPlayers, PieceObject prefab) {
 
         //Create nessesary pieces
         //Create nessesarry players
 
         //Return said players and somehow store the pieces
 
+        List<UserModel> players = new List<UserModel> ();
 
-
-        List<UserModel> players = new List<UserModel>();
-
-        foreach (Node node in originalBoard.boardArray)
-        {
-            if (desiredPlayers.Count == 2)
-            {
-                if (node.belongsTo == Team.BigRed)
-                {
+        foreach (Node node in originalBoard.boardArray) {
+            if (desiredPlayers.Count == 2) {
+                if (node.belongsTo == Team.BigRed) {
                     originalBoard.boardArray[node.currentPosition.x, node.currentPosition.y].belongsTo = Team.Red;
                 }
-                if (node.belongsTo == Team.BigGreen)
-                {
+                if (node.belongsTo == Team.BigGreen) {
                     originalBoard.boardArray[node.currentPosition.x, node.currentPosition.y].belongsTo = Team.Green;
                 }
             }
         }
 
-        for (int i = 0; i < desiredPlayers.Count; i++)
-        {
-
+        for (int i = 0; i < desiredPlayers.Count; i++) {
 
             UserModel model = null;
-            model = NewPlayer(desiredPlayers, i);
+            model = UserModel.CreatePlayer (desiredPlayers[i].isComputer, desiredPlayers[i].player);
 
-            foreach (var node in originalBoard.boardArray)
-            {
+            foreach (var node in originalBoard.boardArray) {
 
-                if (node.belongsTo == model.currentTeam)
-                {
+                if (node.belongsTo == model.currentTeam) {
 
-                    Piece newPiece = new Piece(node.currentPosition, node.belongsTo);
-                    model.playerPieces.Add(newPiece);
+                    Piece newPiece = new Piece (node.currentPosition, node.belongsTo);
+                    model.playerPieces.Add (newPiece);
                     int xPos = node.currentPosition.y - node.currentPosition.x / 2;
                     Vector2 objectPos = node.worldPosition;
-                    originalBoard.pieceViewArray[node.currentPosition.x, node.currentPosition.y] = PieceObject.CreatePieceObject(prefab, objectPos, (PieceColor)newPiece.belongsTo, model.transform, newPiece.currentPosition);
+                    originalBoard.pieceViewArray[node.currentPosition.x, node.currentPosition.y] = PieceObject.CreatePieceObject (prefab, objectPos, (PieceColor) newPiece.belongsTo, model.transform, newPiece.currentPosition);
                     originalBoard.pieceArray[node.currentPosition.x, node.currentPosition.y] = newPiece;
                 }
 
             }
 
-            players.Add(model);
+            players.Add (model);
         }
         return players;
     }
 
+    public static IEnumerator GameRuntime (List<UserModel> players) {
+        players[0].OnTurnTaken ();
+        while (true) {
+            switch (players[0]) {
 
-    public static IEnumerator GameRuntime(List<UserModel> players)
-    {
-        while (true)
-        {
-            foreach (var player in players)
-            {
-                player.OnTurnTaken();
+                case HumanPlayer human:
+                    human.OnTurnTaken ();
+                    break;
             }
             yield return null;
         }
 
-
     }
-    private static UserModel NewPlayer(List<Player> desiredPlayers, int i)
-    {
+    private static UserModel NewPlayer (List<Player> desiredPlayers, int i) {
         UserModel model = null;
-        switch (desiredPlayers[i].isComputer)
-        {
+        switch (desiredPlayers[i].isComputer) {
 
             case true:
-                model = new GameObject($"Player {desiredPlayers[i].player}").AddComponent<ComputerPlayer>();
+                model = new GameObject ($"Player {desiredPlayers[i].player}").AddComponent<ComputerPlayer> ();
                 break;
 
             case false:
-                model = new GameObject($"Player {desiredPlayers[i].player}").AddComponent<HumanPlayer>();
+                model = new GameObject ($"Player {desiredPlayers[i].player}").AddComponent<HumanPlayer> ();
                 break;
         }
-        model.playerPieces = new List<Piece>();
+        model.playerPieces = new List<Piece> ();
         model.currentTeam = desiredPlayers[i].player;
 
         return model;

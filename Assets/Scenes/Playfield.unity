@@ -447,6 +447,7 @@ MonoBehaviour:
     - player: 2
       isComputer: 0
   dropdown: {fileID: 1088513422}
+  test: 0a000000040000000600000002000000
 --- !u!4 &268089206
 Transform:
   m_ObjectHideFlags: 0

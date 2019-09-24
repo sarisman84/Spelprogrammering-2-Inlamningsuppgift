@@ -35,28 +35,11 @@ public class BoardModel
 
         public float value;
 
-        public Board Clone()
-        {
-            Board clone = new Board();
-            clone.boardArray = new Node[boardArray.GetLength(0), boardArray.GetLength(1)];
-            for (int x = 0; x < boardArray.GetLength(0); x++)
-            {
-                for (int y = 0; y < boardArray.GetLength(1); y++)
-                {
-                    Node newNode = new Node(boardArray[x, y].currentPosition, boardArray[x, y].worldPosition, boardArray[x, y].belongsTo);
-                    clone.boardArray[x, y] = newNode;
-                }
-            }
-            clone.pieceArray = new Piece[pieceArray.GetLength(0), pieceArray.GetLength(1)];
-            for (int x = 0; x < pieceArray.GetLength(0); x++)
-            {
-                for (int y = 0; y < pieceArray.GetLength(1); y++)
-                {
-                    Piece newPiece = new Piece(pieceArray[x, y].currentPosition, pieceArray[x, y].belongsTo);
-                    clone.pieceArray[x, y] = newPiece;
-                }
-            }
-            return clone;
+        public Board CreateSimulation(){
+            Board newBoard = new Board();
+            newBoard.pieceArray = this.pieceArray;
+            newBoard.boardArray = this.boardArray;
+            return newBoard;
         }
 
         public Node GetNode(Vector2Int pos) => boardArray[pos.x, pos.y];
