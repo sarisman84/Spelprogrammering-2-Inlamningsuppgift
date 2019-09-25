@@ -18,10 +18,10 @@ public class GameModel {
         foreach (Node node in originalBoard.boardArray) {
             if (desiredPlayers.Count == 2) {
                 if (node.belongsTo == Team.BigRed) {
-                    originalBoard.boardArray[node.currentPosition.x, node.currentPosition.y].belongsTo = Team.Red;
+                    originalBoard.boardArray[node.pos.x, node.pos.y].belongsTo = Team.Red;
                 }
                 if (node.belongsTo == Team.BigGreen) {
-                    originalBoard.boardArray[node.currentPosition.x, node.currentPosition.y].belongsTo = Team.Green;
+                    originalBoard.boardArray[node.pos.x, node.pos.y].belongsTo = Team.Green;
                 }
             }
         }
@@ -35,12 +35,12 @@ public class GameModel {
 
                 if (node.belongsTo == model.currentTeam) {
 
-                    Piece newPiece = new Piece (node.currentPosition, node.belongsTo);
+                    Piece newPiece = new Piece (node.pos, node.belongsTo);
                     model.playerPieces.Add (newPiece);
-                    int xPos = node.currentPosition.y - node.currentPosition.x / 2;
-                    Vector2 objectPos = node.worldPosition;
-                    originalBoard.pieceViewArray[node.currentPosition.x, node.currentPosition.y] = PieceObject.CreatePieceObject (prefab, objectPos, (PieceColor) newPiece.belongsTo, model.transform, newPiece.currentPosition);
-                    originalBoard.pieceArray[node.currentPosition.x, node.currentPosition.y] = newPiece;
+                    int xPos = node.pos.y - node.pos.x / 2;
+                    Vector2 objectPos = node.worldPos;
+                    originalBoard.pieceViewArray[node.pos.x, node.pos.y] = PieceObject.CreatePieceObject (prefab, objectPos, (PieceColor) newPiece.belongsTo, model.transform, newPiece.pos);
+                    originalBoard.pieceArray[node.pos.x, node.pos.y] = newPiece;
                 }
 
             }
@@ -52,15 +52,16 @@ public class GameModel {
 
     public static IEnumerator GameRuntime (List<UserModel> players) {
         players[0].OnTurnTaken ();
-        while (true) {
-            switch (players[0]) {
+        // while (true) {
+        //     switch (players[0]) {
 
-                case HumanPlayer human:
-                    human.OnTurnTaken ();
-                    break;
-            }
-            yield return null;
-        }
+        //         case HumanPlayer human:
+        //             human.OnTurnTaken ();
+        //             break;
+        //     }
+        //     yield return null;
+        // }
+        yield return null;
 
     }
     private static UserModel NewPlayer (List<Player> desiredPlayers, int i) {

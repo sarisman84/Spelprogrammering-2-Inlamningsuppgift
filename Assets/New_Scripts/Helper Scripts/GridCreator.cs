@@ -68,7 +68,7 @@ namespace GridCreator
                     SetPosition(new Vector2Int(x, xPos) -
                     new Vector2(newBoard.boardArray.GetLength(0) / centerPointX, newBoard.boardArray.GetLength(1) / centerPointY));
                     newBoard.boardArray[x, y] = new Node(new Vector2Int(x, y), objectPos, currentTeam);
-                    newBoard.boardViewArray[x, y] = NodeObject.CreateNodeObject(prefab, objectPos, (NodeColor)blueprint[x, y], parent, newBoard.boardArray[x, y].currentPosition);
+                    newBoard.boardViewArray[x, y] = NodeObject.CreateNodeObject(prefab, objectPos, (NodeColor)blueprint[x, y], parent, newBoard.boardArray[x, y].pos);
                 }
             }
 

@@ -35,7 +35,7 @@ public class GameManagercs : MonoBehaviour {
     public List<GameMode> mode;
 
     public TMPro.TMP_Dropdown dropdown;
-    List<UserModel> allPlayers;
+    public static List<UserModel> allPlayers;
 
     public List<int> test;
 

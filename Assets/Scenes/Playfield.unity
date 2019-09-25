@@ -401,8 +401,6 @@ MonoBehaviour:
     type: 3}
   piecePrefab: {fileID: 1448278462493905753, guid: 8ff400f6a82be8240bc2a1fb4e93a647,
     type: 3}
-  board:
-    value: 0
   mode:
   - modeName: Two Players
     ammOfPlayers:
@@ -445,6 +443,8 @@ MonoBehaviour:
   - modeName: Debug
     ammOfPlayers:
     - player: 2
+      isComputer: 1
+    - player: 5
       isComputer: 0
   dropdown: {fileID: 1088513422}
   test: 0a000000040000000600000002000000

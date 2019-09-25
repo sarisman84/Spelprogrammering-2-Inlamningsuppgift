@@ -6,6 +6,7 @@ public class ComputerPlayer : UserModel {
 
     [SerializeField] List<Board> savedResults = new List<Board> ();
     public override void OnTurnTaken () {
+        #region  OldCode
         // Board resultedBoard = Minimax (originalBoard, savedResults, 2, playerPieces, true);
         // Highlight (resultedBoard);
         // Vector2Int target = Vector2Int.zero;
@@ -19,6 +20,16 @@ public class ComputerPlayer : UserModel {
 
         // MovePiece (originalBoard.GetPiece (piecePos), originalBoard.GetNode (target));
         // Debug.Log (resultedBoard.value);
+        #endregion
+
+        Turn test = Minimax (new Turn (), this, UserModel.GetOpponent (this), 2, false);
+     
+        originalBoard.GetVisualNode (test.movedPiece.pos).OnInteract ("#ff00ff");
+        originalBoard.GetVisualNode (test.target.pos).OnInteract ("#00ccff");
+
+        Piece selectedPiece = originalBoard.GetPiece(test.movedPiece.pos);
+        Node selectedTarget = originalBoard.GetNode(test.target.pos);
+        MovePiece(selectedPiece, selectedTarget);
     }
 
     // private void Highlight (Board resultedBoard) {
@@ -28,7 +39,8 @@ public class ComputerPlayer : UserModel {
     //     }
     // }
 
-    Board Minimax (Board currentBoard, List<Board> savedResults, int depth, List<Piece> ownedPieces, bool minimizingPlayer) {
+    Turn Minimax (Turn t, UserModel player, UserModel otherPlayer, int depth, bool minimizingPlayer) {
+        #region OldCode
 
         // if (depth == 0) return savedResults[0];
 
@@ -89,31 +101,24 @@ public class ComputerPlayer : UserModel {
         // }
         // GnomeSort (savedResults);
         // return savedResults[0];
-        return null;
+        #endregion
+
+        if (depth == 0) { return t; }
+
+        if (minimizingPlayer) {
+            List<Turn> mainResults = t.Expand (player, originalBoard);
+            if (mainResults.Count == 0) return t;
+            GnomeSort (mainResults);
+            return Minimax (mainResults[0], player, otherPlayer, depth - 1, false);
+        }
+        List<Turn> results = t.Expand (otherPlayer, originalBoard);
+        if (results.Count == 0) return t;
+        GnomeSort (results);
+        return Minimax (results[results.Count - 1], player, otherPlayer, depth - 1, true);
+
     }
 
     //Taken from https://rosettacode.org/wiki/Sorting_algorithms/Gnome_sort#C.23
-    private void GnomeSort (List<Board> savedResults) {
-        int first = 1;
-        int second = 2;
-
-        while (first < savedResults.Count) {
-
-            if (savedResults[first - 1].value <= savedResults[first].value) {
-                first = second;
-                second++;
-            } else {
-                Board temp = savedResults[first - 1];
-                savedResults[first - 1] = savedResults[first];
-                savedResults[first] = temp;
-                first -= 1;
-                if (first == 0) {
-                    first = 1;
-                    second = 2;
-                }
-            }
-        }
-    }
 
     public static void GnomeSort<S> (List<S> aList) where S : IComparable {
         int first = 1;
@@ -134,17 +139,6 @@ public class ComputerPlayer : UserModel {
                 }
             }
         }
-    }
-
-    float Evaluate (Vector2Int startPos, List<Vector2Int> endPos) {
-        float maxDis = float.MinValue;
-        foreach (Vector2Int pos in endPos) {
-            if (originalBoard.pieceArray[pos.x, pos.y] != null && originalBoard.pieceArray[pos.x, pos.y].belongsTo == currentTeam) continue;
-            float dis = Vector2Int.Distance (startPos, pos);
-            if (dis > maxDis)
-                maxDis = dis;
-        }
-        return maxDis;
     }
 
 }

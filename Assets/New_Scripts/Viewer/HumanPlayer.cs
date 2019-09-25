@@ -16,7 +16,7 @@ public class HumanPlayer : UserModel {
         opponentsBase = new List<Vector2Int> ();
         foreach (Node node in originalBoard.boardArray) {
             if (node.belongsTo == opponent)
-                opponentsBase.Add (node.currentPosition);
+                opponentsBase.Add (node.pos);
 
         }
 
@@ -66,7 +66,7 @@ public class HumanPlayer : UserModel {
         selectedPiece = (selectedNode != null) ? selectedPiece : originalBoard.GetPiece (foundNode.boardCoordinate);
         if (selectedPiece == null) return;
 
-        path = GetPath (BoardModel.originalBoard.GetNode (this.selectedPiece.currentPosition), new List<Node> (), true);
+        path = GetPath (BoardModel.originalBoard.GetNode (this.selectedPiece.pos), new List<Node> (), true, true);
 
     }
 
@@ -76,7 +76,7 @@ public class HumanPlayer : UserModel {
 
     private static Node FromBoard (Piece foundNode) {
         if (foundNode == null) return null;
-        return originalBoard.GetNode (foundNode.currentPosition);
+        return originalBoard.GetNode (foundNode.pos);
     }
 
 }

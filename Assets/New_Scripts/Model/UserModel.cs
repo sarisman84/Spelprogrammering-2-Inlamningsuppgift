@@ -13,23 +13,22 @@ public abstract class UserModel : MonoBehaviour {
 
     public List<Vector2Int> opponentsBase;
 
-   
-
     public abstract void OnTurnTaken ();
 
     public bool HasWon => opponentsBase.All (pos => originalBoard.pieceArray[pos.x, pos.y].belongsTo == currentTeam);
 
-    protected List<Node> GetPath (Node source, List<Node> savedResults, bool searchForGeneralMoves) {
+    public List<Node> GetPath (Node source, List<Node> savedResults, bool searchForGeneralMoves, bool highlight) {
         for (int curDir = 0; curDir < 6; curDir++) {
             Node potentialNode = GetValidMove (source, savedResults, curDir);
             if (potentialNode == null) continue;
-            if (originalBoard.GetPiece (potentialNode.currentPosition) != null) {
+            if (originalBoard.GetPiece (potentialNode.pos) != null) {
                 Node newSource = GetValidMove (potentialNode, savedResults, curDir);
                 if (newSource == null) continue;
-                if (originalBoard.GetPiece (newSource.currentPosition) == null) {
+                if (originalBoard.GetPiece (newSource.pos) == null) {
                     savedResults.Add (newSource);
-                    originalBoard.boardViewArray[newSource.currentPosition.x, newSource.currentPosition.y].OnInteract ("#ffcc99");
-                    List<Node> newResults = GetPath (newSource, savedResults, false);
+                    if (highlight)
+                        originalBoard.boardViewArray[newSource.pos.x, newSource.pos.y].OnInteract ("#ffcc99");
+                    List<Node> newResults = GetPath (newSource, savedResults, false, highlight);
                     savedResults.AddRange (newResults);
 
                 }
@@ -37,7 +36,8 @@ public abstract class UserModel : MonoBehaviour {
             }
             if (searchForGeneralMoves) {
                 savedResults.Add (potentialNode);
-                originalBoard.boardViewArray[potentialNode.currentPosition.x, potentialNode.currentPosition.y].OnInteract ("#ffcc99");
+                if (highlight)
+                    originalBoard.boardViewArray[potentialNode.pos.x, potentialNode.pos.y].OnInteract ("#ffcc99");
             }
 
         }
@@ -46,8 +46,8 @@ public abstract class UserModel : MonoBehaviour {
     }
 
     Node GetValidMove (Node source, List<Node> savedResults, int index) {
-        if (source == null || OutOfBounds (source.currentPosition)) return null;
-        Vector2Int boardDir = source.currentPosition + BoardDirection (source.currentPosition, index);
+        if (source == null || OutOfBounds (source.pos)) return null;
+        Vector2Int boardDir = source.pos + BoardDirection (source.pos, index);
         if (OutOfBounds (boardDir)) return null;
         Node foundNode = BoardModel.originalBoard.GetNode (boardDir);
         if (foundNode == source || foundNode.belongsTo == Team.None || savedResults.Any (p => p == foundNode)) return null;
@@ -99,7 +99,7 @@ public abstract class UserModel : MonoBehaviour {
             computer.playerPieces = new List<Piece> ();
             foreach (Node node in originalBoard.boardArray) {
                 if (node.belongsTo == compOpponent)
-                    computer.opponentsBase.Add (node.currentPosition);
+                    computer.opponentsBase.Add (node.pos);
 
             }
             Debug.Log (computer.opponentsBase.Count);
@@ -113,11 +113,43 @@ public abstract class UserModel : MonoBehaviour {
         human.playerPieces = new List<Piece> ();
         foreach (Node node in originalBoard.boardArray) {
             if (node.belongsTo == humanOpponent)
-                human.opponentsBase.Add (node.currentPosition);
+                human.opponentsBase.Add (node.pos);
 
         }
         return human;
 
+    }
+
+    public static UserModel GetOpponent (UserModel currentPlayer) {
+        foreach (var player in GameManagercs.allPlayers) {
+            switch (currentPlayer.currentTeam) {
+
+                case Team.Red:
+                    if (player.currentTeam == Team.Green) return player;
+                    break;
+
+                case Team.Orange:
+                    if (player.currentTeam == Team.Blue) return player;
+                    break;
+
+                case Team.Yellow:
+                    if (player.currentTeam == Team.Magenta) return player;
+                    break;
+
+                case Team.Green:
+                    if (player.currentTeam == Team.Red) return player;
+                    break;
+
+                case Team.Blue:
+                    if (player.currentTeam == Team.Orange) return player;
+                    break;
+
+                case Team.Magenta:
+                    if (player.currentTeam == Team.Yellow) return player;
+                    break;
+            }
+        }
+        return null;
     }
 
     protected void MovePiece (ref Piece selectedPiece, ref Node selectedNode, ref List<Node> path) {
@@ -126,20 +158,20 @@ public abstract class UserModel : MonoBehaviour {
         Piece pieceToMove = selectedPiece;
         Node target = selectedNode;
         this.playerPieces.Remove (selectedPiece);
-        PieceObject pieceViewToMove = originalBoard.GetVisualPiece (pieceToMove.currentPosition);
+        PieceObject pieceViewToMove = originalBoard.GetVisualPiece (pieceToMove.pos);
         selectedNode = null;
         selectedPiece = null;
 
         //Update pieceArray
-        originalBoard.RemovePieceAt (pieceToMove.currentPosition);
-        pieceToMove.currentPosition = target.currentPosition;
-        originalBoard.InsertPieceAt (pieceToMove.currentPosition, pieceToMove);
+        originalBoard.RemovePieceAt (pieceToMove.pos);
+        pieceToMove.pos = target.pos;
+        originalBoard.InsertPieceAt (pieceToMove.pos, pieceToMove);
         this.playerPieces.Add (pieceToMove);
 
         //Update Visuals
         originalBoard.RemovePieceViewAt (pieceViewToMove.currentBoardPosition);
-        pieceViewToMove.currentBoardPosition = target.currentPosition;
-        pieceViewToMove.transform.position = target.worldPosition;
+        pieceViewToMove.currentBoardPosition = target.pos;
+        pieceViewToMove.transform.position = target.worldPos;
         originalBoard.InsertPieceViewAt (pieceViewToMove.currentBoardPosition, pieceViewToMove);
 
         ResetPath (ref path);
@@ -152,28 +184,37 @@ public abstract class UserModel : MonoBehaviour {
         Piece pieceToMove = selectedPiece;
         Node target = selectedNode;
         this.playerPieces.Remove (selectedPiece);
-        PieceObject pieceViewToMove = originalBoard.GetVisualPiece (pieceToMove.currentPosition);
+        PieceObject pieceViewToMove = originalBoard.GetVisualPiece (pieceToMove.pos);
         selectedNode = null;
         selectedPiece = null;
 
         //Update pieceArray
-        originalBoard.RemovePieceAt (pieceToMove.currentPosition);
-        pieceToMove.currentPosition = target.currentPosition;
-        originalBoard.InsertPieceAt (pieceToMove.currentPosition, pieceToMove);
+        originalBoard.RemovePieceAt (pieceToMove.pos);
+        pieceToMove.pos = target.pos;
+        originalBoard.InsertPieceAt (pieceToMove.pos, pieceToMove);
         this.playerPieces.Add (pieceToMove);
 
         //Update Visuals
         originalBoard.RemovePieceViewAt (pieceViewToMove.currentBoardPosition);
-        pieceViewToMove.currentBoardPosition = target.currentPosition;
-        pieceViewToMove.transform.position = target.worldPosition;
+        pieceViewToMove.currentBoardPosition = target.pos;
+        pieceViewToMove.transform.position = target.worldPos;
         originalBoard.InsertPieceViewAt (pieceViewToMove.currentBoardPosition, pieceViewToMove);
+
+    }
+
+    public void SimulateMove (ref Piece selectedPiece, ref Node selectedNode, ref Board simulatedBoard) {
+        if (selectedPiece == null || selectedNode == null) return;
+
+        //Update pieceArray
+        simulatedBoard.RemovePieceAt (selectedPiece.pos);
+        simulatedBoard.InsertPieceAt (selectedPiece.pos, selectedPiece);
 
     }
 
     protected void ResetPath (ref List<Node> path) {
         if (path != null) {
             foreach (Node nodeObj in path) {
-                originalBoard.boardViewArray[nodeObj.currentPosition.x, nodeObj.currentPosition.y].OnInteract ();
+                originalBoard.boardViewArray[nodeObj.pos.x, nodeObj.pos.y].OnInteract ();
             }
             path.Clear ();
         }
