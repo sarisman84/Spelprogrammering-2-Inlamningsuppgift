@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static BoardModel;
-public class ComputerPlayer : UserModel {
+public class ComputerPlayer : UserModel
+{
 
-    [SerializeField] List<Board> savedResults = new List<Board> ();
-    public override void OnTurnTaken () {
+    [SerializeField] List<Board> savedResults = new List<Board>();
+    public override void OnTurnTaken(ref int index)
+    {
         #region  OldCode
         // Board resultedBoard = Minimax (originalBoard, savedResults, 2, playerPieces, true);
         // Highlight (resultedBoard);
@@ -22,14 +24,14 @@ public class ComputerPlayer : UserModel {
         // Debug.Log (resultedBoard.value);
         #endregion
 
-        Turn test = Minimax (new Turn (), this, UserModel.GetOpponent (this), 2, false);
-     
-        originalBoard.GetVisualNode (test.movedPiece.pos).OnInteract ("#ff00ff");
-        originalBoard.GetVisualNode (test.target.pos).OnInteract ("#00ccff");
+        Turn test = Minimax(new Turn(), this, UserModel.GetOpponent(this), 2, true);
 
-        Piece selectedPiece = originalBoard.GetPiece(test.movedPiece.pos);
-        Node selectedTarget = originalBoard.GetNode(test.target.pos);
+
+
+        Piece selectedPiece = originalBoard.GetPiece(test.movedPiece);
+        Node selectedTarget = originalBoard.GetNode(test.target);
         MovePiece(selectedPiece, selectedTarget);
+        index++;
     }
 
     // private void Highlight (Board resultedBoard) {
@@ -39,101 +41,87 @@ public class ComputerPlayer : UserModel {
     //     }
     // }
 
-    Turn Minimax (Turn t, UserModel player, UserModel otherPlayer, int depth, bool minimizingPlayer) {
-        #region OldCode
+    Turn Minimax(Turn t, UserModel player, UserModel otherPlayer, int depth, bool minimizingPlayer)
+    {
 
-        // if (depth == 0) return savedResults[0];
-
-        // if (minimizingPlayer) {
-
-        //     foreach (Piece piece in ownedPieces) {
-        //         foreach (Node validNode in GetPath (currentBoard.GetNode (piece.currentPosition), new List<Node> (), true)) {
-        //             //Create a simulation of a board.
-        //             Board simulatedBoard = currentBoard.CreateSimulation ();
-        //             //Get the proper references for both piece and node from the simulated board.
-        //             Piece simulatedPiece = simulatedBoard.GetPiece (piece.currentPosition);
-        //             Node simulatedNode = simulatedBoard.GetNode (validNode.currentPosition);
-
-        //             //Do a movement logic on the simulated board.
-        //             simulatedBoard.RemovePieceAt (simulatedPiece.currentPosition);
-        //             simulatedPiece.currentPosition = simulatedNode.currentPosition;
-        //             simulatedBoard.InsertPieceAt (simulatedPiece.currentPosition, simulatedPiece);
-
-        //             //Evaluate the current position of the piece.
-        //             float eval = Evaluate (simulatedPiece.currentPosition, this.opponentsBase);
-        //             simulatedBoard.value = eval;
-
-        //             //Add the simulated board to a list of boards.
-        //             savedResults.Add (simulatedBoard);
-        //         }
-        //     }
-        //     //Sort list.
-        //     GnomeSort (savedResults);
-        //     savedResults.Add (Minimax (savedResults[savedResults.Count - 1], savedResults, depth - 1, ownedPieces, false));
-
-        // }
-
-        // if (!minimizingPlayer) {
-        //     foreach (Piece piece in ownedPieces) {
-        //         foreach (Node validNode in GetPath (currentBoard.GetNode (piece.currentPosition), new List<Node> (), true)) {
-        //             //Create a simulation of a board.
-        //             Board simulatedBoard = currentBoard.CreateSimulation ();
-        //             //Get the proper references for both piece and node from the simulated board.
-        //             Piece simulatedPiece = simulatedBoard.GetPiece (piece.currentPosition);
-        //             Node simulatedNode = simulatedBoard.GetNode (validNode.currentPosition);
-
-        //             //Do a movement logic on the simulated board.
-        //             simulatedBoard.RemovePieceAt (simulatedPiece.currentPosition);
-        //             simulatedPiece.currentPosition = simulatedNode.currentPosition;
-        //             simulatedBoard.InsertPieceAt (simulatedPiece.currentPosition, simulatedPiece);
-
-        //             //Evaluate the current position of the piece.
-        //             float eval = Evaluate (simulatedPiece.currentPosition, this.opponentsBase);
-        //             simulatedBoard.value = eval;
-
-        //             //Add the simulated board to a list of boards.
-        //             savedResults.Add (simulatedBoard);
-        //         }
-        //     }
-        //     //Sort list.
-        //     GnomeSort (savedResults);
-        //     savedResults.Add (Minimax (savedResults[0], savedResults, depth - 1, ownedPieces, true));
-        // }
-        // GnomeSort (savedResults);
-        // return savedResults[0];
-        #endregion
 
         if (depth == 0) { return t; }
 
-        if (minimizingPlayer) {
-            List<Turn> mainResults = t.Expand (player, originalBoard);
+        if (minimizingPlayer)
+        {
+            List<Turn> mainResults = t.Expand(player, originalBoard);
             if (mainResults.Count == 0) return t;
-            GnomeSort (mainResults);
-            return Minimax (mainResults[0], player, otherPlayer, depth - 1, false);
-        }
-        List<Turn> results = t.Expand (otherPlayer, originalBoard);
-        if (results.Count == 0) return t;
-        GnomeSort (results);
-        return Minimax (results[results.Count - 1], player, otherPlayer, depth - 1, true);
+            GnomeSort(mainResults);
 
+            return Minimax(mainResults[0], player, otherPlayer, depth - 1, false);
+        }
+        List<Turn> results = t.Expand(otherPlayer, originalBoard);
+        if (results.Count == 0) return t;
+        GnomeSort(results);
+
+        return Minimax(results[results.Count - 1], player, otherPlayer, depth - 1, true);
+
+    }
+
+
+
+    Turn Minimax(Turn t, UserModel player, UserModel otherPlayer, int depth, float alpha, float beta, bool minimizingPlayer)
+    {
+        if (depth == 0) return t;
+        List<Turn> results;
+        Turn nextPontetialTurn = null;
+        if (minimizingPlayer)
+        {
+            results = t.Expand(player, originalBoard);
+            if (results.Count == 0) return t;
+            float minEval = float.MaxValue;
+            foreach (Turn turn in results)
+            {
+                float eval = turn.Value;
+                nextPontetialTurn = (minEval > eval) ? turn : nextPontetialTurn;
+                minEval = (minEval > eval) ? eval : minEval;
+                beta = (beta > eval) ? eval : beta;
+                if (beta <= alpha) break;
+
+            }
+            return Minimax(nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, false);
+        }
+        results = t.Expand(otherPlayer, originalBoard);
+        if (results.Count == 0) return t;
+        float maxEval = float.MinValue;
+        foreach (Turn turn in results)
+        {
+            float eval = turn.Value;
+            nextPontetialTurn = (maxEval < eval) ? turn : nextPontetialTurn;
+            maxEval = (maxEval < eval) ? eval : maxEval;
+            alpha = (alpha < eval) ? eval : alpha;
+            if (beta <= alpha) break;
+        }
+        return Minimax(nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, true);
     }
 
     //Taken from https://rosettacode.org/wiki/Sorting_algorithms/Gnome_sort#C.23
 
-    public static void GnomeSort<S> (List<S> aList) where S : IComparable {
+    public static void GnomeSort<S>(List<S> aList) where S : IComparable
+    {
         int first = 1;
         int second = 2;
 
-        while (first < aList.Count) {
-            if (aList[first - 1].CompareTo (aList[first]) <= 0) {
+        while (first < aList.Count)
+        {
+            if (aList[first - 1].CompareTo(aList[first]) <= 0)
+            {
                 first = second;
                 second++;
-            } else {
+            }
+            else
+            {
                 S temp = aList[first - 1];
                 aList[first - 1] = aList[first];
                 aList[first] = temp;
                 first -= 1;
-                if (first == 0) {
+                if (first == 0)
+                {
                     first = 1;
                     second = 2;
                 }

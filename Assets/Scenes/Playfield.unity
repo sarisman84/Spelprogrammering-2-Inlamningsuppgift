@@ -429,23 +429,23 @@ MonoBehaviour:
   - modeName: Six Players
     ammOfPlayers:
     - player: 2
-      isComputer: 0
+      isComputer: 1
     - player: 3
-      isComputer: 0
+      isComputer: 1
     - player: 4
-      isComputer: 0
+      isComputer: 1
     - player: 5
-      isComputer: 0
+      isComputer: 1
     - player: 6
-      isComputer: 0
+      isComputer: 1
     - player: 7
-      isComputer: 0
+      isComputer: 1
   - modeName: Debug
     ammOfPlayers:
     - player: 2
       isComputer: 1
     - player: 5
-      isComputer: 0
+      isComputer: 1
   dropdown: {fileID: 1088513422}
   test: 0a000000040000000600000002000000
 --- !u!4 &268089206
