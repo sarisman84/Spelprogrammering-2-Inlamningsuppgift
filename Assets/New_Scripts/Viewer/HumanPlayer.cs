@@ -15,12 +15,12 @@ public class HumanPlayer : UserModel
 
     [SerializeField] Piece selectedPiece;
     [SerializeField] Node selectedNode;
-    public override void OnTurnTaken(ref int index)
+    public override int OnTurnTaken(ref int index)
     {
 
         Vector2 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
         hit2D = Physics2D.Raycast(mousePos, cam.transform.forward);
-        if (hit2D.collider == null) return;
+        if (hit2D.collider == null) return index;
         if (Input.GetMouseButtonDown(0))
         {
             NodeObject foundNode = hit2D.collider.GetComponent<NodeObject>();
@@ -35,7 +35,7 @@ public class HumanPlayer : UserModel
 
         }
         if (Input.GetKeyDown(KeyCode.Tab)) index++;
-
+        return index;
     }
 
     private void GetTarget(NodeObject foundNode)
