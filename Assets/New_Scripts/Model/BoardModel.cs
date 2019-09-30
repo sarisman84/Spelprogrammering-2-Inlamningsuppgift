@@ -65,6 +65,12 @@ public class BoardModel
             }
         }
 
+        public void ResetPieceArray(){
+            pieceArray = new Piece[boardArray.GetLength(0), boardArray.GetLength(1)];
+        }
+        public void ResetPieceViewArray(){
+            pieceViewArray = new PieceObject[boardArray.GetLength(0), boardArray.GetLength(1)];
+        }
         public NodeObject[,] boardViewArray;
         public PieceObject[,] pieceViewArray;
 
@@ -183,4 +189,5 @@ public class Piece
 
     [SerializeField] public Vector2Int pos;
     [SerializeField] public Team belongsTo;
+    [SerializeField] public UnityEngine.Vector2 worldPos;
 }

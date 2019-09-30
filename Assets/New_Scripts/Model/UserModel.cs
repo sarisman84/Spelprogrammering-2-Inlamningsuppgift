@@ -291,6 +291,7 @@ public abstract class UserModel : MonoBehaviour
         //Update pieceArray
         originalBoard.RemovePieceAt(pieceToMove.pos);
         pieceToMove.pos = target.pos;
+        pieceToMove.worldPos = target.worldPos;
         originalBoard.InsertPieceAt(pieceToMove.pos, pieceToMove);
         this.playerPieces.Add(pieceToMove);
 
