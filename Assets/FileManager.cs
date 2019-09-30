@@ -16,27 +16,29 @@ public class FileManager : MonoBehaviour
     string textFilePath = @"Assets\Resources\saveFile.text";
     public void SaveCurrentGame()
     {
-        string savedGameState = "";
 
-        //Create a new Directory
-        currDir = currDir ?? new DirectoryInfo(@"Assets\Resources");
+        DataHandler.Save();
+        // string savedGameState = "";
 
-        //Save the data needed to a string format.
+        // //Create a new Directory
+        // currDir = currDir ?? new DirectoryInfo(@"Assets\Resources");
 
-        savedGameState = SaveState(savedGameState);
+        // //Save the data needed to a string format.
 
-        Debug.Log(savedGameState);
+        // savedGameState = SaveState(savedGameState);
 
-        if (File.Exists(textFilePath))
-        {
-            File.Delete(textFilePath);
-        }
-        using (FileStream fs = File.Create(textFilePath))
-        {
-            byte[] rsByteArr = Encoding.Default.GetBytes(savedGameState);
-            fs.Write(rsByteArr, 0, rsByteArr.Length);
+        // Debug.Log(savedGameState);
 
-        }
+        // if (File.Exists(textFilePath))
+        // {
+        //     File.Delete(textFilePath);
+        // }
+        // using (FileStream fs = File.Create(textFilePath))
+        // {
+        //     byte[] rsByteArr = Encoding.Default.GetBytes(savedGameState);
+        //     fs.Write(rsByteArr, 0, rsByteArr.Length);
+
+        // }
 
 
 
@@ -60,37 +62,39 @@ public class FileManager : MonoBehaviour
     public void LoadLatestGame()
     {
         //Loads Game
-        string foundData = "";
-        currDir = currDir ?? new DirectoryInfo(@"Assets\Resources");
-        using (FileStream fs = File.Open(textFilePath, FileMode.Open))
-        {
-            byte[] loadedByteArr = new byte[fs.Length];
 
-            for (int i = 0; i < fs.Length; i++)
-            {
-                loadedByteArr[i] = (byte)fs.ReadByte();
-            }
-            foundData = Encoding.Default.GetString(loadedByteArr);
-        }
+        DataHandler.Load();
+        // string foundData = "";
+        // currDir = currDir ?? new DirectoryInfo(@"Assets\Resources");
+        // using (FileStream fs = File.Open(textFilePath, FileMode.Open))
+        // {
+        //     byte[] loadedByteArr = new byte[fs.Length];
 
-        string modePattern = @"\d{1}";
-        Match mode = Regex.Match(foundData, modePattern);
+        //     for (int i = 0; i < fs.Length; i++)
+        //     {
+        //         loadedByteArr[i] = (byte)fs.ReadByte();
+        //     }
+        //     foundData = Encoding.Default.GetString(loadedByteArr);
+        // }
+
+        // string modePattern = @"\d{1}";
+        // Match mode = Regex.Match(foundData, modePattern);
 
 
-        GameManagercs.allPlayers = GameModel.StartNewGame(GetComponent<GameManagercs>().mode[int.Parse(mode.Value)].ammOfPlayers, GetComponent<GameManagercs>().piecePrefab);
+        // GameManagercs.allPlayers = GameModel.StartNewGame(GetComponent<GameManagercs>().mode[int.Parse(mode.Value)].ammOfPlayers, GetComponent<GameManagercs>().piecePrefab);
 
-        string coordinatePattern = @"\D\d\D\d\D\d";
+        // string coordinatePattern = @"\D\d\D\d\D\d";
 
-        MatchCollection result = Regex.Matches(foundData, coordinatePattern);
-        foreach (var value in result)
-        {
-            int xPos = int.Parse(new String(Regex.Match(value.ToString(), @"X\d").ToString().Where(Char.IsDigit).ToArray()));
+        // MatchCollection result = Regex.Matches(foundData, coordinatePattern);
+        // foreach (var value in result)
+        // {
+        //     int xPos = int.Parse(new String(Regex.Match(value.ToString(), @"X\d").ToString().Where(Char.IsDigit).ToArray()));
 
-            int yPos = int.Parse(new String(Regex.Match(value.ToString(), @"Y\d").ToString().Where(Char.IsDigit).ToArray()));
+        //     int yPos = int.Parse(new String(Regex.Match(value.ToString(), @"Y\d").ToString().Where(Char.IsDigit).ToArray()));
 
-            int team = int.Parse(new String(Regex.Match(value.ToString(), @"T\d").ToString().Where(Char.IsDigit).ToArray()));
-            Debug.Log($"Owned by: {(Team)team}. Lies in:({xPos},{yPos})");
-        }
+        //     int team = int.Parse(new String(Regex.Match(value.ToString(), @"T\d").ToString().Where(Char.IsDigit).ToArray()));
+        //     Debug.Log($"Owned by: {(Team)team}. Lies in:({xPos},{yPos})");
+        // }
 
 
 

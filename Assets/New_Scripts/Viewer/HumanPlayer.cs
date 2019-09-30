@@ -17,7 +17,7 @@ public class HumanPlayer : UserModel
     [SerializeField] Node selectedNode;
     public override int OnTurnTaken(ref int index)
     {
-
+        
         Vector2 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
         hit2D = Physics2D.Raycast(mousePos, cam.transform.forward);
         if (hit2D.collider == null) return index;
@@ -35,6 +35,7 @@ public class HumanPlayer : UserModel
 
         }
         if (Input.GetKeyDown(KeyCode.Tab)) index++;
+
         return index;
     }
 

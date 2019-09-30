@@ -8,6 +8,8 @@ public class ComputerPlayer : UserModel {
 
     UserModel opponent;
     public override int OnTurnTaken (ref int index) {
+        GameModel.isReady = false;
+
         opponent = opponent ?? UserModel.GetOpponent (this);
         #region  OldCode
         // Board resultedBoard = Minimax (originalBoard, savedResults, 2, playerPieces, true);
@@ -31,6 +33,7 @@ public class ComputerPlayer : UserModel {
         Node selectedTarget = originalBoard.GetNode (test.target);
         MovePiece (selectedPiece, selectedTarget);
         index++;
+        GameModel.isReady = true;
         return index;
     }
 
@@ -74,7 +77,7 @@ public class ComputerPlayer : UserModel {
                 alpha = Mathf.Max (alpha, eval);
                 if (beta <= alpha) break;
             }
-            Debug.Log (otherPlayer.currentTeam);
+            //Debug.Log (otherPlayer.currentTeam);
             nextPontetialTurn = results.Find (p => p.Value == maxEval);
             return Minimax (nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, true);
         }
@@ -88,7 +91,7 @@ public class ComputerPlayer : UserModel {
             if (beta <= alpha) break;
 
         }
-        Debug.Log (player.currentTeam);
+        //Debug.Log (player.currentTeam);
         nextPontetialTurn = results.Find (p => p.Value == minEval);
         return Minimax (nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, false);
     }
