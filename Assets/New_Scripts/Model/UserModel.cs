@@ -16,7 +16,8 @@ public abstract class UserModel : MonoBehaviour
 
     public Vector2Int opponentGoal;
 
-    public abstract int OnTurnTaken(ref int index);
+
+
 
     public bool HasWon => (opponentsBase != null) ? opponentsBase.All(pos => originalBoard.pieceArray[pos.x, pos.y] != null && originalBoard.pieceArray[pos.x, pos.y].belongsTo == currentTeam) : false;
 

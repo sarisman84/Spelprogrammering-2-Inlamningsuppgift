@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 using static BoardModel;
+using UnityEngine.UI;
 namespace GridCreator
 {
 
@@ -46,7 +48,7 @@ namespace GridCreator
         }
         public static Board CreateHexagonGrid(int[,] blueprint, NodeObject prefab)
         {
-            Transform parent = new GameObject($"{prefab.name}'s list.").transform;
+            Transform parent = CreateCanvas($"{prefab.name}'s list.");
             Board newBoard = new Board();
             newBoard.boardArray = new Node[blueprint.GetLength(0), blueprint.GetLength(1)];
             newBoard.pieceArray = new Piece[blueprint.GetLength(0), blueprint.GetLength(1)];
@@ -73,6 +75,15 @@ namespace GridCreator
             }
 
             return newBoard;
+        }
+
+        private static Transform CreateCanvas(string v)
+        {
+            GameObject parent = new GameObject(v);
+            Canvas canvas = parent.AddComponent<Canvas>();
+            CanvasScaler scaler = parent.GetComponent<RectTransform>().gameObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            return parent.transform;
         }
     }
 
