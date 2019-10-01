@@ -43,20 +43,28 @@ public class BoardModel {
         public Node[, ] boardArray;
         public Piece[, ] pieceArray;
 
-        public Board SimulateABoard {
-            get {
-                Board newBoard = new Board ();
-                newBoard.boardArray = new Node[boardArray.GetLength (0), boardArray.GetLength (1)];
-                newBoard.pieceArray = new Piece[pieceArray.GetLength (0), pieceArray.GetLength (1)];
-                for (int x = 0; x < boardArray.GetLength (0); x++) {
-                    for (int y = 0; y < boardArray.GetLength (1); y++) {
-                        newBoard.boardArray[x, y] = new Node (boardArray[x, y].pos, boardArray[x, y].worldPos, boardArray[x, y].belongsTo);
-                        newBoard.pieceArray[x, y] = (pieceArray[x, y] != null) ? new Piece (pieceArray[x, y].pos, pieceArray[x, y].belongsTo) : null;
-                    }
-                }
+        int boardSizeX, boardSizeY;
 
-                return newBoard;
+        public Vector2Int GetLength {
+            get {
+                if (boardSizeX == 0) boardSizeX = boardArray.GetLength (0);
+                if (boardSizeY == 0) boardSizeY = boardArray.GetLength (1);
+
+                return new Vector2Int (boardSizeX, boardSizeY);
             }
+        }
+
+        public Piece[, ] GetSimulateABoard () {
+
+            Piece[, ] newPieceArray = new Piece[GetLength.x, GetLength.y];
+            for (int x = 0; x < boardArray.GetLength (0); x++) {
+                for (int y = 0; y < boardArray.GetLength (1); y++) {
+                    Piece piece = pieceArray[x, y];
+                    newPieceArray[x, y] = (piece != null) ? new Piece (piece.pos, piece.belongsTo) : null;
+                }
+            }
+
+            return newPieceArray;
         }
 
         public void ResetPieceArray () {
@@ -102,8 +110,8 @@ public class BoardModel {
                     Debug.Log (user.currentTeam);
                     Piece newPiece = new Piece (pieceData);
                     user.playerPieces.Add (newPiece);
-                    pieceViewArray[newPiece.pos.x, newPiece.pos.y] = PieceObject.CreatePieceObject (prefab, newPiece.worldPos, (PieceColor) newPiece.belongsTo, user.transform, newPiece.pos);
-                    pieceArray[newPiece.pos.x, newPiece.pos.y] = newPiece;
+                    pieceViewArray[newPiece.x, newPiece.y] = PieceObject.CreatePieceObject (prefab, newPiece.worldPos, (PieceColor) newPiece.belongsTo, user.transform, newPiece.pos);
+                    pieceArray[newPiece.x, newPiece.y] = newPiece;
                 }
             }
 
@@ -133,15 +141,20 @@ public class BoardModel {
 
         public List<Turn> Expand (UserModel model, Board currentBoard) {
             List<Turn> output = new List<Turn> ();
-            foreach (Piece piece in model.playerPieces) {
-                foreach (Node node in model.GetPath (currentBoard.GetNode (piece.pos), new List<Node> (), true, false)) {
-                    Board simulatedBoard = currentBoard.SimulateABoard;
-                    Piece simPiece = simulatedBoard.GetPiece (piece.pos);
-                    Node simNode = simulatedBoard
+            for (int i = 0; i < model.playerPieces.Count; i++) {
+                Piece piece = model.playerPieces[i];
+                List<Node> list = model.GetPath (currentBoard.GetNode (piece.pos), new List<Node> (), true, false);
+                for (int i1 = 0; i1 < list.Count; i1++) {
+                    Node node = list[i1];
+                    Piece[, ] simulatedBoard = currentBoard.GetSimulateABoard ();
+                    Piece simPiece = simulatedBoard[piece.x, piece.y];
+                    Node simNode = originalBoard
                         .GetNode (node.pos);
                     Vector2Int oldPos = simPiece.pos;
-                    model.SimulateMove (ref simPiece, ref simNode, ref simulatedBoard);
-                    float eval = EvaluateState (model, simulatedBoard);
+                    Board newBoard = new Board ();
+                    newBoard.pieceArray = simulatedBoard;
+                    model.SimulateMove (simPiece, simNode, newBoard);
+                    float eval = EvaluateState (model, newBoard);
 
                     Turn turn = new Turn (oldPos, simNode.pos, eval);
                     output.Add (turn);
@@ -172,15 +185,15 @@ public class Node {
         this.worldPos = worldPos;
     }
 
-    [SerializeField] public Vector2Int pos = Vector2Int.zero;
-    [SerializeField] public UnityEngine.Vector2 worldPos = UnityEngine.Vector2.zero;
-    [SerializeField] public Team belongsTo;
+    public Vector2Int pos;
+    public UnityEngine.Vector2 worldPos;
+    public Team belongsTo;
 }
 
 [System.Serializable]
 public class Piece {
-    public Piece (Vector2Int pos, Team currentTeam) {
-        this.pos = pos;
+    public Piece (Vector2Int _pos, Team currentTeam) {
+        pos = _pos;
         belongsTo = currentTeam;
     }
 
@@ -190,7 +203,27 @@ public class Piece {
         belongsTo = data.belongsTo;
     }
 
-    [SerializeField] public Vector2Int pos;
-    [SerializeField] public Team belongsTo;
-    [SerializeField] public UnityEngine.Vector2 worldPos;
+    // public Vector2Int pos;
+    public Vector2Int pos {
+        get {
+            return new Vector2Int (x, y);
+        }
+        set {
+            x = value.x;
+            y = value.y;
+        }
+    }
+
+    public int x, y;
+    public Team belongsTo;
+    public UnityEngine.Vector2 worldPos {
+        get {
+            return new UnityEngine.Vector2 (wX, wY);
+        }
+        set {
+            wX = value.x;
+            wY = value.y;
+        }
+    }
+    public float wX, wY;
 }

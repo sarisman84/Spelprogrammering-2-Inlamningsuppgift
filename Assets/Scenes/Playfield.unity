@@ -444,7 +444,7 @@ MonoBehaviour:
   - modeName: Debug
     ammOfPlayers:
     - player: 2
-      isComputer: 1
+      isComputer: 0
     - player: 5
       isComputer: 1
   dropdown: {fileID: 1088513422}

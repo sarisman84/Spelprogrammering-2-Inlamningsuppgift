@@ -32,27 +32,44 @@ public class GameManagercs : MonoBehaviour {
 
     public static GameManagercs instance;
 
-    
     public List<GameMode> mode;
 
     public TMPro.TMP_Dropdown dropdown;
 
     public static int selectedMode;
     public static List<UserModel> allPlayers;
+    public static bool isReady = false;
 
     public void StartGame () {
         allPlayers = GameModel.StartNewGame (mode[dropdown.value].ammOfPlayers, piecePrefab);
         selectedMode = dropdown.value;
-        StartCoroutine (GameModel.GameRuntime (allPlayers));
+        isReady = true;
+
     }
 
     private void Awake () {
-        if(instance != null){
-            Destroy(gameObject);
+        if (instance != null) {
+            Destroy (gameObject);
             return;
         }
         instance = this;
         BoardModel.originalBoard = GridCreator.ChineseCheckers.CreateHexagonGrid (blueprint, nodePrefab);
+    }
+
+    private void Update () {
+
+        if (isReady) {
+            TurnStarted ();
+            GameModel.GetNextTurn (allPlayers);
+        }
+    }
+
+    public void TurnEnded () {
+        isReady = true;
+    }
+
+    public void TurnStarted () {
+        isReady = false;
     }
 }
 
