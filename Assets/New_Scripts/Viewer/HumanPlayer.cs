@@ -1,11 +1,10 @@
-using System.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static TestBoardModel;
 
-public class HumanPlayer : UserModel
-{
+public class HumanPlayer : UserModel {
     #region OldCode
     // RaycastHit2D hit2D;
     // Camera cam;
@@ -95,12 +94,10 @@ public class HumanPlayer : UserModel
 
     #endregion
 
-
     RaycastHit2D detection;
     Camera cam;
 
-    private void OnEnable()
-    {
+    private void OnEnable () {
         cam = Camera.main;
     }
 
@@ -108,106 +105,92 @@ public class HumanPlayer : UserModel
     NodeObject storedObject;
     Vector2Int target;
     bool hasntDoneFirstMove = true;
-    public List<TestPiece> ownedPieces = new List<TestPiece>();
+    public List<TestPiece> ownedPieces = new List<TestPiece> ();
 
-    public List<PieceObject> visualOwnedPieces = new List<PieceObject>();
-    private void Update()
-    {
-        if (!Input.GetMouseButtonDown(0)) return;
-        Vector2 mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
-        detection = Physics2D.Raycast(mousePos, cam.transform.forward);
+    public List<PieceObject> visualOwnedPieces = new List<PieceObject> ();
+
+    //Obligatory Raycast Update loop.
+    private void Update () {
+        if (!Input.GetMouseButtonDown (0)) return;
+        Vector2 mousePos = cam.ScreenToWorldPoint (Input.mousePosition);
+        detection = Physics2D.Raycast (mousePos, cam.transform.forward);
         if (detection.collider == null) return;
-        OnInteraction(detection.collider.GetComponent<NodeObject>());
+        OnInteraction (detection.collider.GetComponent<NodeObject> ());
 
     }
 
-    List<Vector2Int> results = new List<Vector2Int>();
+    List<Vector2Int> results = new List<Vector2Int> ();
 
     public override List<TestPiece> OwnedPieces { get => ownedPieces; set => ownedPieces = value; }
     public override List<PieceObject> VisualOwnedPieces { get => visualOwnedPieces; set => visualOwnedPieces = value; }
 
-    void OnInteraction(NodeObject node)
-    {
+    //This method handles the interaction between the raycast information and the piece search and movement logic.
+    void OnInteraction (NodeObject node) {
         #region Reset
-        if (storedObject != null)
-        {
-            storedObject.OnInteract();
+        if (storedObject != null) {
+            storedObject.OnInteract ();
         }
 
-        if (results != null || results.Count != 0)
-        {
-            ResetSelection();
+        if (results != null || results.Count != 0) {
+            ResetSelection ();
 
         }
         #endregion
 
-
         if (node == null) return;
-        if (ConfirmTarget(node, results))
-        {
+        //If the node is confirmed to be a target, move the stored piece to it.
+        if (ConfirmTarget (node, results)) {
 
             target = node.boardCoordinate;
-            MovePiece(currentPiece, target);
-            results.Clear();
-            //currentPiece = target;
+            MovePiece (currentPiece, target, visualOwnedPieces, ref hasntDoneFirstMove);
+            results.Clear ();
+
         }
-        if (!ConfirmingPiece(node, TestBoardModel.globalPieceList)) return;
+        //If the piece is not confirmed to be a valid piece, return the method.
+        if (!ConfirmingPiece (node, TestBoardModel.globalPieceList)) return;
+
+        //This section checks for the current Piece. If the hasntDoneFirstMOve is equal to false, always return the target as its new piece. Otherwise, Confirm if the found node is indeed a piece.
         storedObject = node;
-        currentPiece = (ConfirmingPiece(node, TestBoardModel.globalPieceList)) ? node.boardCoordinate : currentPiece;
-        storedObject.OnInteract("#00ff00");
-        results = PathOfMoves(node.boardCoordinate, new List<Vector2Int>(), hasntDoneFirstMove);
-        HighlightSelection();
+        currentPiece = (!hasntDoneFirstMove) ? target : (ConfirmingPiece (node, TestBoardModel.globalPieceList)) ? node.boardCoordinate : currentPiece;
+
+        if(globalPieceList.Any(p => p.pos == currentPiece && p.belongsTo != currentTeam)) return;
+        storedObject.OnInteract ("#00ff00");
+
+    //If the hasntDoneFIrstMove is equal to false, use the target as a baseline for searching for any available paths. Otherwise, use the found node as a baseline for searching any available paths.
+        if (!hasntDoneFirstMove) {
+            results = PathOfMoves (target, new List<Vector2Int> (), hasntDoneFirstMove);
+            HighlightSelection ();
+            return;
+        }
+        results = PathOfMoves (node.boardCoordinate, new List<Vector2Int> (), hasntDoneFirstMove);
+        HighlightSelection ();
     }
 
-    private void MovePiece(Vector2Int currentPiece, Vector2Int target)
-    {
-        int globalI = globalPieceList.FindIndex(0, p => p.pos == currentPiece);
-        TestPiece piece = new TestPiece();
+    //Highlights the list of nodes with a color.
+    private void HighlightSelection () {
 
-        int i = visualOwnedPieces.FindIndex(0, p => p.boardCoordinate == currentPiece);
-
-        piece.pos = target;
-        piece.worldPos = TestBoardModel.test_OriginalBoard[target.x, target.y].worldPos;
-
-        visualOwnedPieces[i].transform.position = piece.worldPos;
-        visualOwnedPieces[i].boardCoordinate = piece.pos;
-
-        globalPieceList[globalI] = piece;
-
-
-        currentPiece = target;
-        hasntDoneFirstMove = false;
-
-    }
-
-    private void HighlightSelection()
-    {
-
-        for (int i = 0; i < results.Count; i++)
-        {
-            NodeObject obj = globalNodeViewList.Find(p => p.boardCoordinate == results[i]);
-            obj.OnInteract("#00ffff");
+        for (int i = 0; i < results.Count; i++) {
+            NodeObject obj = globalNodeViewList.Find (p => p.boardCoordinate == results[i]);
+            obj.OnInteract ("#00ffff");
         }
     }
 
-    private void ResetSelection()
-    {
-        for (int i = 0; i < results.Count; i++)
-        {
-            NodeObject obj = globalNodeViewList.Find(p => p.boardCoordinate == results[i]);
-            obj.OnInteract();
+    //Resets the lists highlight.
+    private void ResetSelection () {
+        for (int i = 0; i < results.Count; i++) {
+            NodeObject obj = globalNodeViewList.Find (p => p.boardCoordinate == results[i]);
+            obj.OnInteract ();
         }
     }
 
-
-    bool ConfirmingPiece(NodeObject node, List<TestPiece> pieceList)
-    {
-        return pieceList.Any(p => p.pos == node.boardCoordinate);
+    //Confirms if said piece belongs inside said list.
+    bool ConfirmingPiece (NodeObject node, List<TestPiece> pieceList) {
+        return pieceList.Any (p => p.pos == node.boardCoordinate);
     }
 
-    bool ConfirmTarget(NodeObject node, List<Vector2Int> result)
-    {
-        return result.Any(p => p == node.boardCoordinate);
+    //Confirms if said target is inside a list of results.
+    bool ConfirmTarget (NodeObject node, List<Vector2Int> result) {
+        return result.Any (p => p == node.boardCoordinate);
     }
 
 }

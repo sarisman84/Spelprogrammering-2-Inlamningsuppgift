@@ -343,5 +343,43 @@ public static class TestBoardModel
 
     public static List<NodeObject> globalNodeViewList;
 
+
+    public struct Move{
+
+        public float value;
+
+        public Vector2Int currentPiece, target;
+
+        public Move(Vector2Int _currentPiece, Vector2Int _target, float _value){
+            value = _value;
+            currentPiece = _currentPiece;
+            target = _target;
+        }
+
+
+        public List<Move> Expand(UserModel owner){
+            List<Move> output = new List<Move>();
+            for (int i = 0; i < owner.OwnedPieces.Count; i++)
+            {
+                TestPiece piece = owner.OwnedPieces[i];
+                List<Vector2Int> path = owner.PathOfMoves(piece.pos, new List<Vector2Int>(), true);
+                for (int a = 0; a < path.Count; a++)
+                {
+                    //Simulate a board
+                    //Get the simulated piece and node positions
+                    //Do a simulated move.
+                    //Evaluate said move with a score
+
+                    //Store all of the previously found information to a move struct.
+
+                    //Add said struct to a list.
+                }
+
+                //Return the list.
+            }
+            return output;
+        }
+    }
+
 }
 #endregion

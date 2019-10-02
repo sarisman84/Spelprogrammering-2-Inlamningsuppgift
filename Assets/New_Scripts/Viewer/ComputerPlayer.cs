@@ -117,4 +117,11 @@ public class ComputerPlayer : UserModel {
 
     public override List<TestPiece> OwnedPieces { get => ownedPieces; set => ownedPieces = value; }
     public override List<PieceObject> VisualOwnedPieces { get => visualOwnedPieces; set => visualOwnedPieces = value; }
+
+
+    void AtTheStartOfTurn(){
+        //Call minimax
+        //Get the nessesary variables
+        //MovePiece(currentPiece, target, visualOwnedPiece) Note: Overload the method to remove the hanstDoneFirstMove bool.
+    }
 }

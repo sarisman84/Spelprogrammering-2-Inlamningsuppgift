@@ -7,8 +7,7 @@ using UnityEngine;
 using static TestBoardModel;
 
 public enum Team { None, Unoccupied, Red, Orange, Yellow, Green, Blue, Magenta, BigRed, BigGreen = 11 }
-public abstract class UserModel : MonoBehaviour
-{
+public abstract class UserModel : MonoBehaviour {
 
     #region OldUserModel
     // public Team currentTeam;
@@ -126,11 +125,6 @@ public abstract class UserModel : MonoBehaviour
 
     // }
 
-
-
-
-
-
     // private static List<Vector2Int> GetPlayerPositions(Team desiredTeam)
     // {
     //     List<Vector2Int> team = new List<Vector2Int>();
@@ -145,8 +139,6 @@ public abstract class UserModel : MonoBehaviour
     //     return team;
     // }
 
-
-
     // public static List<Vector2Int> GetPlayerPositions(Team desiredTeam, BoardModel.Board customBoard)
     // {
     //     List<Vector2Int> team = new List<Vector2Int>();
@@ -160,8 +152,6 @@ public abstract class UserModel : MonoBehaviour
     //     }
     //     return team;
     // }
-
-
 
     // private static Vector2Int GetBestGoal(List<Vector2Int> searchArea, List<Vector2Int> targetArea)
     // {
@@ -382,11 +372,6 @@ public abstract class UserModel : MonoBehaviour
 
     // }
 
-
-
-
-
-
     // public List<TestPiece> ownedPieces = new List<TestPiece>();
 
     // private static List<Vector2Int> Test_GetPlayerPositions(Team desiredTeam)
@@ -442,50 +427,42 @@ public abstract class UserModel : MonoBehaviour
     // }
     #endregion
 
-
     public Team currentTeam;
-    
 
     public abstract List<TestPiece> OwnedPieces { set; get; }
     public abstract List<PieceObject> VisualOwnedPieces { set; get; }
 
     #region Static Methods
 
-    public static UserModel CreatePlayer(bool computerDriven, Team team)
-    {
+    public static UserModel CreatePlayer (bool computerDriven, Team team) {
 
-        if (computerDriven)
-        {
+        if (computerDriven) {
             //Create Object
-            ComputerPlayer computerEntity = new GameObject($"(AI) Player {team}").AddComponent<ComputerPlayer>();
+            ComputerPlayer computerEntity = new GameObject ($"(AI) Player {team}").AddComponent<ComputerPlayer> ();
             //Set its team
             computerEntity.currentTeam = team;
             //Set its target for minimax.
-            computerEntity.desiredGoal = GetDesiredGoal(computerEntity);
+            computerEntity.desiredGoal = GetDesiredGoal (computerEntity);
             return computerEntity;
         }
 
-        HumanPlayer normalPlayer = new GameObject($"Player {team}").AddComponent<HumanPlayer>();
+        HumanPlayer normalPlayer = new GameObject ($"Player {team}").AddComponent<HumanPlayer> ();
 
         normalPlayer.currentTeam = team;
 
         return normalPlayer;
     }
 
-    private static Vector2Int GetDesiredGoal(ComputerPlayer computerEntity)
-    {
-        Vector2Int[] ownedBase = SearchForBase(computerEntity.currentTeam);
-        Vector2Int[] enemyBase = SearchForBase(GetOpponent(computerEntity));
+    private static Vector2Int GetDesiredGoal (ComputerPlayer computerEntity) {
+        Vector2Int[] ownedBase = SearchForBase (computerEntity.currentTeam);
+        Vector2Int[] enemyBase = SearchForBase (GetOpponent (computerEntity));
 
         float dist = 0;
         Vector2Int target = Vector2Int.zero;
-        for (int a = 0; a < ownedBase.Length; a++)
-        {
-            for (int b = 0; b < enemyBase.Length; b++)
-            {
-                float result = Vector2Int.Distance(ownedBase[a], enemyBase[b]);
-                if (dist < result)
-                {
+        for (int a = 0; a < ownedBase.Length; a++) {
+            for (int b = 0; b < enemyBase.Length; b++) {
+                float result = Vector2Int.Distance (ownedBase[a], enemyBase[b]);
+                if (dist < result) {
                     dist = result;
                     target = enemyBase[b];
                 }
@@ -494,17 +471,13 @@ public abstract class UserModel : MonoBehaviour
         return target;
     }
 
-    private static Vector2Int[] SearchForBase(Team computerEntity)
-    {
+    private static Vector2Int[] SearchForBase (Team computerEntity) {
         Vector2Int[] results = (TestGameModel.amountOfPlayers == 2) ? new Vector2Int[15] : new Vector2Int[10];
         int index = 0;
-        for (int x = 0; x < test_OriginalBoard.GetLength(0); x++)
-        {
-            for (int y = 0; y < test_OriginalBoard.GetLength(1); y++)
-            {
+        for (int x = 0; x < test_OriginalBoard.GetLength (0); x++) {
+            for (int y = 0; y < test_OriginalBoard.GetLength (1); y++) {
                 TestNode foundNode = test_OriginalBoard[x, y];
-                if (foundNode.belongsTo == computerEntity)
-                {
+                if (foundNode.belongsTo == computerEntity) {
                     results[index] = foundNode.pos;
                     index++;
                 }
@@ -514,11 +487,8 @@ public abstract class UserModel : MonoBehaviour
         return results;
     }
 
-
-    public static Team GetOpponent(UserModel user)
-    {
-        switch (user.currentTeam)
-        {
+    public static Team GetOpponent (UserModel user) {
+        switch (user.currentTeam) {
 
             case Team.Red:
                 return Team.Green;
@@ -541,35 +511,25 @@ public abstract class UserModel : MonoBehaviour
         return Team.None;
     }
 
-
-
-
-
     #endregion
 
-    public List<Vector2Int> PathOfMoves(Vector2Int source, List<Vector2Int> savedResults, bool isFirstSearch)
-    {
-        for (int curDir = 0; curDir < 6; curDir++)
-        {
-            Vector2Int potentialPath = AttemptToGetPath(source, curDir, savedResults);
+    public List<Vector2Int> PathOfMoves (Vector2Int source, List<Vector2Int> savedResults, bool isFirstSearch) {
+        for (int curDir = 0; curDir < 6; curDir++) {
+            Vector2Int potentialPath = AttemptToGetPath (source, curDir, savedResults);
             if (potentialPath == -Vector2Int.one) continue;
-            if (globalPieceList.Any(p => p.pos == potentialPath))
-            {
-                Vector2Int branch = AttemptToGetPath(potentialPath, curDir, savedResults);
+            if (globalPieceList.Any (p => p.pos == potentialPath)) {
+                Vector2Int branch = AttemptToGetPath (potentialPath, curDir, savedResults);
                 if (branch == -Vector2Int.one) continue;
-                if (!globalPieceList.Any(p => p.pos == branch))
-                {
-                    savedResults.Add(branch);
-                    List<Vector2Int> newResults = PathOfMoves(branch, savedResults, false);
-                    savedResults.AddRange(newResults);
+                if (!globalPieceList.Any (p => p.pos == branch)) {
+                    savedResults.Add (branch);
+                    List<Vector2Int> newResults = PathOfMoves (branch, savedResults, false);
+                    savedResults.AddRange (newResults);
 
                 }
             }
-            if (!globalPieceList.Any(p => p.pos == potentialPath))
-            {
-                if (isFirstSearch)
-                {
-                    savedResults.Add(potentialPath);
+            if (!globalPieceList.Any (p => p.pos == potentialPath)) {
+                if (isFirstSearch) {
+                    savedResults.Add (potentialPath);
                 }
             }
 
@@ -577,50 +537,64 @@ public abstract class UserModel : MonoBehaviour
         return savedResults;
     }
 
-    private Vector2Int AttemptToGetPath(Vector2Int source, int curDir, List<Vector2Int> savedResults)
-    {
-        Vector2Int result = source + BoardDirection(source, curDir);
-        if (OutOfBounds(result) || test_OriginalBoard[result.x, result.y].belongsTo == Team.None || savedResults.Any(p => p == result)) return -Vector2Int.one;
+    private Vector2Int AttemptToGetPath (Vector2Int source, int curDir, List<Vector2Int> savedResults) {
+        Vector2Int result = source + BoardDirection (source, curDir);
+        if (OutOfBounds (result) || test_OriginalBoard[result.x, result.y].belongsTo == Team.None || savedResults.Any (p => p == result)) return -Vector2Int.one;
         return result;
 
     }
 
-    private bool OutOfBounds(Vector2Int result) => (result.x >= test_OriginalBoard.GetLength(0) || result.y >= test_OriginalBoard.GetLength(1) || result.x < 0 || result.y < 0);
+    private bool OutOfBounds (Vector2Int result) => (result.x >= test_OriginalBoard.GetLength (0) || result.y >= test_OriginalBoard.GetLength (1) || result.x < 0 || result.y < 0);
 
+    Vector2Int BoardDirection (Vector2Int source, int index) {
 
-    Vector2Int BoardDirection(Vector2Int source, int index)
-    {
-
-        switch (index)
-        {
+        switch (index) {
 
             case 0:
-                return new Vector2Int(0, -1); // Left
+                return new Vector2Int (0, -1); // Left
 
             case 1:
-                return new Vector2Int(0, 1); // Right
+                return new Vector2Int (0, 1); // Right
 
             case 2:
                 if (source.x % 2 == 0)
-                    return new Vector2Int(-1, 0);
-                return new Vector2Int(-1, 1); //Top Right
+                    return new Vector2Int (-1, 0);
+                return new Vector2Int (-1, 1); //Top Right
             case 3:
                 if (source.x % 2 == 0)
-                    return new Vector2Int(-1, -1);
-                return new Vector2Int(-1, 0); //Top left
+                    return new Vector2Int (-1, -1);
+                return new Vector2Int (-1, 0); //Top left
 
             case 4:
                 if (source.x % 2 == 0)
-                    return new Vector2Int(1, 0);
-                return new Vector2Int(1, 1); //Bottom Right
+                    return new Vector2Int (1, 0);
+                return new Vector2Int (1, 1); //Bottom Right
             case 5:
                 if (source.x % 2 == 0)
-                    return new Vector2Int(1, -1);
-                return new Vector2Int(1, 0); //Bottom Left
+                    return new Vector2Int (1, -1);
+                return new Vector2Int (1, 0); //Bottom Left
         }
         return Vector2Int.zero;
     }
 
+    protected void MovePiece (Vector2Int currentPiece, Vector2Int target, List<PieceObject> visualOwnedPieces, ref bool hasntDoneFirstMove) {
+        int globalI = globalPieceList.FindIndex (0, p => p.pos == currentPiece);
+        TestPiece piece = new TestPiece ();
 
+        int i = visualOwnedPieces.FindIndex (0, p => p.boardCoordinate == currentPiece);
+
+        piece.pos = target;
+        piece.worldPos = TestBoardModel.test_OriginalBoard[target.x, target.y].worldPos;
+        piece.belongsTo = currentTeam;
+
+        visualOwnedPieces[i].transform.position = piece.worldPos;
+        visualOwnedPieces[i].boardCoordinate = piece.pos;
+
+        globalPieceList[globalI] = piece;
+
+        currentPiece = target;
+        hasntDoneFirstMove = false;
+
+    }
 
 }
