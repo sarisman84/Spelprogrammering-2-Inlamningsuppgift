@@ -41,7 +41,7 @@ public class GameManagercs : MonoBehaviour {
     public static bool isReady = false;
 
     public void StartGame () {
-        allPlayers = GameModel.StartNewGame (mode[dropdown.value].ammOfPlayers, piecePrefab);
+        //allPlayers = GameModel.StartNewGame (mode[dropdown.value].ammOfPlayers, piecePrefab);
         selectedMode = dropdown.value;
         isReady = true;
 
@@ -53,14 +53,14 @@ public class GameManagercs : MonoBehaviour {
             return;
         }
         instance = this;
-        BoardModel.originalBoard = GridCreator.ChineseCheckers.CreateHexagonGrid (blueprint, nodePrefab);
+        //BoardModel.originalBoard = GridCreator.ChineseCheckers.CreateHexagonGrid (blueprint, nodePrefab);
     }
 
     private void Update () {
 
         if (isReady) {
             TurnStarted ();
-            GameModel.GetNextTurn (allPlayers);
+            //GameModel.GetNextTurn (allPlayers);
         }
     }
 

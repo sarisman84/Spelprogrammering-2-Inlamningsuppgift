@@ -16,7 +16,7 @@ public class FileManager : MonoBehaviour {
     public void OnLoadEvent () {
         DataHandler.Load ();
         if (GameManagercs.allPlayers != null && GameManagercs.allPlayers.Count != 0) {
-            GameModel.GetNextTurn (GameManagercs.allPlayers);
+            //GameModel.GetNextTurn (GameManagercs.allPlayers);
         }
 
     }

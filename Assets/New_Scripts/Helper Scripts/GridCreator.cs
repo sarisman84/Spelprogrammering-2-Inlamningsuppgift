@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using System;
 using UnityEngine;
-using static BoardModel;
 using UnityEngine.UI;
+using static TestBoardModel;
 namespace GridCreator
 {
 
@@ -46,14 +47,12 @@ namespace GridCreator
         {
             return new Vector2(boardPos.x + deltaX * boardPos.y, boardPos.y * deltaY);
         }
-        public static Board CreateHexagonGrid(int[,] blueprint, NodeObject prefab)
+        public static TestBoardModel.Board CreateHexagonGrid(int[,] blueprint, NodeObject prefab)
         {
             Transform parent = CreateCanvas($"{prefab.name}'s list.");
-            Board newBoard = new Board();
-            newBoard.boardArray = new Node[blueprint.GetLength(0), blueprint.GetLength(1)];
-            newBoard.pieceArray = new Piece[blueprint.GetLength(0), blueprint.GetLength(1)];
-            newBoard.boardViewArray = new NodeObject[blueprint.GetLength(0), blueprint.GetLength(1)];
-            newBoard.pieceViewArray = new PieceObject[blueprint.GetLength(0), blueprint.GetLength(1)];
+            Board newBoard = new TestBoardModel.Board();
+            globalNodeViewList = new List<NodeObject>();
+            newBoard.Grid = new TestNode[blueprint.GetLength(0), blueprint.GetLength(1)];
             int xPos;
             for (int x = 0; x < blueprint.GetLength(0); x++)
             {
@@ -66,11 +65,10 @@ namespace GridCreator
                         Team.BigRed : (blueprint[x, y] == 16 || blueprint[x, y] == 17) ?
                             Team.BigGreen : Team.Unoccupied :
                         (Team)blueprint[x, y];
-                    Vector2 objectPos =
-                    SetPosition(new Vector2Int(x, xPos) -
-                    new Vector2(newBoard.boardArray.GetLength(0) / centerPointX, newBoard.boardArray.GetLength(1) / centerPointY));
-                    newBoard.boardArray[x, y] = new Node(new Vector2Int(x, y), objectPos, currentTeam);
-                    newBoard.boardViewArray[x, y] = NodeObject.CreateNodeObject(prefab, objectPos, (NodeColor)blueprint[x, y], parent, newBoard.boardArray[x, y].pos);
+                    Vector2Int boardPos = new Vector2Int(x, y);
+                    Vector2 objectPos = SetPosition(new Vector2Int(x, xPos) - new Vector2(newBoard.GetLength(0) / centerPointX, newBoard.GetLength(1) / centerPointY));
+                    newBoard[x, y] = new TestNode(boardPos, objectPos, currentTeam);
+                    globalNodeViewList.Add(NodeObject.CreateNodeObject(prefab, objectPos, (NodeColor)blueprint[x, y], parent, boardPos));
                 }
             }
 
