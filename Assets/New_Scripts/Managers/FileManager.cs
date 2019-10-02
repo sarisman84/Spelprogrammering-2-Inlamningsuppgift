@@ -9,14 +9,16 @@ using UnityEngine;
 
 public class FileManager : MonoBehaviour {
 
+
     public void OnSaveEvent () {
         DataHandler.Save ();
     }
 
     public void OnLoadEvent () {
         DataHandler.Load ();
-        if (GameManagercs.allPlayers != null && GameManagercs.allPlayers.Count != 0) {
-            //GameModel.GetNextTurn (GameManagercs.allPlayers);
+        if (TestManager.ins.allPlayers != null && TestManager.ins.allPlayers.Count != 0) {
+
+           
         }
 
     }

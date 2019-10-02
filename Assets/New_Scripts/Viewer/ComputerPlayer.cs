@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static TestBoardModel;
 
 public class ComputerPlayer : UserModel {
     #region OldCode
@@ -9,9 +10,7 @@ public class ComputerPlayer : UserModel {
 
     // UserModel opponent;
 
-
     // public void OnTurnTaken () {
-       
 
     //     Turn test = Minimax (new Turn (), this, opponent, 1, float.MinValue, float.MaxValue, true);
 
@@ -108,20 +107,105 @@ public class ComputerPlayer : UserModel {
     // }
     #endregion
 
+    public List<TestPiece> ownedPieces = new List<TestPiece> ();
+    public List<TestNode> playerBase = new List<TestNode> ();
 
-    public Vector2Int desiredGoal;
-    
-    public List<TestPiece> ownedPieces = new List<TestPiece>();
-
-    public List<PieceObject> visualOwnedPieces = new List<PieceObject>();
+    public List<TestNode> targetBase = new List<TestNode>();
+    public List<PieceObject> visualOwnedPieces = new List<PieceObject> ();
 
     public override List<TestPiece> OwnedPieces { get => ownedPieces; set => ownedPieces = value; }
     public override List<PieceObject> VisualOwnedPieces { get => visualOwnedPieces; set => visualOwnedPieces = value; }
+    public override List<TestNode> PlayerBase { get => playerBase; set => playerBase = value; }
+    public override List<TestNode> TargetBase { get => targetBase; set => targetBase = value; }
 
+    void AtTheStartOfTurn () {
+        Move newMove = Minimax (new Move (), opponent, this, 2, float.MinValue, float.MaxValue, true);
 
-    void AtTheStartOfTurn(){
-        //Call minimax
-        //Get the nessesary variables
-        //MovePiece(currentPiece, target, visualOwnedPiece) Note: Overload the method to remove the hanstDoneFirstMove bool.
+        Vector2Int currentPiece = newMove.currentPiece;
+        Vector2Int target = newMove.target;
+        Debug.Log ($"From {currentTeam}: {newMove.value}");
+        MovePiece (currentPiece, target, visualOwnedPieces);
+
+        EndTurn ();
+    }
+
+    public override void StartTurn () {
+        Debug.Log (currentTeam);
+        opponent = opponent ?? (TestManager.ins.allPlayers.Count % 2 == 1) ? TestManager.ins.allPlayers[UnityEngine.Random.Range (1, TestManager.ins.allPlayers.Count)] : TestManager.ins.allPlayers.Find (p => p.currentTeam == GetOpponent (this));
+        //Debug.Log("Starting Turn");
+        AtTheStartOfTurn ();
+    }
+
+    public override void EndTurn () {
+        TestGameModel.PlayerDone ();
+    }
+
+    Move Minimax (Move t, UserModel player, UserModel otherPlayer, int depth, float alpha, float beta, bool maximizingPlayer) {
+        if (depth == 0) return t;
+        List<Move> results;
+        Move nextPontetialTurn = new Move ();
+        if (maximizingPlayer) {
+            results = t.Expand (player);
+            if (results.Count == 0) return t;
+            float maxEval = float.MinValue;
+            foreach (Move turn in results) {
+                float eval = turn.value;
+                maxEval = Mathf.Max (maxEval, eval);
+                alpha = Mathf.Max (alpha, eval);
+
+            }
+            //Debug.Log (otherPlayer.currentTeam);
+            nextPontetialTurn = results.Find (p => p.value == maxEval);
+            return Minimax (nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, false);
+        }
+        results = t.Expand (otherPlayer);
+        if (results.Count == 0) return t;
+        float minEval = float.MaxValue;
+        foreach (Move turn in results) {
+            float eval = turn.value;
+            minEval = Mathf.Min (minEval, eval);
+            beta = Mathf.Min (beta, eval);
+
+        }
+        //Debug.Log (player.currentTeam);
+        nextPontetialTurn = results.Find (p => p.value == minEval);
+        return Minimax (nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, true);
+    }
+
+    Move Minimax (Move t, UserModel player, UserModel otherPlayer, int depth, bool maximizingPlayer) {
+        if (depth == 0) return t;
+        List<Move> results;
+        Move nextPontetialTurn = new Move ();
+        if (maximizingPlayer) {
+            results = t.Expand (player);
+            if (results.Count == 0) return t;
+            GnomeSort (results);
+            return Minimax (results[0], player, otherPlayer, depth - 1, false);
+        }
+        results = t.Expand (otherPlayer);
+        if (results.Count == 0) return t;
+        GnomeSort (results);
+        return Minimax (results[results.Count - 1], player, otherPlayer, depth - 1, true);
+    }
+
+    public static void GnomeSort<S> (List<S> aList) where S : IComparable {
+        int first = 1;
+        int second = 2;
+
+        while (first < aList.Count) {
+            if (aList[first - 1].CompareTo (aList[first]) <= 0) {
+                first = second;
+                second++;
+            } else {
+                S temp = aList[first - 1];
+                aList[first - 1] = aList[first];
+                aList[first] = temp;
+                first -= 1;
+                if (first == 0) {
+                    first = 1;
+                    second = 2;
+                }
+            }
+        }
     }
 }

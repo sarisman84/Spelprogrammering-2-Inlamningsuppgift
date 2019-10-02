@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using UnityEngine;
 
 using static TestBoardModel;
@@ -428,12 +429,33 @@ public abstract class UserModel : MonoBehaviour {
     #endregion
 
     public Team currentTeam;
+    public Vector2Int desiredGoal;
+    public abstract List<TestNode> PlayerBase { get; set; }
 
+    public abstract List<TestNode> TargetBase { get; set; }
     public abstract List<TestPiece> OwnedPieces { set; get; }
     public abstract List<PieceObject> VisualOwnedPieces { set; get; }
 
+    public UserModel opponent;
+
+    public bool GetHasWon () {
+
+        bool result = (opponent == null) ? false : TargetBase.All (p => {
+            if (globalPieceList.All (f => f.pos == p.pos && f.belongsTo == currentTeam)) return true;
+            return false;
+        });
+        return result;
+    }
+
     #region Static Methods
 
+    public virtual void StartTurn () {
+
+    }
+
+    public virtual void EndTurn () {
+
+    }
     public static UserModel CreatePlayer (bool computerDriven, Team team) {
 
         if (computerDriven) {
@@ -443,6 +465,7 @@ public abstract class UserModel : MonoBehaviour {
             computerEntity.currentTeam = team;
             //Set its target for minimax.
             computerEntity.desiredGoal = GetDesiredGoal (computerEntity);
+            computerEntity.targetBase = GetTargetBase(GetOpponent(computerEntity));
             return computerEntity;
         }
 
@@ -450,10 +473,24 @@ public abstract class UserModel : MonoBehaviour {
 
         normalPlayer.currentTeam = team;
 
+        normalPlayer.desiredGoal = GetDesiredGoal (normalPlayer);
+        normalPlayer.targetBase = GetTargetBase(GetOpponent(normalPlayer));
+
         return normalPlayer;
     }
 
-    private static Vector2Int GetDesiredGoal (ComputerPlayer computerEntity) {
+    private static List<TestNode> GetTargetBase(Team desiredTeam){
+        List<TestNode> results = new List<TestNode>();
+        foreach (var node in test_OriginalBoard.boardArr)
+        {
+            if(node.belongsTo == desiredTeam){
+                results.Add(node);
+            }
+        }
+        return results;
+    }
+
+    private static Vector2Int GetDesiredGoal (UserModel computerEntity) {
         Vector2Int[] ownedBase = SearchForBase (computerEntity.currentTeam);
         Vector2Int[] enemyBase = SearchForBase (GetOpponent (computerEntity));
 
@@ -596,5 +633,80 @@ public abstract class UserModel : MonoBehaviour {
         hasntDoneFirstMove = false;
 
     }
+    protected void MovePiece (Vector2Int currentPiece, Vector2Int target, List<PieceObject> visualOwnedPieces) {
+        int globalI = globalPieceList.FindIndex (0, p => p.pos == currentPiece);
+        TestPiece piece = new TestPiece ();
 
+        int i = visualOwnedPieces.FindIndex (0, p => p.boardCoordinate == currentPiece);
+        if (i >= visualOwnedPieces.Count || i < 0) return;
+        piece.pos = target;
+        piece.worldPos = TestBoardModel.test_OriginalBoard[target.x, target.y].worldPos;
+        piece.belongsTo = currentTeam;
+
+        visualOwnedPieces[i].transform.position = piece.worldPos;
+        visualOwnedPieces[i].boardCoordinate = piece.pos;
+
+        globalPieceList[globalI] = piece;
+
+    }
+
+    public void Simulate_MovePiece (int index, Vector2Int target, List<TestPiece> board) {
+
+        TestPiece piece = new TestPiece ();
+        piece.pos = target;
+        piece.worldPos = test_OriginalBoard.FindReference (board[index].pos).worldPos;
+        piece.belongsTo = currentTeam;
+        board[index] = piece;
+
+    }
+
+    private bool OutOfBounds (Board test_OriginalBoard, Vector2Int pos) {
+        return (pos.x >= test_OriginalBoard.GetLength (0) || pos.y >= test_OriginalBoard.GetLength (1) || pos.x < 0 || pos.y < 0);
+    }
+
+    // public static UserModel GetOpponent(UserModel currentPlayer)
+    // {
+    //     foreach (var player in GameManagercs.allPlayers)
+    //     {
+    //         switch (currentPlayer.currentTeam)
+    //         {
+
+    //             case Team.Red:
+    //                 if (player.currentTeam == Team.Green) return player;
+    //                 break;
+
+    //             case Team.Orange:
+    //                 if (player.currentTeam == Team.Blue) return player;
+    //                 break;
+
+    //             case Team.Yellow:
+    //                 if (player.currentTeam == Team.Magenta) return player;
+    //                 break;
+
+    //             case Team.Green:
+    //                 if (player.currentTeam == Team.Red) return player;
+    //                 break;
+
+    //             case Team.Blue:
+    //                 if (player.currentTeam == Team.Orange) return player;
+    //                 break;
+
+    //             case Team.Magenta:
+    //                 if (player.currentTeam == Team.Yellow) return player;
+    //                 break;
+    //         }
+    //     }
+    //     return null;
+    // }
+
+    public static List<Vector2Int> GetPlayerPositions (Team desiredTeam, List<TestPiece> customBoard) {
+        List<Vector2Int> team = new List<Vector2Int> ();
+        foreach (TestPiece piece in customBoard) {
+            if (piece != null && piece.belongsTo == desiredTeam) {
+                team.Add (piece.pos);
+
+            }
+        }
+        return team;
+    }
 }

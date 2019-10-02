@@ -11,6 +11,8 @@ public class NodeObject : MonoBehaviour
 
     [SerializeField] public SpriteRenderer childRenderer;
     [SerializeField] public TMP_Text evenCounter;
+
+    public string coordinate;
     private void OnEnable()
     {
         col2D = GetComponent<PolygonCollider2D>();
@@ -25,8 +27,12 @@ public class NodeObject : MonoBehaviour
         col2D = GetComponent<PolygonCollider2D>();
         _renderer = GetComponent<SpriteRenderer>();
         OnInteract();
-        float val = boardCoordinate.x % 2;
-        evenCounter.text = $"{val}";
+        //float val = boardCoordinate.x % 2;
+        //evenCounter.text = $"{val}";
+    }
+
+    public void DebugCoordinates(bool value){
+        evenCounter.text = (value) ? coordinate : "";
     }
 
     public static NodeObject CreateNodeObject(NodeObject prefab, Vector2 position, NodeColor team, Transform parent, Vector2Int boardCoord)
@@ -36,7 +42,7 @@ public class NodeObject : MonoBehaviour
         newNode.boardCoordinate = boardCoord;
         newNode.childRenderer = newNode.transform.GetChild(0).gameObject.GetComponentInChildren<SpriteRenderer>();
         newNode.evenCounter = newNode.GetComponentInChildren<TMP_Text>();
-        newNode.evenCounter.text = $"{newNode.boardCoordinate}";
+        newNode.coordinate = $"{newNode.boardCoordinate}";
         return newNode;
 
     }

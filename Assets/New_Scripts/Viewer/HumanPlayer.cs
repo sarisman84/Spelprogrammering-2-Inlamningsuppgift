@@ -105,12 +105,17 @@ public class HumanPlayer : UserModel {
     NodeObject storedObject;
     Vector2Int target;
     bool hasntDoneFirstMove = true;
+    List<TestNode> playerBase = new List<TestNode> ();
     public List<TestPiece> ownedPieces = new List<TestPiece> ();
 
     public List<PieceObject> visualOwnedPieces = new List<PieceObject> ();
 
+    bool isReady = false;
+
     //Obligatory Raycast Update loop.
     private void Update () {
+        if (!isReady) return;
+        if (Input.GetKeyDown (KeyCode.Tab)) EndTurn ();
         if (!Input.GetMouseButtonDown (0)) return;
         Vector2 mousePos = cam.ScreenToWorldPoint (Input.mousePosition);
         detection = Physics2D.Raycast (mousePos, cam.transform.forward);
@@ -119,22 +124,36 @@ public class HumanPlayer : UserModel {
 
     }
 
+    public override void StartTurn () {
+        opponent = opponent ?? (TestManager.ins.allPlayers.Count % 2 == 1) ? TestManager.ins.allPlayers[UnityEngine.Random.Range (1, TestManager.ins.allPlayers.Count)] : TestManager.ins.allPlayers.Find (p => p.currentTeam == GetOpponent (this));
+        isReady = true;
+    }
+
+    public override void EndTurn () {
+
+        isReady = false;
+        Reset ();
+        hasntDoneFirstMove = true;
+        TestGameModel.PlayerDone ();
+    }
+
     List<Vector2Int> results = new List<Vector2Int> ();
 
     public override List<TestPiece> OwnedPieces { get => ownedPieces; set => ownedPieces = value; }
     public override List<PieceObject> VisualOwnedPieces { get => visualOwnedPieces; set => visualOwnedPieces = value; }
+    public override List<TestNode> PlayerBase {
+        get =>
+            playerBase;
+        set =>
+            playerBase = value;
+    }
+    public List<TestNode> targetBase = new List<TestNode> ();
+    public override List<TestNode> TargetBase { get => targetBase; set => targetBase = value; }
 
     //This method handles the interaction between the raycast information and the piece search and movement logic.
     void OnInteraction (NodeObject node) {
         #region Reset
-        if (storedObject != null) {
-            storedObject.OnInteract ();
-        }
-
-        if (results != null || results.Count != 0) {
-            ResetSelection ();
-
-        }
+        Reset ();
         #endregion
 
         if (node == null) return;
@@ -153,10 +172,10 @@ public class HumanPlayer : UserModel {
         storedObject = node;
         currentPiece = (!hasntDoneFirstMove) ? target : (ConfirmingPiece (node, TestBoardModel.globalPieceList)) ? node.boardCoordinate : currentPiece;
 
-        if(globalPieceList.Any(p => p.pos == currentPiece && p.belongsTo != currentTeam)) return;
+        if (globalPieceList.Any (p => p.pos == currentPiece && p.belongsTo != currentTeam)) return;
         storedObject.OnInteract ("#00ff00");
 
-    //If the hasntDoneFIrstMove is equal to false, use the target as a baseline for searching for any available paths. Otherwise, use the found node as a baseline for searching any available paths.
+        //If the hasntDoneFIrstMove is equal to false, use the target as a baseline for searching for any available paths. Otherwise, use the found node as a baseline for searching any available paths.
         if (!hasntDoneFirstMove) {
             results = PathOfMoves (target, new List<Vector2Int> (), hasntDoneFirstMove);
             HighlightSelection ();
@@ -164,6 +183,17 @@ public class HumanPlayer : UserModel {
         }
         results = PathOfMoves (node.boardCoordinate, new List<Vector2Int> (), hasntDoneFirstMove);
         HighlightSelection ();
+    }
+
+    private void Reset () {
+        if (storedObject != null) {
+            storedObject.OnInteract ();
+        }
+
+        if (results != null || results.Count != 0) {
+            ResetSelection ();
+
+        }
     }
 
     //Highlights the list of nodes with a color.
