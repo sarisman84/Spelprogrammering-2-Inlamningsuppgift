@@ -429,22 +429,83 @@ public abstract class UserModel : MonoBehaviour {
     #endregion
 
     public Team currentTeam;
-    public Vector2Int desiredGoal;
-    public abstract List<TestNode> PlayerBase { get; set; }
 
-    public abstract List<TestNode> TargetBase { get; set; }
-    public abstract List<TestPiece> OwnedPieces { set; get; }
-    public abstract List<PieceObject> VisualOwnedPieces { set; get; }
+    [SerializeField] List<TestNode> targetBase;
 
-    public UserModel opponent;
+    [SerializeField] List<PieceObject> viewPieces = new List<PieceObject> ();
 
-    public bool GetHasWon () {
+    public List<TestPiece> OwnedPieces {
+        get {
+            return globalPieceList.FindAll (x => x.belongsTo == currentTeam);
+        }
+    }
 
-        bool result = (opponent == null) ? false : TargetBase.All (p => {
-            if (globalPieceList.All (f => f.pos == p.pos && f.belongsTo == currentTeam)) return true;
-            return false;
-        });
-        return result;
+    public List<PieceObject> OwnedViewPieces { get => viewPieces; set => viewPieces = value; }
+
+    public List<TestNode> TargetBase {
+        get {
+            targetBase = targetBase ?? test_OriginalBoard.FindAll (node => node.belongsTo == GetOpponent (this));
+            return targetBase;
+        }
+    }
+
+
+    public Vector2Int DesiredGoal () {
+        float dist = 0;
+        Vector2Int target = Vector2Int.zero;
+        for (int i = 0; i < TargetBase.Count; i++) {
+            if (OwnedPieces[i].pos == TargetBase[i].pos) continue;
+            float value = Vector2Int.Distance (TargetBase[i].pos, OwnedPieces[i].pos);
+            if (dist < value) {
+                dist = value;
+                target = TargetBase[i].pos;
+            }
+        }
+        Debug.Log ($"{target} - {this.name}");
+        return target;
+    }
+
+    public Vector2Int SimplerDesiredGoal () {
+
+        for (int i = 0; i < TargetBase.Count; i++) {
+            for (int a = 0; a < OwnedPieces.Count; a++) {
+                if (TargetBase[i].pos == OwnedPieces[a].pos)
+                 {
+                    continue;
+                }
+
+            }
+            return TargetBase[i].pos;
+
+        }
+        return Vector2Int.zero;
+        //return TargetBase.Find(x =>x.belongsTo != currentTeam).pos;
+
+    }
+
+    public TestNode DesiredGoals () {
+
+        List<TestNode> goals = new List<TestNode>();
+        for (int i = 0; i < TargetBase.Count; i++) {
+            for (int a = 0; a < OwnedPieces.Count; a++) {
+                if (TargetBase[i].pos == OwnedPieces[a].pos) {
+                    continue;
+                }
+
+            }
+            goals.Add(TargetBase[i]);
+
+        }goals.OrderBy(x => Vector2.Distance(x.worldPos, new Vector2(0,0)));
+        return goals[0];
+        //return TargetBase.Find(x =>x.belongsTo != currentTeam).pos;
+
+    }
+    public bool HasPlayerWon () {
+
+        for (int i = 0; i < OwnedPieces.Count; i++) {
+            if (OwnedPieces[i].pos != targetBase[i].pos) return false;
+        }
+        return true;
     }
 
     #region Static Methods
@@ -464,8 +525,7 @@ public abstract class UserModel : MonoBehaviour {
             //Set its team
             computerEntity.currentTeam = team;
             //Set its target for minimax.
-            computerEntity.desiredGoal = GetDesiredGoal (computerEntity);
-            computerEntity.targetBase = GetTargetBase(GetOpponent(computerEntity));
+            computerEntity.targetBase = GetTargetBase (GetOpponent (computerEntity));
             return computerEntity;
         }
 
@@ -473,18 +533,16 @@ public abstract class UserModel : MonoBehaviour {
 
         normalPlayer.currentTeam = team;
 
-        normalPlayer.desiredGoal = GetDesiredGoal (normalPlayer);
-        normalPlayer.targetBase = GetTargetBase(GetOpponent(normalPlayer));
+        normalPlayer.targetBase = GetTargetBase (GetOpponent (normalPlayer));
 
         return normalPlayer;
     }
 
-    private static List<TestNode> GetTargetBase(Team desiredTeam){
-        List<TestNode> results = new List<TestNode>();
-        foreach (var node in test_OriginalBoard.boardArr)
-        {
-            if(node.belongsTo == desiredTeam){
-                results.Add(node);
+    private static List<TestNode> GetTargetBase (Team desiredTeam) {
+        List<TestNode> results = new List<TestNode> ();
+        foreach (var node in test_OriginalBoard.boardArr) {
+            if (node.belongsTo == desiredTeam) {
+                results.Add (node);
             }
         }
         return results;
@@ -559,8 +617,7 @@ public abstract class UserModel : MonoBehaviour {
                 if (branch == -Vector2Int.one) continue;
                 if (!globalPieceList.Any (p => p.pos == branch)) {
                     savedResults.Add (branch);
-                    List<Vector2Int> newResults = PathOfMoves (branch, savedResults, false);
-                    savedResults.AddRange (newResults);
+                    savedResults = PathOfMoves (branch, savedResults, false);
 
                 }
             }
@@ -618,14 +675,14 @@ public abstract class UserModel : MonoBehaviour {
         int globalI = globalPieceList.FindIndex (0, p => p.pos == currentPiece);
         TestPiece piece = new TestPiece ();
 
-        int i = visualOwnedPieces.FindIndex (0, p => p.boardCoordinate == currentPiece);
-
+        int i = OwnedViewPieces.FindIndex (0, p => p.boardCoordinate == currentPiece);
+        if (i >= OwnedViewPieces.Count || i < 0) return;
         piece.pos = target;
         piece.worldPos = TestBoardModel.test_OriginalBoard[target.x, target.y].worldPos;
         piece.belongsTo = currentTeam;
 
-        visualOwnedPieces[i].transform.position = piece.worldPos;
-        visualOwnedPieces[i].boardCoordinate = piece.pos;
+        OwnedViewPieces[i].transform.position = piece.worldPos;
+        OwnedViewPieces[i].boardCoordinate = piece.pos;
 
         globalPieceList[globalI] = piece;
 
@@ -637,14 +694,14 @@ public abstract class UserModel : MonoBehaviour {
         int globalI = globalPieceList.FindIndex (0, p => p.pos == currentPiece);
         TestPiece piece = new TestPiece ();
 
-        int i = visualOwnedPieces.FindIndex (0, p => p.boardCoordinate == currentPiece);
-        if (i >= visualOwnedPieces.Count || i < 0) return;
+        int i = OwnedViewPieces.FindIndex (0, p => p.boardCoordinate == currentPiece);
+        if (i >= OwnedViewPieces.Count || i < 0) return;
         piece.pos = target;
         piece.worldPos = TestBoardModel.test_OriginalBoard[target.x, target.y].worldPos;
         piece.belongsTo = currentTeam;
 
-        visualOwnedPieces[i].transform.position = piece.worldPos;
-        visualOwnedPieces[i].boardCoordinate = piece.pos;
+        OwnedViewPieces[i].transform.position = piece.worldPos;
+        OwnedViewPieces[i].boardCoordinate = piece.pos;
 
         globalPieceList[globalI] = piece;
 
@@ -699,14 +756,15 @@ public abstract class UserModel : MonoBehaviour {
     //     return null;
     // }
 
-    public static List<Vector2Int> GetPlayerPositions (Team desiredTeam, List<TestPiece> customBoard) {
-        List<Vector2Int> team = new List<Vector2Int> ();
+    public static List<TestPiece> GetPlayerPositions (Team desiredTeam, List<TestPiece> customBoard) {
+        List<TestPiece> team = new List<TestPiece> ();
         foreach (TestPiece piece in customBoard) {
             if (piece != null && piece.belongsTo == desiredTeam) {
-                team.Add (piece.pos);
+                team.Add (piece);
 
             }
         }
+        Debug.Log ($"Returning {team.Count} pieces");
         return team;
     }
 }

@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -312,6 +313,8 @@ public static class TestBoardModel {
 
     public class Board {
         public TestNode[, ] boardArr;
+
+        public List<NodeObject> boardViewList;
         public TestNode this [int a, int b] {
             get => boardArr[a, b];
             set => boardArr[a, b] = value;
@@ -332,13 +335,27 @@ public static class TestBoardModel {
             }
             return result;
         }
+
+        public List<TestNode> FindAll (Predicate<TestNode> del) {
+            List<TestNode> result = new List<TestNode> ();
+            for (int x = 0; x < boardArr.GetLength (0); x++) {
+                for (int y = 0; y < boardArr.GetLength (1); y++) {
+                    result.Add (boardArr[x, y]);
+                }
+
+            }
+            result = result.FindAll (del);
+            return result;
+        }
     }
     #endregion
 
     public static Board test_OriginalBoard;
-    public static List<TestPiece> globalPieceList;
+    public static List<TestPiece> globalPieceList = new List<TestPiece> ();
 
     public static List<NodeObject> globalNodeViewList;
+
+    public static List<PieceObject> global_PieceObjectList;
 
     public class Move : IComparable {
 
@@ -360,8 +377,9 @@ public static class TestBoardModel {
 
         public List<Move> Expand (UserModel owner) {
             List<Move> output = new List<Move> ();
-            for (int i = 0; i < owner.OwnedPieces.Count; i++) {
-                TestPiece piece = owner.OwnedPieces[i];
+            List<TestPiece> ownedPieces = owner.OwnedPieces;
+            for (int i = 0; i < ownedPieces.Count; i++) {
+                TestPiece piece = ownedPieces[i];
                 List<Vector2Int> path = owner.PathOfMoves (piece.pos, new List<Vector2Int> (), true);
                 for (int a = 0; a < path.Count; a++) {
                     //Simulate a board
@@ -390,11 +408,29 @@ public static class TestBoardModel {
 
         float EvaluateMove (List<TestPiece> board, UserModel user) {
             float dist = 0;
-            foreach (Vector2Int pos in UserModel.GetPlayerPositions (user.currentTeam, board)) {
-                dist += Vector2Int.Distance (user.desiredGoal, pos);
+            TestNode goal = user.DesiredGoals();
+            foreach (TestPiece pos in UserModel.GetPlayerPositions (user.currentTeam, board)) 
+            {
+                dist += UnityEngine.Vector2.Distance (goal.worldPos, pos.worldPos);
             }
-
-            return dist;
+                //dist += Vector2Int.Distance (goal, pos);
+              /*
+               
+                foreach(Vector2Int target in goals)
+                {
+                     
+                   
+                }
+                  foreach(TestNode node in user.TargetBase)
+                    {
+                        if(node.pos == pos)
+                        {
+                            dist -= 20;
+                            break;
+                        }
+                    }
+            }*/
+            return -dist * dist;
         }
 
         //float EvaluateState(UserModel model, Board customBoard)

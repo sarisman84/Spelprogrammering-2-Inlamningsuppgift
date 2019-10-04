@@ -107,31 +107,18 @@ public class ComputerPlayer : UserModel {
     // }
     #endregion
 
-    public List<TestPiece> ownedPieces = new List<TestPiece> ();
-    public List<TestNode> playerBase = new List<TestNode> ();
-
-    public List<TestNode> targetBase = new List<TestNode>();
-    public List<PieceObject> visualOwnedPieces = new List<PieceObject> ();
-
-    public override List<TestPiece> OwnedPieces { get => ownedPieces; set => ownedPieces = value; }
-    public override List<PieceObject> VisualOwnedPieces { get => visualOwnedPieces; set => visualOwnedPieces = value; }
-    public override List<TestNode> PlayerBase { get => playerBase; set => playerBase = value; }
-    public override List<TestNode> TargetBase { get => targetBase; set => targetBase = value; }
-
     void AtTheStartOfTurn () {
-        Move newMove = Minimax (new Move (), opponent, this, 2, float.MinValue, float.MaxValue, true);
+        Move newMove = Minimax (new Move (), this, 1, float.MinValue, float.MaxValue, true);
 
         Vector2Int currentPiece = newMove.currentPiece;
         Vector2Int target = newMove.target;
-        Debug.Log ($"From {currentTeam}: {newMove.value}");
-        MovePiece (currentPiece, target, visualOwnedPieces);
+        MovePiece (currentPiece, target, OwnedViewPieces);
 
         EndTurn ();
     }
 
     public override void StartTurn () {
-        Debug.Log (currentTeam);
-        opponent = opponent ?? (TestManager.ins.allPlayers.Count % 2 == 1) ? TestManager.ins.allPlayers[UnityEngine.Random.Range (1, TestManager.ins.allPlayers.Count)] : TestManager.ins.allPlayers.Find (p => p.currentTeam == GetOpponent (this));
+
         //Debug.Log("Starting Turn");
         AtTheStartOfTurn ();
     }
@@ -140,25 +127,29 @@ public class ComputerPlayer : UserModel {
         TestGameModel.PlayerDone ();
     }
 
-    Move Minimax (Move t, UserModel player, UserModel otherPlayer, int depth, float alpha, float beta, bool maximizingPlayer) {
+    Move Minimax (Move t, UserModel player, int depth, float alpha, float beta, bool maximizingPlayer) {
         if (depth == 0) return t;
         List<Move> results;
         Move nextPontetialTurn = new Move ();
-        if (maximizingPlayer) {
+
+        if (maximizingPlayer)
+         {
             results = t.Expand (player);
             if (results.Count == 0) return t;
-            float maxEval = float.MinValue;
+            nextPontetialTurn.value = float.MinValue;
             foreach (Move turn in results) {
                 float eval = turn.value;
-                maxEval = Mathf.Max (maxEval, eval);
-                alpha = Mathf.Max (alpha, eval);
-
+                if (nextPontetialTurn.value < eval) {
+                    nextPontetialTurn = turn;
+                }
+                // maxEval = Mathf.Max (maxEval, eval);
+                //alpha = Mathf.Max (alpha, eval);
             }
             //Debug.Log (otherPlayer.currentTeam);
-            nextPontetialTurn = results.Find (p => p.value == maxEval);
-            return Minimax (nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, false);
+            //nextPontetialTurn = results.Find (p => p.value == maxEval);
+            return Minimax (nextPontetialTurn, player, depth - 1, alpha, beta, false);
         }
-        results = t.Expand (otherPlayer);
+        results = t.Expand (player);
         if (results.Count == 0) return t;
         float minEval = float.MaxValue;
         foreach (Move turn in results) {
@@ -169,7 +160,7 @@ public class ComputerPlayer : UserModel {
         }
         //Debug.Log (player.currentTeam);
         nextPontetialTurn = results.Find (p => p.value == minEval);
-        return Minimax (nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, true);
+        return Minimax (nextPontetialTurn, player, depth - 1, alpha, beta, true);
     }
 
     Move Minimax (Move t, UserModel player, UserModel otherPlayer, int depth, bool maximizingPlayer) {

@@ -105,10 +105,6 @@ public class HumanPlayer : UserModel {
     NodeObject storedObject;
     Vector2Int target;
     bool hasntDoneFirstMove = true;
-    List<TestNode> playerBase = new List<TestNode> ();
-    public List<TestPiece> ownedPieces = new List<TestPiece> ();
-
-    public List<PieceObject> visualOwnedPieces = new List<PieceObject> ();
 
     bool isReady = false;
 
@@ -125,7 +121,7 @@ public class HumanPlayer : UserModel {
     }
 
     public override void StartTurn () {
-        opponent = opponent ?? (TestManager.ins.allPlayers.Count % 2 == 1) ? TestManager.ins.allPlayers[UnityEngine.Random.Range (1, TestManager.ins.allPlayers.Count)] : TestManager.ins.allPlayers.Find (p => p.currentTeam == GetOpponent (this));
+
         isReady = true;
     }
 
@@ -139,17 +135,6 @@ public class HumanPlayer : UserModel {
 
     List<Vector2Int> results = new List<Vector2Int> ();
 
-    public override List<TestPiece> OwnedPieces { get => ownedPieces; set => ownedPieces = value; }
-    public override List<PieceObject> VisualOwnedPieces { get => visualOwnedPieces; set => visualOwnedPieces = value; }
-    public override List<TestNode> PlayerBase {
-        get =>
-            playerBase;
-        set =>
-            playerBase = value;
-    }
-    public List<TestNode> targetBase = new List<TestNode> ();
-    public override List<TestNode> TargetBase { get => targetBase; set => targetBase = value; }
-
     //This method handles the interaction between the raycast information and the piece search and movement logic.
     void OnInteraction (NodeObject node) {
         #region Reset
@@ -161,18 +146,16 @@ public class HumanPlayer : UserModel {
         if (ConfirmTarget (node, results)) {
 
             target = node.boardCoordinate;
-            MovePiece (currentPiece, target, visualOwnedPieces, ref hasntDoneFirstMove);
+            MovePiece (currentPiece, target, OwnedViewPieces, ref hasntDoneFirstMove);
             results.Clear ();
 
         }
         //If the piece is not confirmed to be a valid piece, return the method.
-        if (!ConfirmingPiece (node, TestBoardModel.globalPieceList)) return;
 
         //This section checks for the current Piece. If the hasntDoneFirstMOve is equal to false, always return the target as its new piece. Otherwise, Confirm if the found node is indeed a piece.
         storedObject = node;
-        currentPiece = (!hasntDoneFirstMove) ? target : (ConfirmingPiece (node, TestBoardModel.globalPieceList)) ? node.boardCoordinate : currentPiece;
+        currentPiece = (!hasntDoneFirstMove) ? target : (ConfirmingPiece (node, OwnedPieces)) ? node.boardCoordinate : currentPiece;
 
-        if (globalPieceList.Any (p => p.pos == currentPiece && p.belongsTo != currentTeam)) return;
         storedObject.OnInteract ("#00ff00");
 
         //If the hasntDoneFIrstMove is equal to false, use the target as a baseline for searching for any available paths. Otherwise, use the found node as a baseline for searching any available paths.

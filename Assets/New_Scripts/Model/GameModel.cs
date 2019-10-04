@@ -233,7 +233,6 @@ public static class TestGameModel {
         List<UserModel> users = CreatePlayers (players);
         CreatePieces (users, prefab, data);
 
-        
         return users;
     }
 
@@ -253,22 +252,19 @@ public static class TestGameModel {
 
     private static void CreatePieces (List<UserModel> players, PieceObject prefab) {
         Transform parent = new GameObject ("Piece List").transform;
-        List<TestPiece> allPieces = new List<TestPiece> ();
         for (int i = 0; i < players.Count; i++) {
             for (int x = 0; x < test_OriginalBoard.GetLength (0); x++) {
                 for (int y = 0; y < test_OriginalBoard.GetLength (1); y++) {
                     TestNode foundNode = test_OriginalBoard[x, y];
                     if (players[i].currentTeam == foundNode.belongsTo) {
-                        players[i].OwnedPieces.Add (new TestPiece (foundNode));
+                        globalPieceList.Add (new TestPiece (foundNode));
                         PieceObject piece = PieceObject.CreatePieceObject (prefab, foundNode.worldPos, (PieceColor) foundNode.belongsTo, parent, foundNode.pos);
-                        players[i].VisualOwnedPieces.Add (piece);
-                        players[i].PlayerBase.Add (foundNode);
+                        players[i].OwnedViewPieces.Add (piece);
                     }
                 }
             }
-            allPieces.AddRange (players[i].OwnedPieces);
         }
-        globalPieceList = allPieces;
+        
 
     }
 
@@ -279,15 +275,13 @@ public static class TestGameModel {
             foreach (var item in data.savedBoard) {
                 if (item.belongsTo == players[i].currentTeam) {
                     TestNode foundNode = new TestNode (new Vector2Int (item.boardPos.x, item.boardPos.y), new Vector2 (item.worldPos.x, item.worldPos.y), item.belongsTo);
-                    players[i].OwnedPieces.Add (new TestPiece (foundNode));
+                    globalPieceList.Add (new TestPiece (foundNode));
                     PieceObject piece = PieceObject.CreatePieceObject (prefab, foundNode.worldPos, (PieceColor) foundNode.belongsTo, parent, foundNode.pos);
-                    players[i].VisualOwnedPieces.Add (piece);
-                    players[i].PlayerBase.Add (foundNode);
+                    players[i].OwnedViewPieces.Add (piece);
                 }
 
             }
 
-            allPieces.AddRange (players[i].OwnedPieces);
         }
         globalPieceList = allPieces;
 
@@ -314,8 +308,8 @@ public static class TestGameModel {
     }
 
     public static void PlayerDone () {
-        if (TestManager.ins.allPlayers.FindAll (p => p.GetHasWon () == false).Count == 1) {
-            EndGameRuntime (TestManager.ins.winText, TestManager.ins.allPlayers.FindAll (p => p.GetHasWon () == true));
+        if (TestManager.ins.allPlayers.FindAll (p => p.HasPlayerWon () == false).Count == 1) {
+            EndGameRuntime (TestManager.ins.winText, TestManager.ins.allPlayers.FindAll (p => p.HasPlayerWon () == true));
             return;
         }
         //Debug.LogError("Player Done!");

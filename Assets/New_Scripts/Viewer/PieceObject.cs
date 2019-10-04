@@ -4,6 +4,8 @@ public class PieceObject : MonoBehaviour
 {
 
     public Vector2Int boardCoordinate;
+
+    public Team belongsTo;
     SpriteRenderer _renderer;
 
     private void OnEnable()
@@ -11,12 +13,13 @@ public class PieceObject : MonoBehaviour
         _renderer = GetComponent<SpriteRenderer>();
     }
 
-    public Vector2Int currentBoardPosition;
+   
     public static PieceObject CreatePieceObject(PieceObject prefab, Vector2 worldPosition, PieceColor team, Transform parent, Vector2Int boardCoord)
     {
         PieceObject newPiece = Instantiate(prefab, worldPosition, Quaternion.identity, parent);
         newPiece.SetTeamColor(team);
         newPiece.boardCoordinate = boardCoord;
+        newPiece.belongsTo = (Team)team;
         return newPiece;
 
     }
