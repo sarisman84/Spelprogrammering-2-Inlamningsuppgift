@@ -119,7 +119,12 @@ public class ComputerPlayer : UserModel {
     public override List<TestNode> TargetBase { get => targetBase; set => targetBase = value; }
 
     void AtTheStartOfTurn () {
+<<<<<<< Updated upstream
         Move newMove = Minimax (new Move (), opponent, this, 2, float.MinValue, float.MaxValue, true);
+=======
+        int index = (TestGameModel.currPlayerIndex + 1) >= TestManager.ins.allPlayers.Count ? 0 : TestGameModel.currPlayerIndex + 1;
+        Move newMove = Minimax (new Move (), this, TestManager.ins.allPlayers[index], 1, float.MinValue, float.MaxValue, true);
+>>>>>>> Stashed changes
 
         Vector2Int currentPiece = newMove.currentPiece;
         Vector2Int target = newMove.target;
@@ -144,11 +149,17 @@ public class ComputerPlayer : UserModel {
         if (depth == 0) return t;
         List<Move> results;
         Move nextPontetialTurn = new Move ();
+<<<<<<< Updated upstream
+=======
+        Move potentialTurn;
+
+>>>>>>> Stashed changes
         if (maximizingPlayer) {
             results = t.Expand (player);
             if (results.Count == 0) return t;
             float maxEval = float.MinValue;
             foreach (Move turn in results) {
+<<<<<<< Updated upstream
                 float eval = turn.value;
                 maxEval = Mathf.Max (maxEval, eval);
                 alpha = Mathf.Max (alpha, eval);
@@ -165,11 +176,42 @@ public class ComputerPlayer : UserModel {
             float eval = turn.value;
             minEval = Mathf.Min (minEval, eval);
             beta = Mathf.Min (beta, eval);
+=======
 
+                potentialTurn = Minimax (turn, player, otherPlayer, depth - 1, alpha, beta, false);
+                if (potentialTurn != null && potentialTurn.value > maxEval) {
+                    nextPontetialTurn = turn;
+                    maxEval = potentialTurn.value;
+                }
+                // maxEval = Mathf.Max (maxEval, eval);
+                //alpha = Mathf.Max (alpha, eval);
+            }
+            //Debug.Log (otherPlayer.currentTeam);
+            //nextPontetialTurn = results.Find (p => p.value == maxEval);
+        } else {
+            results = t.Expand (otherPlayer);
+            if (results.Count == 0) return t;
+            float minEval = float.MaxValue;
+            foreach (Move turn in results) {
+>>>>>>> Stashed changes
+
+                potentialTurn = Minimax (turn, player, otherPlayer, depth - 1, alpha, beta, true);
+                if (potentialTurn != null && potentialTurn.value < minEval) {
+                    nextPontetialTurn = turn;
+                    minEval = potentialTurn.value;
+                }
+
+            }
+            //Debug.Log (player.currentTeam);
         }
+<<<<<<< Updated upstream
         //Debug.Log (player.currentTeam);
         nextPontetialTurn = results.Find (p => p.value == minEval);
         return Minimax (nextPontetialTurn, player, otherPlayer, depth - 1, alpha, beta, true);
+=======
+        return nextPontetialTurn;
+
+>>>>>>> Stashed changes
     }
 
     Move Minimax (Move t, UserModel player, UserModel otherPlayer, int depth, bool maximizingPlayer) {
