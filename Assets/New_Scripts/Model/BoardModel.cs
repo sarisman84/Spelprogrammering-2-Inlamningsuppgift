@@ -332,35 +332,6 @@ public static class TestBoardModel {
             }
             return result;
         }
-<<<<<<< Updated upstream
-=======
-
-        public List<TestNode> FindAll (Predicate<TestNode> del) {
-            List<TestNode> result = new List<TestNode> ();
-            for (int x = 0; x < boardArr.GetLength (0); x++) {
-                for (int y = 0; y < boardArr.GetLength (1); y++) {
-                    result.Add (boardArr[x, y]);
-                }
-
-            }
-            result = result.FindAll (del);
-            return result;
-        }
-
-        public TestNode Find (Predicate<TestNode> del) {
-            List<TestNode> result = new List<TestNode> ();
-            for (int x = 0; x < boardArr.GetLength (0); x++) {
-                for (int y = 0; y < boardArr.GetLength (1); y++) {
-                    result.Add (boardArr[x, y]);
-                }
-
-            }
-            TestNode node = result.Find (del);
-            return node;
-        }
-
-
->>>>>>> Stashed changes
     }
     #endregion
 
@@ -419,17 +390,8 @@ public static class TestBoardModel {
 
         float EvaluateMove (List<TestPiece> board, UserModel user) {
             float dist = 0;
-<<<<<<< Updated upstream
             foreach (Vector2Int pos in UserModel.GetPlayerPositions (user.currentTeam, board)) {
                 dist += Vector2Int.Distance (user.desiredGoal, pos);
-=======
-            TestNode goal = user.DesiredGoal();
-            
-            foreach (TestPiece pos in UserModel.GetPlayerPositions (user.currentTeam, board)) 
-            {
-                dist += UnityEngine.Vector2Int.Distance (goal.pos, pos.pos);
-                Debug.DrawLine(goal.worldPos, pos.worldPos, Color.cyan, 1.5f);
->>>>>>> Stashed changes
             }
 
             return dist;

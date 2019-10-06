@@ -438,7 +438,6 @@ public abstract class UserModel : MonoBehaviour {
 
     public UserModel opponent;
 
-<<<<<<< Updated upstream
     public bool GetHasWon () {
 
         bool result = (opponent == null) ? false : TargetBase.All (p => {
@@ -446,117 +445,6 @@ public abstract class UserModel : MonoBehaviour {
             return false;
         });
         return result;
-=======
-    public List<TestPiece> OwnedPieces {
-        get {
-            return globalPieceList.FindAll (x => x.belongsTo == currentTeam);
-        }
-    }
-
-    public List<PieceObject> OwnedViewPieces { get => viewPieces; set => viewPieces = value; }
-
-    public List<TestNode> TargetBase {
-        get {
-            targetBase = targetBase ?? test_OriginalBoard.FindAll (node => node.belongsTo == GetOpponent (this));
-            return targetBase;
-        }
-    }
-
-    private TestNode OwnedNode (Predicate<TestNode> pred) {
-        TestNode node = test_OriginalBoard.Find (pred);
-        globalNodeViewList.Find (x => node.pos == x.boardCoordinate).OnInteract ("#00ffff");
-        return node;
-    }
-
-    public TestNode DesiredGoal () {
-        float dist = float.MinValue;
-        TestNode target = new TestNode ();
-
-        for (int i = 0; i < TargetBase.Count; i++) {
-            for (int x = 0; x < OwnedPieces.Count; x++) {
-                if(TargetBase[i].pos == OwnedPieces[i].pos){
-                    globalNodeViewList.Find(z => z.boardCoordinate == TargetBase[i].pos).OnInteract("#00ffff");
-                    continue;
-                }
-                float value = Vector2Int.Distance (TargetBase[i].pos, StartPoint ().pos);
-                if (dist < value) {
-                    dist = value;
-                    target = TargetBase[i];
-                }
-            }
-
-        }
-
-        Debug.Log ($"Player {currentTeam} has this {target.pos} as a Goal.");
-        return target;
-    }
-
-    public Vector2Int SimplerDesiredGoal () {
-
-        for (int i = 0; i < TargetBase.Count; i++) {
-            for (int a = 0; a < OwnedPieces.Count; a++) {
-                if (TargetBase[i].pos == OwnedPieces[a].pos) {
-                    continue;
-                }
-
-            }
-            return TargetBase[i].pos;
-
-        }
-        return Vector2Int.zero;
-        //return TargetBase.Find(x =>x.belongsTo != currentTeam).pos;
-
-    }
-
-    public TestNode DesiredGoals () {
-
-        List<TestNode> goals = new List<TestNode> ();
-        for (int i = 0; i < TargetBase.Count; i++) {
-            for (int a = 0; a < OwnedPieces.Count; a++) {
-                if (TargetBase[i].pos == OwnedPieces[a].pos) {
-                    continue;
-                }
-
-            }
-            goals.Add (TargetBase[i]);
-
-        }
-        goals.OrderBy (x => Vector2Int.Distance (x.pos, new Vector2Int (8, 7)));
-        return goals[0];
-        //return TargetBase.Find(x =>x.belongsTo != currentTeam).pos;
-
-    }
-
-    public TestNode StartPoint () {
-        switch (currentTeam) {
-
-            case Team.Green:
-                return OwnedNode (x => x.pos == new Vector2Int (0, 7));
-
-            case Team.Blue:
-                return OwnedNode (x => x.pos == new Vector2Int (4, 13));
-
-            case Team.Magenta:
-                return OwnedNode (x => x.pos == new Vector2Int (12, 13));
-
-            case Team.Red:
-                return OwnedNode (x => x.pos == new Vector2Int (16, 7));
-
-            case Team.Orange:
-                return OwnedNode (x => x.pos == new Vector2Int (12, 1));
-
-            case Team.Yellow:
-                return OwnedNode (x => x.pos == new Vector2Int (4, 1));
-        }
-        return new TestNode ();
-    }
-    public bool HasPlayerWon () {
-
-        for (int i = 0; i < OwnedPieces.Count; i++) {
-            if (OwnedPieces[i].pos != targetBase[i].pos) return false;
-        }
-        return true;
->>>>>>> Stashed changes
     }
 
     #region Static Methods
