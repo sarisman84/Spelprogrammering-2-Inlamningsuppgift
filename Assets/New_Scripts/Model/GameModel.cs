@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -194,141 +195,179 @@ using static TestBoardModel;
 // }
 #endregion
 
-public static class TestGameModel {
+public static class TestGameModel
+{
 
     public static int amountOfPlayers = 0;
-    public static List<UserModel> StartNewGame (List<PlayerDefinition> players, PieceObject prefab) {
-        ResetGame (0);
+    public static List<UserModel> StartNewGame(List<PlayerDefinition> players, PieceObject prefab)
+    {
+        ResetGame(0);
         amountOfPlayers = players.Count;
-        if (players.Count == 2) {
+        if (players.Count == 2)
+        {
 
-            AdaptTheBoard ();
+            AdaptTheBoard();
         }
-        List<UserModel> users = CreatePlayers (players);
-        CreatePieces (users, prefab);
+        List<UserModel> users = CreatePlayers(players);
+        CreatePieces(users, prefab);
         return users;
     }
 
-    private static void ResetGame (int customIndex) {
-        if (TestManager.ins.allPlayers.Count != 0) {
-            TestManager.ins.allPlayers.Clear ();
+    private static void ResetGame(int customIndex)
+    {
+        if (TestManager.ins.allPlayers.Count != 0)
+        {
+            TestManager.ins.allPlayers.Clear();
 
         }
-        foreach (var item in MonoBehaviour.FindObjectsOfType<UserModel> ()) {
-            MonoBehaviour.Destroy (item.gameObject);
+        foreach (var item in MonoBehaviour.FindObjectsOfType<UserModel>())
+        {
+            MonoBehaviour.Destroy(item.gameObject);
         }
-        foreach (var item in MonoBehaviour.FindObjectsOfType<PieceObject> ()) {
-            MonoBehaviour.Destroy (item.gameObject);
+        foreach (var item in MonoBehaviour.FindObjectsOfType<PieceObject>())
+        {
+            MonoBehaviour.Destroy(item.gameObject);
         }
         currPlayerIndex = customIndex;
     }
-    public static List<UserModel> StartNewGame (SaveData data, PieceObject prefab) {
-        ResetGame (data.savedTurn);
+    public static List<UserModel> StartNewGame(SaveData data, PieceObject prefab)
+    {
+        ResetGame(data.savedTurn);
         List<PlayerDefinition> players = data.savedPlayers;
         amountOfPlayers = players.Count;
-        if (players.Count == 2) {
+        if (players.Count == 2)
+        {
 
-            AdaptTheBoard ();
+            AdaptTheBoard();
         }
-        List<UserModel> users = CreatePlayers (players);
-        CreatePieces (users, prefab, data);
+        List<UserModel> users = CreatePlayers(players);
+        CreatePieces(users, prefab, data);
 
-        
+
         return users;
     }
 
     #region Helper Methods
-    private static List<UserModel> CreatePlayers (List<PlayerDefinition> players) {
+    private static List<UserModel> CreatePlayers(List<PlayerDefinition> players)
+    {
 
-        List<UserModel> result = new List<UserModel> ();
-        for (int i = 0; i < players.Count; i++) {
+        List<UserModel> result = new List<UserModel>();
+        for (int i = 0; i < players.Count; i++)
+        {
             PlayerDefinition player = players[i];
-            UserModel user = UserModel.CreatePlayer (player.computerDriven, player.player);
-            result.Add (user);
+            UserModel user = UserModel.CreatePlayer(player.computerDriven, player.player);
+            result.Add(user);
 
         }
 
         return result;
     }
 
-    private static void CreatePieces (List<UserModel> players, PieceObject prefab) {
-        Transform parent = new GameObject ("Piece List").transform;
-        List<TestPiece> allPieces = new List<TestPiece> ();
-        for (int i = 0; i < players.Count; i++) {
-            for (int x = 0; x < test_OriginalBoard.GetLength (0); x++) {
-                for (int y = 0; y < test_OriginalBoard.GetLength (1); y++) {
+    private static void CreatePieces(List<UserModel> players, PieceObject prefab)
+    {
+        Transform parent = new GameObject("Piece List").transform;
+        globalPieceList = new List<TestPiece>();
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            players[i].OwnedViewPieces = new List<PieceObject>();
+            for (int x = 0; x < test_OriginalBoard.GetLength(0); x++)
+            {
+                for (int y = 0; y < test_OriginalBoard.GetLength(1); y++)
+                {
                     TestNode foundNode = test_OriginalBoard[x, y];
-                    if (players[i].currentTeam == foundNode.belongsTo) {
-                        players[i].OwnedPieces.Add (new TestPiece (foundNode));
-                        PieceObject piece = PieceObject.CreatePieceObject (prefab, foundNode.worldPos, (PieceColor) foundNode.belongsTo, parent, foundNode.pos);
-                        players[i].VisualOwnedPieces.Add (piece);
-                        players[i].PlayerBase.Add (foundNode);
+                    if (players[i].currentTeam == foundNode.belongsTo)
+                    {
+                        globalPieceList.Add(new TestPiece(foundNode));
+                        PieceObject piece = PieceObject.CreatePieceObject(prefab, foundNode.worldPos, (PieceColor)foundNode.belongsTo, parent, foundNode.pos);
+                        players[i].OwnedViewPieces.Add(piece);
+
                     }
                 }
             }
-            allPieces.AddRange (players[i].OwnedPieces);
+
         }
-        globalPieceList = allPieces;
+
 
     }
 
-    private static void CreatePieces (List<UserModel> players, PieceObject prefab, SaveData data) {
-        Transform parent = new GameObject ("Piece List").transform;
-        List<TestPiece> allPieces = new List<TestPiece> ();
-        for (int i = 0; i < players.Count; i++) {
-            foreach (var item in data.savedBoard) {
-                if (item.belongsTo == players[i].currentTeam) {
-                    TestNode foundNode = new TestNode (new Vector2Int (item.boardPos.x, item.boardPos.y), new Vector2 (item.worldPos.x, item.worldPos.y), item.belongsTo);
-                    players[i].OwnedPieces.Add (new TestPiece (foundNode));
-                    PieceObject piece = PieceObject.CreatePieceObject (prefab, foundNode.worldPos, (PieceColor) foundNode.belongsTo, parent, foundNode.pos);
-                    players[i].VisualOwnedPieces.Add (piece);
-                    players[i].PlayerBase.Add (foundNode);
+    private static void CreatePieces(List<UserModel> players, PieceObject prefab, SaveData data)
+    {
+        Transform parent = new GameObject("Piece List").transform;
+        globalPieceList = new List<TestPiece>();
+        for (int i = 0; i < players.Count; i++)
+        {
+            players[i].OwnedViewPieces = new List<PieceObject>();
+            foreach (var item in data.savedBoard)
+            {
+                if (item.belongsTo == players[i].currentTeam)
+                {
+                    TestNode foundNode = new TestNode(new Vector2Int(item.boardPos.x, item.boardPos.y), new Vector2(item.worldPos.x, item.worldPos.y), item.belongsTo);
+                    globalPieceList.Add(new TestPiece(foundNode));
+                    PieceObject piece = PieceObject.CreatePieceObject(prefab, foundNode.worldPos, (PieceColor)foundNode.belongsTo, parent, foundNode.pos);
+                    players[i].OwnedViewPieces.Add(piece);
+
                 }
 
             }
 
-            allPieces.AddRange (players[i].OwnedPieces);
+
         }
-        globalPieceList = allPieces;
+
 
     }
 
-    private static void AdaptTheBoard () {
-        foreach (TestNode node in test_OriginalBoard) {
-            TestNode foundNode = test_OriginalBoard.FindReference (node.pos);
-            if (node.belongsTo == Team.BigRed) {
+    private static void AdaptTheBoard()
+    {
+        foreach (TestNode node in test_OriginalBoard)
+        {
+            TestNode foundNode = test_OriginalBoard.FindReference(node.pos);
+            if (node.belongsTo == Team.BigRed)
+            {
                 test_OriginalBoard.boardArr[node.pos.x, node.pos.y].belongsTo = Team.Red;
             }
-            if (node.belongsTo == Team.BigGreen) {
+            if (node.belongsTo == Team.BigGreen)
+            {
                 test_OriginalBoard.boardArr[node.pos.x, node.pos.y].belongsTo = Team.Green;
             }
 
         }
     }
     public static int currPlayerIndex = 0;
-    public static void GetNextTurn (List<UserModel> players, TMPro.TMP_Text sign) {
+    public static void GetNextTurn(List<UserModel> players, TMPro.TMP_Text sign)
+    {
         //Debug.Log ($"{players[currPlayerIndex]}:{currPlayerIndex}");
+        if(players[currPlayerIndex].HasPlayerWon()) NextPlayer(players);
         sign.text = $"Turn: {players[currPlayerIndex].currentTeam}";
-        players[currPlayerIndex].StartTurn ();
+        players[currPlayerIndex].StartTurn();
 
     }
 
-    public static void PlayerDone () {
-        if (TestManager.ins.allPlayers.FindAll (p => p.GetHasWon () == false).Count == 1) {
-            EndGameRuntime (TestManager.ins.winText, TestManager.ins.allPlayers.FindAll (p => p.GetHasWon () == true));
+    private static void NextPlayer(List<UserModel> players)
+    {
+        currPlayerIndex++;
+        currPlayerIndex = (currPlayerIndex >= players.Count || players == null || currPlayerIndex < 0) ? 0 : currPlayerIndex;
+    }
+
+    public static void PlayerDone()
+    {
+        if (TestManager.ins.allPlayers.FindAll(p => p.HasPlayerWon() == false).Count == 1)
+        {
+            EndGameRuntime(TestManager.ins.winText, TestManager.ins.allPlayers.FindAll(p => p.HasPlayerWon() == true));
             return;
         }
         //Debug.LogError("Player Done!");
-        currPlayerIndex++;
-
-        if (TestManager.ins.allPlayers == null || currPlayerIndex >= TestManager.ins.allPlayers.Count || currPlayerIndex < 0) currPlayerIndex = 0;
-        TestManager.ins.TurnEnded ();
+        NextPlayer(TestManager.ins.allPlayers);
+      
+        TestManager.ins.TurnEnded();
     }
 
-    private static void EndGameRuntime (TMPro.TMP_Text sign, List<UserModel> winners) {
+    private static void EndGameRuntime(TMPro.TMP_Text sign, List<UserModel> winners)
+    {
         //End the game.
         string message = "";
-        foreach (var winner in winners) {
+        foreach (var winner in winners)
+        {
             message += $": {winner.currentTeam} :";
         }
         message += " Won!";
