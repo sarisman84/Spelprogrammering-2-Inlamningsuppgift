@@ -508,32 +508,20 @@ public abstract class UserModel : MonoBehaviour
 
     public TestNode DesiredGoal()
     {
-        float dist = float.MinValue;
+        float maxEval = float.MinValue;
         TestNode target = new TestNode();
         //List<OpponentNode> occupiedNodes = new List<OpponentNode>();
-        for (int i = 0; i < TargetBase.Count; i++)
-        {
-            for (int h = 0; h < OwnedPieces.Count; h++)
-            {
-                if (TargetBase[i].isOccupied  /* && !occupiedNodes.Any(o => o.node == TargetBase[i].node)*/)
-                {
-
-
-                    //occupiedNodes.Add(TargetBase[i]);
-                    continue;
-                }
-                float value = Vector2Int.Distance(TargetBase[i].node.pos, StartPoint().pos);
-                if (dist < value)
-                {
-                    dist = value;
-                    globalNodeViewList.Find(y => TargetBase[i].node.pos == y.boardCoordinate).OnInteract("#00ffff");
-                    target = TargetBase[i].node;
-                }
-            }
-
-
-
-        }
+       for (int t = 0; t < TargetBase.Count; t++)
+       {
+           for (int p = 0; p < OwnedPieces.Count; p++)
+           {
+               float dist = Vector2.Distance(TargetBase[t].node.worldPos, OwnedPieces[p].worldPos);
+               if(maxEval < dist){
+                   maxEval = dist;
+                   target = TargetBase[t].node;
+               }
+           }
+       }
 
 
         return target;

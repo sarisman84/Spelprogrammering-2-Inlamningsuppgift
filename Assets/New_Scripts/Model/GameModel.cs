@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -336,9 +337,16 @@ public static class TestGameModel
     public static void GetNextTurn(List<UserModel> players, TMPro.TMP_Text sign)
     {
         //Debug.Log ($"{players[currPlayerIndex]}:{currPlayerIndex}");
+        if(players[currPlayerIndex].HasPlayerWon()) NextPlayer(players);
         sign.text = $"Turn: {players[currPlayerIndex].currentTeam}";
         players[currPlayerIndex].StartTurn();
 
+    }
+
+    private static void NextPlayer(List<UserModel> players)
+    {
+        currPlayerIndex++;
+        currPlayerIndex = (currPlayerIndex >= players.Count || players == null || currPlayerIndex < 0) ? 0 : currPlayerIndex;
     }
 
     public static void PlayerDone()
@@ -349,9 +357,8 @@ public static class TestGameModel
             return;
         }
         //Debug.LogError("Player Done!");
-        currPlayerIndex++;
-
-        if (TestManager.ins.allPlayers == null || currPlayerIndex >= TestManager.ins.allPlayers.Count || currPlayerIndex < 0) currPlayerIndex = 0;
+        NextPlayer(TestManager.ins.allPlayers);
+      
         TestManager.ins.TurnEnded();
     }
 

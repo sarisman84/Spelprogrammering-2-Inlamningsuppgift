@@ -276,11 +276,17 @@ public class TestNode
     public Vector2 worldPos;
     public Team belongsTo;
 
+    public bool countAsBase;
+
     public TestNode(Vector2Int boardPos, Vector2 transformPos, Team currentTeam)
     {
         pos = boardPos;
         worldPos = transformPos;
         belongsTo = currentTeam;
+        if(currentTeam != Team.Unoccupied && currentTeam != Team.None && currentTeam != Team.BigGreen && currentTeam != Team.BigRed ){
+            countAsBase = false;
+        }
+        countAsBase = true;
     }
 
     public TestNode() { }
@@ -431,13 +437,10 @@ public static class TestBoardModel
                     }
                     Vector2Int currentPiece = simulatedBoard[newPiece].pos;
                     Vector2Int target = path[a];
+
+
                     owner.Simulate_MovePiece(newPiece, target, simulatedBoard);
                     TestNode goal = owner.DesiredGoal();
-                    if (test_OriginalBoard.Find(x => x.pos == piece.pos).belongsTo == UserModel.GetOpponent(owner))
-                    {
-
-                        piece.offsetValue = UnityEngine.Vector2Int.Distance(goal.pos, piece.pos);
-                    }
                     float value = EvaluateMove(simulatedBoard, owner, goal);
                     Move move = new Move(currentPiece, target, value);
                     output.Add(move);
@@ -448,18 +451,48 @@ public static class TestBoardModel
             return output;
         }
 
+
         float EvaluateMove(List<TestPiece> board, UserModel user, TestNode goal)
         {
-            float dist = 0;
+            float value = 0;
 
-            foreach (TestPiece pos in UserModel.GetPlayerPositions(user.currentTeam, board))
+            foreach (TestPiece ownedPiece in UserModel.GetPlayerPositions(user.currentTeam, board))
             {
-                dist += UnityEngine.Vector2Int.Distance(goal.pos, pos.pos);
-                dist -= pos.offsetValue * 10;
-                Debug.DrawLine(goal.worldPos, pos.worldPos, Color.cyan, 1.5f);
-            }
+                Color rayColor = Color.cyan;
+                value += Vector2.Distance(ownedPiece.pos, goal.pos);
+                if (DoesPieceExistIn(ownedPiece, UserModel.GetOpponent(user)))
+                {
+                    value -= TestGameModel.amountOfPlayers;
+                    rayColor = Color.yellow;
+                }
 
-            return -dist;
+                if(DoesPieceExistIn(ownedPiece, user.currentTeam) || PieceLiesInAnUninterestingArea(ownedPiece, user)){
+                    value += 2 + (TestGameModel.amountOfPlayers * 2);
+                    rayColor = Color.red;
+                }
+                Debug.DrawLine(ownedPiece.worldPos, goal.worldPos, rayColor, 0.5f);
+            }
+            return -(value * value);
+        }
+
+        private bool PieceLiesInAnUninterestingArea(TestPiece ownedPiece, UserModel user)
+        {
+            return (!DoesPieceExistIn(ownedPiece, UserModel.GetOpponent(user)) && !DoesPieceExistIn(ownedPiece, Team.Unoccupied));
+        }
+
+        private static bool DoesPieceExistIn(TestPiece ownedPiece, Team desiredTeam)
+        {
+            return GetBelongsTo(ownedPiece) == desiredTeam;
+        }
+
+        private static Team GetBelongsTo(TestNode value)
+        {
+            return test_OriginalBoard[value.pos.x, value.pos.y].belongsTo;
+        }
+
+        private static Team GetBelongsTo(TestPiece value)
+        {
+            return test_OriginalBoard[value.pos.x, value.pos.y].belongsTo;
         }
 
         //float EvaluateState(UserModel model, Board customBoard)
