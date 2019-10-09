@@ -283,7 +283,8 @@ public class TestNode
         pos = boardPos;
         worldPos = transformPos;
         belongsTo = currentTeam;
-        if(currentTeam != Team.Unoccupied && currentTeam != Team.None && currentTeam != Team.BigGreen && currentTeam != Team.BigRed ){
+        if (currentTeam != Team.Unoccupied && currentTeam != Team.None && currentTeam != Team.BigGreen && currentTeam != Team.BigRed)
+        {
             countAsBase = false;
         }
         countAsBase = true;
@@ -341,6 +342,8 @@ public static class TestBoardModel
 
         public int GetLength(int a) => boardArr.GetLength(a);
         public TestNode FindReference(Vector2Int value) => (value.x >= boardArr.GetLength(0) || value.y >= boardArr.GetLength(1) || value.x < 0 || value.y < 0) ? new TestNode() : boardArr[value.x, value.y];
+
+        public TestNode FindReference(TestPiece value) => (boardArr[value.pos.x, value.pos.y]);
 
         public IEnumerator GetEnumerator() => boardArr.GetEnumerator();
 
@@ -462,22 +465,28 @@ public static class TestBoardModel
                 value += Vector2.Distance(ownedPiece.pos, goal.pos);
                 if (DoesPieceExistIn(ownedPiece, UserModel.GetOpponent(user)))
                 {
-                    value -= TestGameModel.amountOfPlayers;
+                    value -= 40;
+                    rayColor = Color.green;
+                }
+
+                if (DoesPieceExistIn(ownedPiece, user.currentTeam) || PieceLiesInAnUninterestingArea(ownedPiece, user))
+                {
+                    value += 1000;
                     rayColor = Color.yellow;
                 }
 
-                if(DoesPieceExistIn(ownedPiece, user.currentTeam) || PieceLiesInAnUninterestingArea(ownedPiece, user)){
-                    value += 2 + (TestGameModel.amountOfPlayers * 2);
+                if(UserModel.CheckForNeighbours(ownedPiece, user).Any(p => p.belongsTo != user.currentTeam) && DoesPieceExistIn(ownedPiece, user.currentTeam)){
+                    value -= 40;
                     rayColor = Color.red;
                 }
                 Debug.DrawLine(ownedPiece.worldPos, goal.worldPos, rayColor, 0.5f);
             }
-            return -(value * value);
+            return -value;
         }
 
         private bool PieceLiesInAnUninterestingArea(TestPiece ownedPiece, UserModel user)
         {
-            return (!DoesPieceExistIn(ownedPiece, UserModel.GetOpponent(user)) && !DoesPieceExistIn(ownedPiece, Team.Unoccupied));
+            return TestManager.ins.allPlayers.Any(x => user != x && DoesPieceExistIn(ownedPiece, x.currentTeam) && x.currentTeam != UserModel.GetOpponent(user));
         }
 
         private static bool DoesPieceExistIn(TestPiece ownedPiece, Team desiredTeam)
@@ -492,9 +501,10 @@ public static class TestBoardModel
 
         private static Team GetBelongsTo(TestPiece value)
         {
-            return test_OriginalBoard[value.pos.x, value.pos.y].belongsTo;
+            return test_OriginalBoard.FindReference(value).belongsTo;
         }
 
+        
         //float EvaluateState(UserModel model, Board customBoard)
         //         {
         //             float dist = 0;

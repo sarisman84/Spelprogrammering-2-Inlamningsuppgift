@@ -430,7 +430,7 @@ public abstract class UserModel : MonoBehaviour
     #endregion
 
     public Team currentTeam;
-    public Vector2Int desiredGoal;
+   
 
 
 
@@ -634,7 +634,7 @@ public abstract class UserModel : MonoBehaviour
             //Set its team
             computerEntity.currentTeam = team;
             //Set its target for minimax.
-            computerEntity.desiredGoal = GetDesiredGoal(computerEntity);
+           
             computerEntity.targetBase = GetTargetBase(GetOpponent(computerEntity), computerEntity);
             return computerEntity;
         }
@@ -643,7 +643,7 @@ public abstract class UserModel : MonoBehaviour
 
         normalPlayer.currentTeam = team;
 
-        normalPlayer.desiredGoal = GetDesiredGoal(normalPlayer);
+       
         normalPlayer.targetBase = GetTargetBase(GetOpponent(normalPlayer), normalPlayer);
 
         return normalPlayer;
@@ -662,47 +662,9 @@ public abstract class UserModel : MonoBehaviour
         return results;
     }
 
-    private static Vector2Int GetDesiredGoal(UserModel computerEntity)
-    {
-        Vector2Int[] ownedBase = SearchForBase(computerEntity.currentTeam);
-        Vector2Int[] enemyBase = SearchForBase(GetOpponent(computerEntity));
+   
 
-        float dist = 0;
-        Vector2Int target = Vector2Int.zero;
-        for (int a = 0; a < ownedBase.Length; a++)
-        {
-            for (int b = 0; b < enemyBase.Length; b++)
-            {
-                float result = Vector2Int.Distance(ownedBase[a], enemyBase[b]);
-                if (dist < result)
-                {
-                    dist = result;
-                    target = enemyBase[b];
-                }
-            }
-        }
-        return target;
-    }
-
-    private static Vector2Int[] SearchForBase(Team computerEntity)
-    {
-        Vector2Int[] results = (TestGameModel.amountOfPlayers == 2) ? new Vector2Int[15] : new Vector2Int[10];
-        int index = 0;
-        for (int x = 0; x < test_OriginalBoard.GetLength(0); x++)
-        {
-            for (int y = 0; y < test_OriginalBoard.GetLength(1); y++)
-            {
-                TestNode foundNode = test_OriginalBoard[x, y];
-                if (foundNode.belongsTo == computerEntity)
-                {
-                    results[index] = foundNode.pos;
-                    index++;
-                }
-            }
-        }
-
-        return results;
-    }
+   
 
     public static Team GetOpponent(UserModel user)
     {
@@ -759,6 +721,24 @@ public abstract class UserModel : MonoBehaviour
 
         }
         return savedResults;
+    }
+
+    public static List<TestPiece> CheckForNeighbours(TestPiece source, UserModel user){
+        List<TestPiece> output = new List<TestPiece>();
+        for (int i = 0; i < 6; i++)
+        {
+            TestPiece neighbour = GetNeighbour(source, i, user);
+            if(neighbour == null) continue;
+            output.Add(neighbour);
+        }
+        return output;
+    }
+
+    private static TestPiece GetNeighbour(TestPiece source, int i, UserModel user)
+    {
+        Vector2Int result = source.pos + user.BoardDirection(source.pos, i);
+        if (user.OutOfBounds(result) || test_OriginalBoard[result.x, result.y].belongsTo == Team.None) return null;
+        return globalPieceList.Find(p => p.pos == result);
     }
 
     private Vector2Int AttemptToGetPath(Vector2Int source, int curDir, List<Vector2Int> savedResults)
