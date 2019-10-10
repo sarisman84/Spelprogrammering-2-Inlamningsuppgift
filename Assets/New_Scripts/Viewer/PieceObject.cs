@@ -3,6 +3,7 @@ using System;
 public class PieceObject : MonoBehaviour
 {
 
+    //Variables that one, stores the position of an item in the array (as a reference, not actually IN the array) and two, hold some basic components.
     public Vector2Int boardCoordinate;
     SpriteRenderer _renderer;
 
@@ -11,7 +12,15 @@ public class PieceObject : MonoBehaviour
         _renderer = GetComponent<SpriteRenderer>();
     }
 
-    public Vector2Int currentBoardPosition;
+    /// <summary>
+    /// Fake constructor that creates a view piece.
+    /// </summary>
+    /// <param name="prefab">A prefab reference.</param>
+    /// <param name="worldPosition">Where the newrly created view piece will be spawned at.</param>
+    /// <param name="team">Which team it lies in.</param>
+    /// <param name="parent">A designated parent for sorting.</param>
+    /// <param name="boardCoord">A reference to the globalPieceList item.</param>
+    /// <returns>A view Piece.</returns>
     public static PieceObject CreatePieceObject(PieceObject prefab, Vector2 worldPosition, PieceColor team, Transform parent, Vector2Int boardCoord)
     {
         PieceObject newPiece = Instantiate(prefab, worldPosition, Quaternion.identity, parent);
@@ -21,6 +30,10 @@ public class PieceObject : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Sets a team color depending on team.
+    /// </summary>
+    /// <param name="team">Current team.</param>
     public void SetTeamColor(PieceColor team)
     {
         switch (team)
@@ -40,7 +53,13 @@ public class PieceObject : MonoBehaviour
             case PieceColor.Unoccupied: _renderer.color = Color.gray; break;
         }
     }
+    //A repeat of the same method from NodeObject.
 
+    /// <summary>
+    /// Custom method that converts hmtl color into unity color.
+    /// </summary>
+    /// <param name="v">Input.</param>
+    /// <returns>A color from that html string.</returns>
     private Color CustomColor(string v)
     {
         Color myColor = new Color();

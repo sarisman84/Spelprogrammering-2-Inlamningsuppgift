@@ -1,204 +1,28 @@
-using System.Runtime.InteropServices;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using UnityEngine;
 
 using static TestBoardModel;
 
-#region OldGameModel
-// public class GameModel
-// {
 
-//     private static int currentPlayerIndex = 0;
-//     public static List<UserModel> StartNewGame(List<Player> desiredPlayers, PieceObject prefab)
-//     {
-
-//         originalBoard.pieceArray = new Piece[originalBoard.boardArray.GetLength(0), originalBoard.boardArray.GetLength(1)];
-//         foreach (var obj in originalBoard.pieceViewArray)
-//         {
-//             if (obj != null)
-//                 MonoBehaviour.Destroy(obj.gameObject);
-//         }
-
-//         //Create nessesary pieces
-//         //Create nessesarry players
-
-//         //Return said players and somehow store the pieces
-
-//         List<UserModel> players = new List<UserModel>();
-
-//         foreach (Node node in originalBoard.boardArray)
-//         {
-//             if (desiredPlayers.Count == 2)
-//             {
-//                 if (node.belongsTo == Team.BigRed)
-//                 {
-//                     originalBoard.boardArray[node.pos.x, node.pos.y].belongsTo = Team.Red;
-//                 }
-//                 if (node.belongsTo == Team.BigGreen)
-//                 {
-//                     originalBoard.boardArray[node.pos.x, node.pos.y].belongsTo = Team.Green;
-//                 }
-//             }
-//         }
-
-//         for (int i = 0; i < desiredPlayers.Count; i++)
-//         {
-
-//             UserModel model = null;
-//             model = UserModel.CreatePlayer(desiredPlayers[i].isComputer, desiredPlayers[i].player);
-
-//             foreach (var node in originalBoard.boardArray)
-//             {
-
-//                 if (node.belongsTo == model.currentTeam)
-//                 {
-
-//                     Piece newPiece = new Piece(node.pos, node.belongsTo);
-//                     model.playerPieces.Add(newPiece);
-//                     Vector2 objectPos = node.worldPos;
-//                     originalBoard.pieceViewArray[node.pos.x, node.pos.y] = PieceObject.CreatePieceObject(prefab, objectPos, (PieceColor)newPiece.belongsTo, model.transform, newPiece.pos);
-//                     newPiece.worldPos = objectPos;
-//                     originalBoard.pieceArray[node.pos.x, node.pos.y] = newPiece;
-//                 }
-
-//             }
-
-//             players.Add(model);
-//         }
-//         return players;
-//     }
-
-//     public static List<UserModel> StartNewGame(SaveData data, PieceObject prefab)
-//     {
-
-//         List<Player> desiredPlayers = data.savedPlayers;
-//         foreach (var player in GameObject.FindObjectsOfType<UserModel>())
-//         {
-
-//             GameObject.Destroy(player.gameObject);
-//         }
-//         if (GameManagercs.allPlayers != null)
-//             GameManagercs.allPlayers.Clear();
-
-//         //Create nessesary pieces
-//         //Create nessesarry players
-
-//         //Return said players and somehow store the pieces
-
-//         List<UserModel> players = new List<UserModel>();
-
-//         foreach (Node node in originalBoard.boardArray)
-//         {
-//             if (desiredPlayers.Count == 2)
-//             {
-//                 if (node.belongsTo == Team.BigRed)
-//                 {
-//                     originalBoard.boardArray[node.pos.x, node.pos.y].belongsTo = Team.Red;
-//                 }
-//                 if (node.belongsTo == Team.BigGreen)
-//                 {
-//                     originalBoard.boardArray[node.pos.x, node.pos.y].belongsTo = Team.Green;
-//                 }
-//             }
-//         }
-
-//         for (int i = 0; i < desiredPlayers.Count; i++)
-//         {
-//             UserModel model = UserModel.CreatePlayer(desiredPlayers[i].isComputer, desiredPlayers[i].player);
-
-//             players.Add(model);
-//         }
-//         originalBoard.SetupLoadedBoard(data, players, prefab);
-
-//         return players;
-//     }
-//     public static IEnumerator GameRuntime(List<UserModel> players)
-//     {
-//         // int i = 0;
-//         // foreach (var player in players)
-//         // {
-//         //     switch (player)
-//         //     {
-
-//         //         case HumanPlayer human:
-//         //             human.OnGameAwake();
-//         //             break;
-
-//         //         case ComputerPlayer computer:
-
-//         //             computer.OnGameAwake();
-//         //             break;
-//         //     }
-//         // }
-//         // while (players.FindAll(p => p.HasWon == false).Count != 1)
-//         // {
-
-//         //     if (!isReady)
-//         //     {
-//         //         yield return null;
-//         //         continue;
-//         //     }
-//         //     if (i >= players.Count) i = 0;
-//         //     if (players.Count <= i) break;
-
-//         //     switch (players[i])
-//         //     {
-
-//         //         case HumanPlayer human:
-//         //             human.OnTurnTaken(ref i);
-//         //             break;
-
-//         //         case ComputerPlayer computer:
-
-//         //             yield return new WaitForSeconds(0.1f);
-//         //             computer.OnTurnTaken(ref i);
-//         //             break;
-//         //     }
-
-//         // }
-//         yield return null;
-
-//     }
-
-//     public static void GetNextTurn(List<UserModel> players)
-//     {
-//         //Debug.Log ($"{GameManagercs.allPlayers[currentPlayerIndex]}:{currentPlayerIndex}");
-
-//         players[currentPlayerIndex].StartTurn();
-
-//     }
-
-//     public static void PlayerDone()
-//     {
-//         if (GameManagercs.allPlayers.FindAll(p => p.HasWon == false).Count == 1)
-//         {
-//             EndGameRuntime();
-//             return;
-//         }
-//         //Debug.LogError("Player Done!");
-//         currentPlayerIndex++;
-
-//         if (currentPlayerIndex >= GameManagercs.allPlayers.Count) currentPlayerIndex = 0;
-//         GameManagercs.instance.TurnEnded();
-//     }
-
-//     private static void EndGameRuntime()
-//     {
-//         //End the game.
-//         Debug.Log("Game over!");
-//     }
-
-// }
-#endregion
 
 public static class TestGameModel
 {
 
+
+    //Some basic variables to have the class keep track of.
+
     public static int amountOfPlayers = 0;
+
+    static BoardNode[,] savedBoard;
+
+
+
+    /// <summary>
+    /// Mainline method: Creates a new match
+    /// </summary>
+    /// <param name="players">The amount of players participating, this includes what team each player will be as well as if they are computers.</param>
+    /// <param name="prefab">A reference to a view piece prefab for spawning each player's pieces.</param>
+    /// <returns>A list of active players that are participating in a match.</returns>
     public static List<UserModel> StartNewGame(List<PlayerDefinition> players, PieceObject prefab)
     {
         ResetGame(0);
@@ -213,8 +37,17 @@ public static class TestGameModel
         return users;
     }
 
+    /// <summary>
+    /// Helper method: Resets the game
+    /// </summary>
+    /// <param name="customIndex">Which player starts off.</param>
     private static void ResetGame(int customIndex)
     {
+        NodeObject.ResetInteractions();
+        TestManager.ins.ResetVictoryText();
+        if (savedBoard != null)
+            test_OriginalBoard.boardArr = savedBoard;
+        savedBoard = null;
         if (TestManager.ins.allPlayers.Count != 0)
         {
             TestManager.ins.allPlayers.Clear();
@@ -230,6 +63,13 @@ public static class TestGameModel
         }
         currPlayerIndex = customIndex;
     }
+
+    /// <summary>
+    /// Mainline: Starts a new game based on savedData
+    /// </summary>
+    /// <param name="data">The saved data used as a reference to create said game.</param>
+    /// <param name="prefab">A prefab reference for spawning in a view piece for each player</param>
+    /// <returns></returns>
     public static List<UserModel> StartNewGame(SaveData data, PieceObject prefab)
     {
         ResetGame(data.savedTurn);
@@ -248,6 +88,12 @@ public static class TestGameModel
     }
 
     #region Helper Methods
+
+    /// <summary>
+    /// Helper method: Creates players based on desired data.
+    /// </summary>
+    /// <param name="players">A reference to the desired data in order to create the players needed.</param>
+    /// <returns>A list of active players.</returns>
     private static List<UserModel> CreatePlayers(List<PlayerDefinition> players)
     {
 
@@ -263,10 +109,15 @@ public static class TestGameModel
         return result;
     }
 
+    /// <summary>
+    /// Helper method: Creates view pieces depending on player.
+    /// </summary>
+    /// <param name="players">A list of active players</param>
+    /// <param name="prefab">A prefab reference.</param>
     private static void CreatePieces(List<UserModel> players, PieceObject prefab)
     {
         Transform parent = new GameObject("Piece List").transform;
-        globalPieceList = new List<TestPiece>();
+        globalPieceList = new List<BoardPiece>();
 
         for (int i = 0; i < players.Count; i++)
         {
@@ -275,10 +126,10 @@ public static class TestGameModel
             {
                 for (int y = 0; y < test_OriginalBoard.GetLength(1); y++)
                 {
-                    TestNode foundNode = test_OriginalBoard[x, y];
+                    BoardNode foundNode = test_OriginalBoard[x, y];
                     if (players[i].currentTeam == foundNode.belongsTo)
                     {
-                        globalPieceList.Add(new TestPiece(foundNode));
+                        globalPieceList.Add(new BoardPiece(foundNode));
                         PieceObject piece = PieceObject.CreatePieceObject(prefab, foundNode.worldPos, (PieceColor)foundNode.belongsTo, parent, foundNode.pos);
                         players[i].OwnedViewPieces.Add(piece);
 
@@ -291,10 +142,18 @@ public static class TestGameModel
 
     }
 
+    /// <summary>
+    /// Helper method: Creates view pieces depending on player with information form a saved data file 
+    /// </summary>
+    /// <param name="players">A list of active players</param>
+    /// <param name="prefab">A prefab reference</param>
+    /// <param name="data">A data file reference</param>
     private static void CreatePieces(List<UserModel> players, PieceObject prefab, SaveData data)
     {
+        //This method is an overload of the original CreatePieces method.
+        //It uses data info to create pieces with their positions and teams intact.
         Transform parent = new GameObject("Piece List").transform;
-        globalPieceList = new List<TestPiece>();
+        globalPieceList = new List<BoardPiece>();
         for (int i = 0; i < players.Count; i++)
         {
             players[i].OwnedViewPieces = new List<PieceObject>();
@@ -302,8 +161,8 @@ public static class TestGameModel
             {
                 if (item.belongsTo == players[i].currentTeam)
                 {
-                    TestNode foundNode = new TestNode(new Vector2Int(item.boardPos.x, item.boardPos.y), new Vector2(item.worldPos.x, item.worldPos.y), item.belongsTo);
-                    globalPieceList.Add(new TestPiece(foundNode));
+                    BoardNode foundNode = new BoardNode(new Vector2Int(item.boardPos.x, item.boardPos.y), new Vector2(item.worldPos.x, item.worldPos.y), item.belongsTo);
+                    globalPieceList.Add(new BoardPiece(foundNode));
                     PieceObject piece = PieceObject.CreatePieceObject(prefab, foundNode.worldPos, (PieceColor)foundNode.belongsTo, parent, foundNode.pos);
                     players[i].OwnedViewPieces.Add(piece);
 
@@ -317,11 +176,16 @@ public static class TestGameModel
 
     }
 
+    /// <summary>
+    /// Changes the board to fit the 2 player format. (saves the original board in a seperate variable).
+    /// </summary>
     private static void AdaptTheBoard()
     {
-        foreach (TestNode node in test_OriginalBoard)
+        savedBoard = test_OriginalBoard.SaveBoard();
+        Debug.Log(test_OriginalBoard.Length);
+        foreach (BoardNode node in test_OriginalBoard)
         {
-            TestNode foundNode = test_OriginalBoard.FindReference(node.pos);
+            BoardNode foundNode = test_OriginalBoard.FindReference(node.pos);
             if (node.belongsTo == Team.BigRed)
             {
                 test_OriginalBoard.boardArr[node.pos.x, node.pos.y].belongsTo = Team.Red;
@@ -333,45 +197,74 @@ public static class TestGameModel
 
         }
     }
+
+    //The following code is representing a game runtime.
+
+
     public static int currPlayerIndex = 0;
+
+    /// <summary>
+    /// Gets called whenever a player is done in their previous turn (or gets called at the beginning of the game via TestManager)
+    /// </summary>
+    /// <param name="players">A list of active players</param>
+    /// <param name="sign">A reference to a text UI element to show the players turn.</param>
     public static void GetNextTurn(List<UserModel> players, TMPro.TMP_Text sign)
     {
-        //Debug.Log ($"{players[currPlayerIndex]}:{currPlayerIndex}");
-        if(players[currPlayerIndex].HasPlayerWon()) NextPlayer(players);
+        
+        if (players[currPlayerIndex].HasPlayerWon()) NextPlayer(players);
         sign.text = $"Turn: {players[currPlayerIndex].currentTeam}";
+        if(players[currPlayerIndex].currentTeam == Team.Red && players[currPlayerIndex].GetType() != typeof(ComputerPlayer)) sign.text += " (You!)";
+        sign.color = UtilityClass.GetColor((UtilityClass.tColor)players[currPlayerIndex].currentTeam);
         players[currPlayerIndex].StartTurn();
 
     }
 
+    /// <summary>
+    /// Helper method: Gets the next player within the list.
+    /// </summary>
+    /// <param name="players">List of active players</param>
     private static void NextPlayer(List<UserModel> players)
     {
         currPlayerIndex++;
         currPlayerIndex = (currPlayerIndex >= players.Count || players == null || currPlayerIndex < 0) ? 0 : currPlayerIndex;
     }
 
+    /// <summary>
+    /// Gets called whenever someones turn is over.
+    /// </summary>
     public static void PlayerDone()
     {
         if (TestManager.ins.allPlayers.FindAll(p => p.HasPlayerWon() == false).Count == 1)
         {
-            EndGameRuntime(TestManager.ins.winText, TestManager.ins.allPlayers.FindAll(p => p.HasPlayerWon() == true));
+            EndGameRuntime(TestManager.ins.allPlayers.FindAll(p => p.HasPlayerWon() == true));
             return;
         }
         //Debug.LogError("Player Done!");
         NextPlayer(TestManager.ins.allPlayers);
-      
+
         TestManager.ins.TurnEnded();
     }
 
-    private static void EndGameRuntime(TMPro.TMP_Text sign, List<UserModel> winners)
+    /// <summary>
+    /// Gets called when all but one player has not won which will end the loop.
+    /// </summary>
+    /// <param name="winners">The list of all players that have won!</param>
+    private static void EndGameRuntime(List<UserModel> winners)
     {
         //End the game.
-        string message = "";
-        foreach (var winner in winners)
+        string message = "<Winners: ";
+        for (int i = 0; i < winners.Count; i++)
         {
-            message += $": {winner.currentTeam} :";
+            
+            if(i == winners.Count - 1){
+                message += $"{winners[i].currentTeam}";
+                continue;
+            }
+            message += $"{winners[i].currentTeam},";
+
         }
-        message += " Won!";
-        sign.text = message;
+        message += ">";
+        TestManager.ins.InsertVictoryMessage(message);
     }
 
     #endregion

@@ -5,6 +5,8 @@ using TMPro;
 
 public class NodeObject : MonoBehaviour
 {
+
+    //Variables that one, stores the position of an item in the array (as a reference, not actually IN the array) and two, hold some basic components.
     public Vector2Int boardCoordinate;
     PolygonCollider2D col2D;
     SpriteRenderer _renderer;
@@ -17,7 +19,7 @@ public class NodeObject : MonoBehaviour
     {
         col2D = GetComponent<PolygonCollider2D>();
         _renderer = GetComponent<SpriteRenderer>();
-        
+
         OnInteract();
 
     }
@@ -27,14 +29,23 @@ public class NodeObject : MonoBehaviour
         col2D = GetComponent<PolygonCollider2D>();
         _renderer = GetComponent<SpriteRenderer>();
         OnInteract();
-        //float val = boardCoordinate.x % 2;
-        //evenCounter.text = $"{val}";
     }
 
-    public void DebugCoordinates(bool value){
+
+    public void DebugCoordinates(bool value)
+    {
         evenCounter.text = (value) ? coordinate : "";
     }
 
+    /// <summary>
+    /// Fake constructor that creates a node via Instantiate().
+    /// </summary>
+    /// <param name="prefab">A reference to a prefab.</param>
+    /// <param name="position">Where said node will lie in (world position).</param>
+    /// <param name="team">Which team it currently belongs to.</param>
+    /// <param name="parent">A designated parent for sorting.</param>
+    /// <param name="boardCoord">A boardCoordinate to reference the real array's node.</param>
+    /// <returns>A newrly created view node.</returns>
     public static NodeObject CreateNodeObject(NodeObject prefab, Vector2 position, NodeColor team, Transform parent, Vector2Int boardCoord)
     {
         NodeObject newNode = Instantiate(prefab, position, Quaternion.identity, parent);
@@ -47,6 +58,10 @@ public class NodeObject : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Highlights said node baised on hexcode color.
+    /// </summary>
+    /// <param name="hexcode">Color in a html format.</param>
     public void OnInteract(string hexcode)
     {
         if (childRenderer == null) return;
@@ -60,6 +75,10 @@ public class NodeObject : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Sets base color depending on NodeColor information
+    /// </summary>
+    /// <param name="team">What color this will turn into</param>
     public void SetTeamColor(NodeColor team)
     {
         switch (team)
@@ -142,15 +161,29 @@ public class NodeObject : MonoBehaviour
 
             default:
                 col2D.enabled = false;
+                _renderer.color = new Color();
                 break;
         }
     }
 
+    /// <summary>
+    /// Custom method that converts hmtl color into unity color.
+    /// </summary>
+    /// <param name="v">Input.</param>
+    /// <returns>A color from that html string.</returns>
     private Color CustomColor(string v)
     {
         Color myColor = new Color();
         ColorUtility.TryParseHtmlString(v, out myColor);
         return myColor;
+    }
+
+    public static void ResetInteractions()
+    {
+        foreach (var item in TestBoardModel.globalNodeViewList)
+        {
+            item.OnInteract();
+        }
     }
 }
 

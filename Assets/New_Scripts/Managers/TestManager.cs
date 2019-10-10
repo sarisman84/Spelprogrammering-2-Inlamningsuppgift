@@ -60,7 +60,13 @@ public class TestManager : MonoBehaviour {
         foreach (var item in FindObjectsOfType<NodeObject> ()) {
             item.DebugCoordinates (value);
         }
+        
+        if(!value){
+            NodeObject.ResetInteractions();
+        }
     }
+
+    public bool EnableDebug => value;
 
     public void OnStartEvent () {
         allPlayers = TestGameModel.StartNewGame (modeSelection[selection.value].players, piecePrefab);
@@ -82,6 +88,14 @@ public class TestManager : MonoBehaviour {
         isReady = false;
         TestGameModel.GetNextTurn (allPlayers, turnText);
 
+    }
+
+    public void ResetVictoryText(){
+        winText.text = "";
+    }
+
+    public void InsertVictoryMessage(string message){
+        winText.text = message;
     }
 }
 

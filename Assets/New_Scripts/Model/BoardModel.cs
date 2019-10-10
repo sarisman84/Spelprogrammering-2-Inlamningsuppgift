@@ -35,281 +35,53 @@ public enum PieceColor
     Red = 2, Orange, Yellow, Green, Blue, Magenta, Unoccupied = 1
 }
 
-#region OldBoardModel
-// [System.Serializable]
-// public class BoardModel
-// {
-//     [System.Serializable]
-//     public class Board
-//     {
 
-//         public Node[,] boardArray;
-//         public Piece[,] pieceArray;
-
-//         int boardSizeX, boardSizeY;
-
-//         public Vector2Int GetLength
-//         {
-//             get
-//             {
-//                 if (boardSizeX == 0) boardSizeX = boardArray.GetLength(0);
-//                 if (boardSizeY == 0) boardSizeY = boardArray.GetLength(1);
-
-//                 return new Vector2Int(boardSizeX, boardSizeY);
-//             }
-//         }
-
-//         public Piece[,] GetSimulateABoard()
-//         {
-
-//             Piece[,] newPieceArray = new Piece[GetLength.x, GetLength.y];
-//             for (int x = 0; x < boardArray.GetLength(0); x++)
-//             {
-//                 for (int y = 0; y < boardArray.GetLength(1); y++)
-//                 {
-//                     Piece piece = pieceArray[x, y];
-//                     newPieceArray[x, y] = (piece != null) ? new Piece(piece.pos, piece.belongsTo) : null;
-//                 }
-//             }
-
-//             return newPieceArray;
-//         }
-
-//         public void ResetPieceArray()
-//         {
-//             pieceArray = new Piece[boardArray.GetLength(0), boardArray.GetLength(1)];
-//         }
-//         public void ResetPieceViewArray()
-//         {
-//             pieceViewArray = new PieceObject[boardArray.GetLength(0), boardArray.GetLength(1)];
-//         }
-//         public NodeObject[,] boardViewArray;
-//         public PieceObject[,] pieceViewArray;
-
-//         public Node GetNode(Vector2Int pos) => boardArray[pos.x, pos.y];
-//         public Piece GetPiece(Vector2Int pos) => pieceArray[pos.x, pos.y];
-//         public PieceObject GetVisualPiece(Vector2Int pos) => pieceViewArray[pos.x, pos.y];
-
-//         public NodeObject GetVisualNode(Vector2Int pos) => boardViewArray[pos.x, pos.y];
-
-//         public void RemovePieceAt(Vector2Int pos)
-//         {
-//             pieceArray[pos.x, pos.y] = null;
-//         }
-//         public void InsertPieceAt(Vector2Int pos, Piece newPiece)
-//         {
-//             pieceArray[pos.x, pos.y] = newPiece;
-//         }
-
-//         public void RemovePieceViewAt(Vector2Int pos)
-//         {
-//             pieceViewArray[pos.x, pos.y] = null;
-//         }
-//         public void InsertPieceViewAt(Vector2Int pos, PieceObject obj)
-//         {
-//             pieceViewArray[pos.x, pos.y] = obj;
-//         }
-
-//         public void SetupLoadedBoard(SaveData data, List<UserModel> players, PieceObject prefab)
-//         {
-//             pieceArray = new Piece[boardArray.GetLength(0), boardArray.GetLength(1)];
-//             foreach (var obj in pieceViewArray)
-//             {
-//                 if (obj != null)
-//                     MonoBehaviour.Destroy(obj.gameObject);
-//             }
-//             pieceViewArray = new PieceObject[boardArray.GetLength(0), boardArray.GetLength(1)];
-//             foreach (var user in players)
-//             {
-//                 foreach (var pieceData in data.savedBoard)
-//                 {
-//                     if (pieceData == null) continue;
-//                     if (user.currentTeam != pieceData.belongsTo) continue;
-//                     Debug.Log(user.currentTeam);
-//                     Piece newPiece = new Piece(pieceData);
-//                     user.playerPieces.Add(newPiece);
-//                     pieceViewArray[newPiece.x, newPiece.y] = PieceObject.CreatePieceObject(prefab, newPiece.worldPos, (PieceColor)newPiece.belongsTo, user.transform, newPiece.pos);
-//                     pieceArray[newPiece.x, newPiece.y] = newPiece;
-//                 }
-//             }
-
-//         }
-
-//     }
-
-//     public class Turn : IComparable
-//     {
-
-//         public Vector2Int movedPiece;
-//         public Vector2Int target;
-//         float value;
-//         public float Value => value;
-
-//         public Turn() { }
-
-//         public Turn(Vector2Int _piece, Vector2Int _node, float _value)
-//         {
-//             movedPiece = _piece;
-//             target = _node;
-//             value = _value;
-
-//         }
-
-//         public int CompareTo(object obj)
-//         {
-//             return (value > (obj as Turn).value) ? 1 : (value < (obj as Turn).value) ? -1 : 0;
-//         }
-
-//         public List<Turn> Expand(UserModel model, Board currentBoard)
-//         {
-//             List<Turn> output = new List<Turn>();
-//             for (int i = 0; i < model.playerPieces.Count; i++)
-//             {
-//                 Piece piece = model.playerPieces[i];
-//                 List<Node> list = model.GetPath(currentBoard.GetNode(piece.pos), new List<Node>(), true, false);
-//                 for (int i1 = 0; i1 < list.Count; i1++)
-//                 {
-//                     Node node = list[i1];
-//                     Piece[,] simulatedBoard = currentBoard.GetSimulateABoard();
-//                     Piece simPiece = simulatedBoard[piece.x, piece.y];
-//                     Node simNode = originalBoard
-//                         .GetNode(node.pos);
-//                     Vector2Int oldPos = simPiece.pos;
-//                     Board newBoard = new Board();
-//                     newBoard.pieceArray = simulatedBoard;
-//                     model.SimulateMove(simPiece, simNode, newBoard);
-//                     float eval = EvaluateState(model, newBoard);
-
-//                     Turn turn = new Turn(oldPos, simNode.pos, eval);
-//                     output.Add(turn);
-//                 }
-//             }
-//             return output;
-//         }
-
-//         float EvaluateState(UserModel model, Board customBoard)
-//         {
-//             float dist = 0;
-//             foreach (Vector2Int pos in UserModel.GetPlayerPositions(model.currentTeam, customBoard))
-//             {
-//                 dist -= Vector2Int.Distance(pos, model.opponentGoal);
-
-//             }
-//             return dist;
-//         }
-//     }
-
-//     public static Board originalBoard;
-
-// }
-
-// [System.Serializable]
-// public class Node
-// {
-//     public Node(Vector2Int pos, UnityEngine.Vector2 worldPos, Team currentTeam)
-//     {
-//         this.pos = pos;
-//         belongsTo = currentTeam;
-//         this.worldPos = worldPos;
-//     }
-
-//     public Vector2Int pos;
-//     public UnityEngine.Vector2 worldPos;
-//     public Team belongsTo;
-// }
-
-// [System.Serializable]
-// public class Piece
-// {
-//     public Piece(Vector2Int _pos, Team currentTeam)
-//     {
-//         pos = _pos;
-//         belongsTo = currentTeam;
-//     }
-
-//     public Piece(PieceData data)
-//     {
-//         pos = new Vector2Int(data.boardPos.x, data.boardPos.y);
-//         worldPos = new UnityEngine.Vector2(data.worldPos.x, data.worldPos.y);
-//         belongsTo = data.belongsTo;
-//     }
-
-//     // public Vector2Int pos;
-//     public Vector2Int pos
-//     {
-//         get
-//         {
-//             return new Vector2Int(x, y);
-//         }
-//         set
-//         {
-//             x = value.x;
-//             y = value.y;
-//         }
-//     }
-
-//     public int x, y;
-//     public Team belongsTo;
-//     public UnityEngine.Vector2 worldPos
-//     {
-//         get
-//         {
-//             return new UnityEngine.Vector2(wX, wY);
-//         }
-//         set
-//         {
-//             wX = value.x;
-//             wY = value.y;
-//         }
-//     }
-//     public float wX, wY;
-// }
-
-#endregion
 
 #region NewBoardModel
 [System.Serializable]
-public class TestNode
+public class BoardNode
 {
 
     public Vector2Int pos;
     public Vector2 worldPos;
     public Team belongsTo;
 
-    public bool countAsBase;
 
-    public TestNode(Vector2Int boardPos, Vector2 transformPos, Team currentTeam)
+
+    public BoardNode(Vector2Int boardPos, Vector2 transformPos, Team currentTeam)
     {
         pos = boardPos;
         worldPos = transformPos;
         belongsTo = currentTeam;
-        if (currentTeam != Team.Unoccupied && currentTeam != Team.None && currentTeam != Team.BigGreen && currentTeam != Team.BigRed)
-        {
-            countAsBase = false;
-        }
-        countAsBase = true;
     }
 
-    public TestNode() { }
-}
-
-[System.Serializable]
-public class TestPiece
-{
-
-    public Vector2Int pos;
-    public Vector2 worldPos;
-
-    public Team belongsTo;
-
-    public TestPiece(TestNode node)
+    public BoardNode(BoardNode node)
     {
         pos = node.pos;
         worldPos = node.worldPos;
         belongsTo = node.belongsTo;
     }
 
-    public TestPiece(TestPiece piece)
+    public BoardNode() { }
+}
+
+[System.Serializable]
+public class BoardPiece
+{
+
+    public Vector2Int pos;
+    public Vector2 worldPos;
+
+    public Team belongsTo;
+
+    public BoardPiece(BoardNode node)
+    {
+        pos = node.pos;
+        worldPos = node.worldPos;
+        belongsTo = node.belongsTo;
+    }
+
+    public BoardPiece(BoardPiece piece)
     {
         pos = piece.pos;
         worldPos = piece.worldPos;
@@ -318,7 +90,7 @@ public class TestPiece
 
     public float offsetValue = 0;
 
-    public TestPiece()
+    public BoardPiece()
     {
 
     }
@@ -330,36 +102,69 @@ public static class TestBoardModel
 
     public class Board
     {
-        public TestNode[,] boardArr;
-        public TestNode this[int a, int b]
+        public BoardNode[,] boardArr;
+        public BoardNode this[int a, int b]
         {
             get => boardArr[a, b];
             set => boardArr[a, b] = value;
         }
 
-        #region Properties
-        public TestNode[,] Grid { set => boardArr = value; }
+        public Board(int sizeX, int sizeY)
+        {
+            boardArr = new BoardNode[sizeX, sizeY];
+        }
+
+        #region Properties // These are used to get a direct reference to the boardArray.
+        public BoardNode[,] Grid { set => boardArr = value; }
+
 
         public int GetLength(int a) => boardArr.GetLength(a);
-        public TestNode FindReference(Vector2Int value) => (value.x >= boardArr.GetLength(0) || value.y >= boardArr.GetLength(1) || value.x < 0 || value.y < 0) ? new TestNode() : boardArr[value.x, value.y];
+        public BoardNode FindReference(Vector2Int value) => (value.x >= boardArr.GetLength(0) || value.y >= boardArr.GetLength(1) || value.x < 0 || value.y < 0) ? new BoardNode() : boardArr[value.x, value.y];
 
-        public TestNode FindReference(TestPiece value) => (boardArr[value.pos.x, value.pos.y]);
+        public BoardNode FindReference(BoardPiece value) => (boardArr[value.pos.x, value.pos.y]);
 
         public IEnumerator GetEnumerator() => boardArr.GetEnumerator();
 
-        public List<TestPiece> Clone()
+        /// <summary>
+        /// Creates a literal clone of the globalPieceList. (Since Clone() only returns a reference point to the original list.)
+        /// </summary>
+        /// <returns>A literal clone.</returns>
+        public List<BoardPiece> Clone()
         {
-            List<TestPiece> result = new List<TestPiece>();
+            List<BoardPiece> result = new List<BoardPiece>();
             for (int i = 0; i < globalPieceList.Count; i++)
             {
-                result.Add(new TestPiece(TestBoardModel.globalPieceList[i]));
+                result.Add(new BoardPiece(TestBoardModel.globalPieceList[i]));
             }
             return result;
         }
 
-        public List<TestNode> FindAll(Predicate<TestNode> del)
+        /// <summary>
+        /// Creates a literal clone of the boardArr. (Since Clone() only returns a reference point to the original array.)
+        /// </summary>
+        /// <returns>A literal clone.</returns>
+        public BoardNode[,] SaveBoard()
         {
-            List<TestNode> result = new List<TestNode>();
+            BoardNode[,] output = new BoardNode[boardArr.GetLength(0), boardArr.GetLength(1)];
+            for (int h = 0; h < output.GetLength(0); h++)
+            {
+                for (int i = 0; i < output.GetLength(1); i++)
+                {
+                    output[h, i] = new BoardNode(boardArr[h, i]);
+                }
+            }
+            return output;
+        }
+
+
+        /// <summary>
+        /// A replication of the Linq.FindAll() method.
+        /// </summary>
+        /// <param name="del">A predicate delegate that mimics the behaivour of the original method.</param>
+        /// <returns>A list of elements from the desired predicate.</returns>
+        public List<BoardNode> FindAll(Predicate<BoardNode> del)
+        {
+            List<BoardNode> result = new List<BoardNode>();
             for (int x = 0; x < boardArr.GetLength(0); x++)
             {
                 for (int y = 0; y < boardArr.GetLength(1); y++)
@@ -372,9 +177,14 @@ public static class TestBoardModel
             return result;
         }
 
-        public TestNode Find(Predicate<TestNode> del)
+        /// <summary>
+        /// A replication of the Linq.Find() method.
+        /// </summary>
+        /// <param name="del">A predicate delegate that mimics the behaivour of the original method.</param>
+        /// <returns>A list of elements from the desired predicate.</returns>
+        public BoardNode Find(Predicate<BoardNode> del)
         {
-            List<TestNode> result = new List<TestNode>();
+            List<BoardNode> result = new List<BoardNode>();
             for (int x = 0; x < boardArr.GetLength(0); x++)
             {
                 for (int y = 0; y < boardArr.GetLength(1); y++)
@@ -383,17 +193,24 @@ public static class TestBoardModel
                 }
 
             }
-            TestNode node = result.Find(del);
+            BoardNode node = result.Find(del);
             return node;
         }
+
+        
+        public int Length => boardArr.Length;
 
 
     }
     #endregion
 
     public static Board test_OriginalBoard;
-    public static List<TestPiece> globalPieceList;
 
+
+    //I have seperated the BoardPiece list from the Board class since we only want to interact with this list and not the static board.
+    public static List<BoardPiece> globalPieceList;
+
+    //I have also seperated the list for the viewNodes for the same reason. Then again, i could always add this back into the board class.
     public static List<NodeObject> globalNodeViewList;
 
     public class Move : IComparable
@@ -412,22 +229,29 @@ public static class TestBoardModel
 
         public Move() { }
 
+        //Impementation of IComparable for the Gnome sort algorithm.
         public int CompareTo(object obj)
         {
             return ((obj as Move).value > value) ? 1 : ((obj as Move).value < value) ? -1 : 0;
         }
 
+        //Note: A move (this class) is deficed by the selected piece, the selected destination for said piece and a value for the move.
+        /// <summary>
+        /// Mainline Method: Gets the child moves of this current one.
+        /// </summary>
+        /// <param name="owner">Which user are we used from?</param>
+        /// <returns>A list of moves</returns>
         public List<Move> Expand(UserModel owner)
         {
             List<Move> output = new List<Move>();
             for (int i = 0; i < owner.OwnedPieces.Count; i++)
             {
-                TestPiece piece = owner.OwnedPieces[i];
+                BoardPiece piece = owner.OwnedPieces[i];
                 List<Vector2Int> path = owner.PathOfMoves(piece.pos, new List<Vector2Int>(), true);
                 for (int a = 0; a < path.Count; a++)
                 {
                     //Simulate a board
-                    List<TestPiece> simulatedBoard = test_OriginalBoard.Clone();
+                    List<BoardPiece> simulatedBoard = test_OriginalBoard.Clone();
                     int newPiece = 0;
                     for (int p = 0; p < simulatedBoard.Count; p++)
                     {
@@ -443,7 +267,7 @@ public static class TestBoardModel
 
 
                     owner.Simulate_MovePiece(newPiece, target, simulatedBoard);
-                    TestNode goal = owner.DesiredGoal();
+                    BoardNode goal = owner.DesiredGoal();
                     float value = EvaluateMove(simulatedBoard, owner, goal);
                     Move move = new Move(currentPiece, target, value);
                     output.Add(move);
@@ -454,12 +278,18 @@ public static class TestBoardModel
             return output;
         }
 
-
-        float EvaluateMove(List<TestPiece> board, UserModel user, TestNode goal)
+        /// <summary>
+        /// Helper method: rates the move depending on distance.
+        /// </summary>
+        /// <param name="board">The current simulated board we are working in.</param>
+        /// <param name="user">The current user we are working with.</param>
+        /// <param name="goal">The current goal we are trying to go to.</param>
+        /// <returns>A score for the current move.</returns>
+        float EvaluateMove(List<BoardPiece> board, UserModel user, BoardNode goal)
         {
             float value = 0;
 
-            foreach (TestPiece ownedPiece in UserModel.GetPlayerPositions(user.currentTeam, board))
+            foreach (BoardPiece ownedPiece in UserModel.GetPlayerPositions(user.currentTeam, board))
             {
                 Color rayColor = Color.cyan;
                 value += Vector2.Distance(ownedPiece.pos, goal.pos);
@@ -475,46 +305,43 @@ public static class TestBoardModel
                     rayColor = Color.yellow;
                 }
 
-                if(UserModel.CheckForNeighbours(ownedPiece, user).Any(p => p.belongsTo != user.currentTeam) && DoesPieceExistIn(ownedPiece, user.currentTeam)){
+                if (UserModel.CheckForNeighbours(ownedPiece, user).Any(p => p.belongsTo != user.currentTeam) && DoesPieceExistIn(ownedPiece, user.currentTeam))
+                {
                     value -= 40;
                     rayColor = Color.red;
                 }
-                Debug.DrawLine(ownedPiece.worldPos, goal.worldPos, rayColor, 0.5f);
+                if (DoesPieceExistIn(ownedPiece, UserModel.GetOpponent(user)) && GetBelongsTo(goal) == UserModel.GetOpponent(user))
+                {
+                    value -= 400;
+                    rayColor = Color.gray;
+                }
+                if (TestManager.ins.EnableDebug)
+                    Debug.DrawLine(ownedPiece.worldPos, goal.worldPos, rayColor, 0.5f);
             }
             return -value;
         }
 
-        private bool PieceLiesInAnUninterestingArea(TestPiece ownedPiece, UserModel user)
+        //The following are used as conditions for setting different score values on different scenarios.
+
+        private bool PieceLiesInAnUninterestingArea(BoardPiece ownedPiece, UserModel user)
         {
             return TestManager.ins.allPlayers.Any(x => user != x && DoesPieceExistIn(ownedPiece, x.currentTeam) && x.currentTeam != UserModel.GetOpponent(user));
         }
 
-        private static bool DoesPieceExistIn(TestPiece ownedPiece, Team desiredTeam)
+        private static bool DoesPieceExistIn(BoardPiece ownedPiece, Team desiredTeam)
         {
             return GetBelongsTo(ownedPiece) == desiredTeam;
         }
 
-        private static Team GetBelongsTo(TestNode value)
+        private static Team GetBelongsTo(BoardNode value)
         {
             return test_OriginalBoard[value.pos.x, value.pos.y].belongsTo;
         }
 
-        private static Team GetBelongsTo(TestPiece value)
+        private static Team GetBelongsTo(BoardPiece value)
         {
             return test_OriginalBoard.FindReference(value).belongsTo;
         }
-
-        
-        //float EvaluateState(UserModel model, Board customBoard)
-        //         {
-        //             float dist = 0;
-        //             foreach (Vector2Int pos in UserModel.GetPlayerPositions(model.currentTeam, customBoard))
-        //             {
-        //                 dist -= Vector2Int.Distance(pos, model.opponentGoal);
-
-        //             }
-        //             return dist;
-        //         }
     }
 
 }
