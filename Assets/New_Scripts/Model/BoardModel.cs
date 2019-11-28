@@ -307,7 +307,7 @@ public static class TestBoardModel
 
                 if (UserModel.CheckForNeighbours(ownedPiece, user).Any(p => p.belongsTo != user.currentTeam) && DoesPieceExistIn(ownedPiece, user.currentTeam))
                 {
-                    value -= 40;
+                    value -= 400;
                     rayColor = Color.red;
                 }
                 if (DoesPieceExistIn(ownedPiece, UserModel.GetOpponent(user)) && GetBelongsTo(goal) == UserModel.GetOpponent(user))
