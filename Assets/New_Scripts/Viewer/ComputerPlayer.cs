@@ -48,7 +48,7 @@ public class ComputerPlayer : UserModel {
     /// </summary>
     /// <param name="t">Used for recursion.</param>
     /// <param name="player">A reference to this current player.</param>
-    /// <param name="otherPlayers">A reference to the another player.</param>
+    /// <param name="otherPlayers">A reference of the other players who have not won yet.</param>
     /// <param name="depth">How many layers of recursion are we doing?</param>
     /// <param name="alpha"> Pruning used to lessen searching.</param>
     /// <param name="beta">Pruning used to lessen searching.</param>
