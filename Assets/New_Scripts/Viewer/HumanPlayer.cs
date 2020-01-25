@@ -27,7 +27,7 @@ public class HumanPlayer : UserModel {
     //Obligatory Raycast Update loop.
     private void Update () {
         if (!isReady) return;
-        if (Input.GetKeyDown (KeyCode.Tab) && hasntDoneFirstMove) EndTurn ();
+        if (Input.GetKeyDown (KeyCode.Tab) && !hasntDoneFirstMove) EndTurn ();
         if (!Input.GetMouseButtonDown (0)) return;
         Vector2 mousePos = cam.ScreenToWorldPoint (Input.mousePosition);
         detection = Physics2D.Raycast (mousePos, cam.transform.forward);
