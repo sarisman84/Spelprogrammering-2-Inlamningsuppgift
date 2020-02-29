@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static TestBoardModel;
 
@@ -8,8 +9,15 @@ public class ComputerPlayer : UserModel {
     void AtTheStartOfTurn () {
         int index = GetValidOpponent (TestGameModel.currPlayerIndex + 1);
         Move newMove = //Minimax (new Move (), this, TestManager.ins.allPlayers[index], 1, float.MinValue, float.MaxValue, true); 
-            Minimax (new Move (), this, TestManager.ins.allPlayers.FindAll (u => u != this && u.HasPlayerWon () == false), 1, float.MinValue, float.MaxValue, true);
-
+            Minimax (
+                new Move (),
+                TestManager.ins.allPlayers,
+                1,
+                TestManager.ins.allPlayers.FindIndex (0, TestManager.ins.allPlayers.Count, p => p == this),
+                float.MinValue,
+                float.MaxValue,
+                true);
+        if (newMove == null) { EndTurn (); return; }
         Vector2Int currentPiece = newMove.currentPiece;
         Vector2Int target = newMove.target;
         //Debug.Log($"From {currentTeam}: {newMove.value}");
@@ -171,6 +179,57 @@ public class ComputerPlayer : UserModel {
         return Minimax (results[results.Count - 1], player, otherPlayer, depth - 1, true);
     }
 
+    Move Minimax (Move t, List<UserModel> playerList, int depth, int startingPlayer, float alpha, float beta, bool maximizingPlayer) {
+        if (depth == 0) return t;
+        List<Move> results;
+        Move nextPontetialTurn = new Move ();
+        Move potentialTurn;
+
+        startingPlayer = (playerList.Count <= startingPlayer) ? 0 : startingPlayer;
+
+        if (maximizingPlayer) {
+            results = t.Expand (playerList[startingPlayer]);
+            if (results.Count == 0) return t;
+            float maxEval = float.MinValue;
+            foreach (Move turn in results) {
+                potentialTurn = Minimax (turn, playerList, depth - 1, startingPlayer + 1, alpha, beta, false);
+                if (potentialTurn != null && potentialTurn.value > maxEval) {
+                    nextPontetialTurn = turn;
+                    maxEval = potentialTurn.value;
+                }
+                if (potentialTurn != null && potentialTurn.value > alpha) {
+                    alpha = potentialTurn.value;
+                }
+                if (beta <= alpha) {
+                    break;
+                }
+            }
+        } else {
+
+            UserModel otherPlayer = playerList[startingPlayer];
+            results = t.Expand (otherPlayer);
+            if (results.Count == 0) return t;
+            float minEval = float.MaxValue;
+            foreach (Move turn in results) {
+
+                potentialTurn = Minimax (turn, playerList, depth - 1, startingPlayer + 1, alpha, beta, true);
+                if (potentialTurn != null && potentialTurn.value < minEval) {
+                    nextPontetialTurn = turn;
+                    minEval = potentialTurn.value;
+                }
+                if (potentialTurn != null && potentialTurn.value < beta) {
+                    beta = potentialTurn.value;
+                }
+
+                if (beta <= alpha) {
+                    break;
+                }
+
+            }
+
+        }
+        return nextPontetialTurn;
+    }
     /// <summary>
     /// A sorting algorithm meant to sort from best to worst result depending on variables within the list.
     /// </summary>
