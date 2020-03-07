@@ -5,7 +5,6 @@ using UnityEngine;
 using static TestBoardModel;
 
 public class HumanPlayer : UserModel {
-   
 
     RaycastHit2D detection;
     Camera cam;
@@ -19,7 +18,6 @@ public class HumanPlayer : UserModel {
     NodeObject storedObject;
     Vector2Int target;
     bool hasntDoneFirstMove = true;
-   
 
     //Used as a way to end and start this player's turn.
     bool isReady = false;
@@ -27,7 +25,7 @@ public class HumanPlayer : UserModel {
     //Obligatory Raycast Update loop.
     private void Update () {
         if (!isReady) return;
-        if (Input.GetKeyDown (KeyCode.Tab) && !hasntDoneFirstMove) EndTurn ();
+        if (!hasntDoneFirstMove) EndTurn ();
         if (!Input.GetMouseButtonDown (0)) return;
         Vector2 mousePos = cam.ScreenToWorldPoint (Input.mousePosition);
         detection = Physics2D.Raycast (mousePos, cam.transform.forward);
@@ -52,7 +50,6 @@ public class HumanPlayer : UserModel {
 
     List<Vector2Int> results = new List<Vector2Int> ();
 
-    
     //This method handles the interaction between the raycast information and the piece search and movement logic.
     void OnInteraction (NodeObject node) {
         #region Reset
@@ -79,12 +76,7 @@ public class HumanPlayer : UserModel {
         storedObject.OnInteract ("#00ff00");
 
         //If the hasntDoneFIrstMove is equal to false, use the target as a baseline for searching for any available paths. Otherwise, use the found node as a baseline for searching any available paths.
-        if (!hasntDoneFirstMove) {
-            results = PathOfMoves (target, new List<Vector2Int> (), hasntDoneFirstMove);
-            HighlightSelection ();
-            return;
-        }
-        results = PathOfMoves (node.boardCoordinate, new List<Vector2Int> (), hasntDoneFirstMove);
+        results = FindPotentialPaths (node.boardCoordinate, new List<Vector2Int> (), hasntDoneFirstMove);
         HighlightSelection ();
     }
 

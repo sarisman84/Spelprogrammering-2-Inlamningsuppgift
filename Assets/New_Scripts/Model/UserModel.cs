@@ -226,28 +226,58 @@ public abstract class UserModel : MonoBehaviour {
 
     //This is a recursive method that finds a list of available paths per source in a position.
     //I am using Vector2int here as a general variable incase i want to use other forms of 2D arrays.
-    public List<Vector2Int> PathOfMoves (Vector2Int source, List<Vector2Int> savedResults, bool isFirstSearch) {
-        for (int curDir = 0; curDir < 6; curDir++) {
-            Vector2Int potentialPath = AttemptToGetPath (source, curDir, savedResults);
-            if (potentialPath == -Vector2Int.one) continue;
-            if (globalPieceList.Any (p => p.pos == potentialPath)) {
-                Vector2Int branch = AttemptToGetPath (potentialPath, curDir, savedResults);
-                if (branch == -Vector2Int.one) continue;
-                if (!globalPieceList.Any (p => p.pos == branch)) {
-                    savedResults.Add (branch);
-                    savedResults = PathOfMoves (branch, savedResults, false);
 
-                }
-            }
-            if (!globalPieceList.Any (p => p.pos == potentialPath)) {
-                if (isFirstSearch) {
-                    savedResults.Add (potentialPath);
-                }
+    /// <summary>
+    /// A searching algorithm. Finds any potential positions in six directions on the board.
+    /// </summary>
+    /// <param name="source">Where the search algoritm will begin it's search. </param>
+    /// <param name="savedResults">A list of saved results that is used recursivly.</param>
+    /// <param name="isFirstSearch">Whenever or not the method call is considered as the first search or not. If it isn't, skip the first search check that finds the 6 closest positions from the source.</param>
+    /// <returns>A list of positions</returns>
+    public List<Vector2Int> FindPotentialPaths (Vector2Int source, List<Vector2Int> savedResults, bool isFirstSearch) {
+
+        for (int curDir = 0; curDir < 6; curDir++) {
+
+            Vector2Int potentialPath = AttemptToGetPath (source, curDir, savedResults);
+            savedResults = Search (potentialPath, savedResults, isFirstSearch && !PieceFoundInSelectedPosition (potentialPath), false);
+            if (PieceFoundInSelectedPosition (potentialPath)) {
+
+                Vector2Int branch = AttemptToGetPath (potentialPath, curDir, savedResults);
+                savedResults = Search (branch, savedResults, !PieceFoundInSelectedPosition (branch), true);
+
             }
 
         }
+
+        return savedResults;
+
+    }
+
+    /// <summary>
+    /// The main logic of the searching algorithm. By using a potential path, it checks whenever or not the path is valid (i.e. out of bounds or already occupied), then saves it into a list for further use.
+    /// </summary>
+    /// <param name="potentialPath">The current path that is tested to be valid.</param>
+    /// <param name="savedResults">A list of all saved positions from other itterations of this method. Used as check to see if dublicates exist.</param>
+    /// <param name="statementCheck">A conditional bool that decides whenever or not the potential path should be added to the list.</param>
+    /// <param name="furtherSearch">A conditional bool that recursivly calls its parent method FindPotentialPaths() when it is equal to true.</param>
+    /// <returns></returns>
+    private List<Vector2Int> Search (Vector2Int potentialPath, List<Vector2Int> savedResults, bool statementCheck, bool furtherSearch) {
+
+        if (potentialPath == -Vector2Int.one) return savedResults;
+        if (statementCheck) {
+            savedResults.Add (potentialPath);
+            if (furtherSearch)
+                savedResults = FindPotentialPaths (potentialPath, savedResults, false);
+        }
         return savedResults;
     }
+
+    /// <summary>
+    /// A Method that checks whenever or not a position is valid.
+    /// </summary>
+    /// <param name="potentialPath">The position in question to be tested.</param>
+    /// <returns>True if potentialPath is within the board's coordinates and/or fieldType</returns>
+    private static bool PieceFoundInSelectedPosition (Vector2Int potentialPath) => globalPieceList.Any (p => p.pos == potentialPath);
 
     /// <summary>
     /// Helper method: Attemps to get a valid path depending on where it checks from, the direction it checks from as well as if the result in question is already within a saved list.

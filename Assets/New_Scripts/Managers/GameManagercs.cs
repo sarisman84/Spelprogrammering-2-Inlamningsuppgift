@@ -86,9 +86,5 @@ public class Player {
     public Team player;
     public bool isComputer;
 
-    public Player (UserModel user) {
-        isComputer = (user.GetType () == typeof (ComputerPlayer)) ? true : false;
-        player = user.currentTeam;
-    }
     public Player () { }
 }
